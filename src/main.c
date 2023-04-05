@@ -1,35 +1,42 @@
 #include <stdio.h>
-#include <string.h>
 #include <pthread.h>
 #include <unistd.h>
-#include "echoall.h"
-#include <sys/types.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 #include <errno.h>
+#include <string.h>
 
-#define CHILD 0
+
+// Authors: Felix Grüning, Patrick Zockol
+// Last Change: 05.04.2023
+// Task: 1. Praktikumstermin | UNIX Prozessmanagement
+
+
+#define CHILD 1
 
 int main(int argv, char* argc[]){
 
-if(argc[1] == 1 || argc[1] == 0){
+    printf("STRERROR_START: %s\n", strerror(errno));
 
-  pid_t pid = fork();
+    pid_t pid = fork();
+    // Kindprozess bei PID = 0
+    // Elternprozess da PID = XXXXX und XXXXX ist die PID vom Kind
+    int i;
+    for (i = 0; i < 3; i++) {
 
-  if (pid != CHILD){
-      printf("PID = %d", pid);
-  }
-  else if(pid == CHILD){
-    printf("");
-  }
-}
-if(argc[1] == 2 || argc[1] == 0){
+        if (pid != 0) {
+            printf("PID = %d\n", pid);
+            waitpid(pid, system, NULL);
+            printf("Elternprozess ab hier\n");
+        } else if (pid == 0) {
+            printf("Kindprozess\n");
+            execlp("./output/echoall", "echoall", "Echoall" ,"Test", NULL);
 
-//Programm, welches ein neues Programm ausführt 
+        }
+        sleep(3);
+    }
 
-for(int i = 0; i<5;i++)
-{
-char *programm1[]={"./../output/echoall.o", "%d", i};
-        execvp(programm1[0], programm1);
-}
-}
+
+    return 0;
+
 }
