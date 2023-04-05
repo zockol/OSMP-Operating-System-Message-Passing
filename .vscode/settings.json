@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "pthread.h": "c",
-        "echoall.c": "cpp"
-    }
-}

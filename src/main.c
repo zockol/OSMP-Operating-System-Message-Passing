@@ -22,11 +22,12 @@ int main(int argv, char* argc[]){
     // Kindprozess bei PID = 0
     // Elternprozess da PID = XXXXX und XXXXX ist die PID vom Kind
     int i;
+
     for (i = 0; i < 3; i++) {
 
         if (pid != 0) {
             printf("PID = %d\n", pid);
-            waitpid(pid, system, NULL);
+            waitpid(pid, NULL, WNOHANG);
             printf("Elternprozess ab hier\n");
         } else if (pid == 0) {
             printf("Kindprozess\n");
