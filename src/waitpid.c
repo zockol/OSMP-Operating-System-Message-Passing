@@ -2,6 +2,8 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <errno.h>
+#include <string.h>
 
 
 #define CHILD 0
@@ -10,6 +12,9 @@ int main(){
 
   
     pid_t pid = fork();
+    if(!errno){
+        printf("ERROR: %s\nProgramm has stopped!", strerror(errno));
+    }
     int status;
    
     if (pid != CHILD){

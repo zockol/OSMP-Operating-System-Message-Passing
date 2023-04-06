@@ -16,9 +16,12 @@
 
 int main(int argv, char* argc[]){
 
-    printf("STRERROR_START: %s\n", strerror(errno));
+    printf("STRERROR_START: %s, ERRNO == %d\n", strerror(errno), errno);
 
     pid_t pid = fork();
+    if(!errno){
+        printf("ERROR: %s\nProgramm has stopped!", strerror(errno));
+    }
     // Kindprozess bei PID = 0
     // Elternprozess da PID = XXXXX und XXXXX ist die PID vom Kind
     int i;
