@@ -17,21 +17,24 @@ int main(int argv, char* argc[]){
 
     printf("STRERROR_START: %s, ERRNO == %d\n", strerror(errno), errno);
 
-    pid_t pid = fork();
-    if(!errno){
-        printf("ERROR: %s\nProgramm has stopped!", strerror(errno));
-    }
+    pid_t pid, pid2;
+
     // Kindprozess bei PID = 0
     // Elternprozess da PID = XXXXX und XXXXX ist die PID vom Kind
     int i;
 
+    pid = fork();
+    if (pid != 0) {
+        pid2 = fork();
+    }
+
     for (i = 0; i < 3; i++) {
 
-        if (pid != 0) {
-            printf("PID = %d\n", pid);
+        if (pid > 0 && pid2 > 0) {
+            printf("Elternprozess PID = %d\n", pid);
             waitpid(pid, NULL, WNOHANG);
-            printf("Elternprozess ab hier\n");
-        } else if (pid == 0) {
+            waitpid(pid2, NULL, WNOHANG);
+        } else {
             printf("Kindprozess\n");
             execlp("./output/echoall", "echoall", "Echoall" ,"Test", NULL);
 
