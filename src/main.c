@@ -14,18 +14,21 @@
 #define CHILD 1
 
 int main(int argv, char* argc[]){
-
-    printf("STRERROR_START: %s, ERRNO == %d\n", strerror(errno), errno);
-
-    pid_t pid, pid2;
+    int argProcess = argc[1]
+    pid_t pid[argProcess];
 
     // Kindprozess bei PID = 0
     // Elternprozess da PID = XXXXX und XXXXX ist die PID vom Kind
-    int i;
+    for(int i = 0; i< pid; i++)){
+        pid[i] = fork();
+        if(pid[i]== 0){
 
+        }
+}
     pid = fork();
     if (pid != 0) {
         pid2 = fork();
+
     }
 
     for (i = 0; i < 3; i++) {
@@ -36,7 +39,7 @@ int main(int argv, char* argc[]){
             waitpid(pid2, NULL, WNOHANG);
         } else {
             printf("Kindprozess\n");
-            execlp("./output/echoall", "echoall", "Echoall" ,"Test", NULL);
+
 
         }
         sleep(3);
