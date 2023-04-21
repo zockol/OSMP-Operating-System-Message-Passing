@@ -10,35 +10,40 @@
 #include <string.h>
 #include "osmprun.h"
 
+void forker(int nprocesses, pid_t pid[])
+{
+    pid[nprocesses];
 
-int contains(pid_t pid[]){
-    int var = 0;
-    for (int i = 0; i < sizeof(pid)/sizeof(pid[0]); ++i) {
-            if(pid[i]!=0){
-                var+=1;
-            }
-
+    if(nprocesses > 0)
+    {
+        if ((pid[nprocesses] = fork()) < 0)
+        {
+            perror("fork");
+        }
+        else if (pid[nprocesses] == 0)
+        {
+            //Child stuff here
+            printf("Child %d end\n", nprocesses);
+            exit(1);
+        }
+        else if(pid > 0)
+        {
+            waitpid(pid[nprocesses], NULL, WNOHANG);
+            //parent
+            forker(nprocesses - 1, pid);
+        }
     }
-    return var;
 }
 
 int main(int argv, char* argc[]) {
-    if(argv <=2) {
-        pid_t pid[argv];
-        int i = 0;
-        for( i = 0; i <= argv ;i++){
-            if(!contains(pid)){
-                pid[i] = fork();
-                printf("Mainprozess %d\n", pid[i]);
-                for(int j = 0; j<(sizeof(pid)/sizeof(pid[0]));j++){
-                    waitpid(pid[j], 0, WHOHANG);
-                }
-            }else{
-                printf("Kinderprozess\n");
-            }
-        }
-    }else{
-        printf("Es muss die Anzahl der Prozesse angegeben werden");
+
+    int i = atol(argc[1]);
+    pid_t pid[i];
+    forker(i, pid);
+    for(int j = 0 ; j <= i ; j++){
+        waitpid(pid[j], NULL, WNOHANG);
     }
+    printf("Elternprozess");
+
 
 }
