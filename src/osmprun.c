@@ -11,20 +11,30 @@
 #include "osmprun.h"
 
 
-int main(int argv, char* argc[]) {
-if(argv <=2) {
-    pid_t pid[argv];
-    int i = 0;
-    for( i = 0; i <= argv ;i++){
-    pid[i] = fork();
-    if(pid[i] != 0){
-        printf("Mainprozess %d\n", pid[i]);
-    }else{
-        printf("Kinderprozess\n");
+int contains(pid_t *pid){
+    for (int i = 0; i < sizeof(&pid); ++i) {
+        for (int j = 0; j < ; ++j) {
+            
+        }
+        
     }
-    }
-}else{
-    printf("Es muss die Anzahl der Prozesse angegeben werden");
+    
 }
+
+int main(int argv, char* argc[]) {
+    if(argv <=2) {
+        pid_t pid[argv];
+        int i = 0;
+        for( i = 0; i <= argv ;i++){
+            pid[i] = fork();
+            if(pid != 0){
+                printf("Mainprozess %d\n", pid[i]);
+            }else{
+                printf("Kinderprozess\n");
+            }
+        }
+    }else{
+        printf("Es muss die Anzahl der Prozesse angegeben werden");
+    }
 
 }
