@@ -11,14 +11,15 @@
 #include "osmprun.h"
 
 
-int contains(pid_t *pid){
-    for (int i = 0; i < sizeof(&pid); ++i) {
-        for (int j = 0; j < ; ++j) {
-            
-        }
-        
+int contains(pid_t pid[]){
+    int var = 0;
+    for (int i = 0; i < sizeof(pid)/sizeof(pid[0]); ++i) {
+            if(pid[i]!=0){
+                var+=1;
+            }
+
     }
-    
+    return var;
 }
 
 int main(int argv, char* argc[]) {
@@ -26,9 +27,12 @@ int main(int argv, char* argc[]) {
         pid_t pid[argv];
         int i = 0;
         for( i = 0; i <= argv ;i++){
-            pid[i] = fork();
-            if(pid != 0){
+            if(!contains(pid)){
+                pid[i] = fork();
                 printf("Mainprozess %d\n", pid[i]);
+                for(int j = 0; j<(sizeof(pid)/sizeof(pid[0]));j++){
+                    waitpid(pid[j]);
+                }
             }else{
                 printf("Kinderprozess\n");
             }
