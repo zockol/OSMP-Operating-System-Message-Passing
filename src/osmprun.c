@@ -23,12 +23,12 @@ void forker(int nprocesses, pid_t pid[])
         else if (pid[nprocesses] == 0)
         {
             //Child stuff here
-            printf("Child %d end\n", nprocesses);
+            printf("Child %d end PID : %d \n", nprocesses, getpid());
             exit(1);
         }
         else if(pid > 0)
         {
-            waitpid(pid[nprocesses], NULL, WNOHANG);
+           // waitpid(pid[nprocesses], NULL, WNOHANG);
             //parent
             forker(nprocesses - 1, pid);
         }
@@ -41,9 +41,9 @@ int main(int argv, char* argc[]) {
     pid_t pid[i];
     forker(i, pid);
     for(int j = 0 ; j <= i ; j++){
+        printf("Wait for pid %d\n", pid[j]);
         waitpid(pid[j], NULL, WNOHANG);
     }
     printf("Elternprozess");
-
 
 }
