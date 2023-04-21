@@ -31,7 +31,7 @@ int main(int argv, char* argc[]) {
                 pid[i] = fork();
                 printf("Mainprozess %d\n", pid[i]);
                 for(int j = 0; j<(sizeof(pid)/sizeof(pid[0]));j++){
-                    waitpid(pid[j]);
+                    waitpid(pid[j], 0, WHOHANG);
                 }
             }else{
                 printf("Kinderprozess\n");
