@@ -12,18 +12,16 @@
 
 
 int main(int argv, char* argc[]) {
-if(argv <=2){
-    pid_t pid[(int)argc[1]];
+if(argv <=2) {
+    pid_t pid[argv];
     int i = 0;
-    for( i = 0; i < argc[1];i++){
+    for( i = 0; i <= argv ;i++){
     pid[i] = fork();
-
     if(pid[i] != 0){
-        printf("Mainprozess %d", pid[i]);
+        printf("Mainprozess %d\n", pid[i]);
     }else{
-        printf("Kinderprozess");
+        printf("Kinderprozess\n");
     }
-
     }
 }else{
     printf("Es muss die Anzahl der Prozesse angegeben werden");
