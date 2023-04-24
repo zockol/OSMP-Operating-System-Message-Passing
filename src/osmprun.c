@@ -10,6 +10,11 @@
 #include <string.h>
 #include "osmprun.h"
 
+
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
 void forker(int nprocesses, pid_t pid[])
 {
     pid[nprocesses];
@@ -23,16 +28,20 @@ void forker(int nprocesses, pid_t pid[])
         else if (pid[nprocesses] == 0)
         {
             //Child stuff here
-            printf("Child %d end PID : %d \n", nprocesses, getpid());
-            exit(1);
+            execvp("./output/echoall", "");
         }
-        else if(pid > 0)
+        else if(pid[nprocesses] > 0)
         {
-           // waitpid(pid[nprocesses], NULL, WNOHANG);
+            waitpid(pid[nprocesses], NULL, WNOHANG);
             //parent
             forker(nprocesses - 1, pid);
         }
+    }else{
+        printf("%d", sizeof(*pid));
+        for (int i; i< sizeof(*pid); i++)
+        ;
     }
+
 }
 
 int main(int argv, char* argc[]) {
@@ -44,6 +53,4 @@ int main(int argv, char* argc[]) {
         printf("Wait for pid %d\n", pid[j]);
         waitpid(pid[j], NULL, WNOHANG);
     }
-    printf("Elternprozess");
-
 }
