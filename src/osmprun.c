@@ -1,6 +1,8 @@
 //
 // Created by fegrue on 21.04.23.
 //
+//In dieser Quelltext-Datei ist die Funktionalität des OSMP-Starters implementiert
+
 #include <stdio.h>
 #include "stdlib.h"
 #include <pthread.h>
@@ -9,11 +11,12 @@
 #include <errno.h>
 #include <string.h>
 #include "osmprun.h"
-
-
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+
+
+
 
 int main(int argv, char* argc[]) {
 
@@ -35,7 +38,7 @@ int main(int argv, char* argc[]) {
             printf("Parent with ID: %d\n", pid[i]);
             waitpid(pid[i], NULL, WNOHANG);
         } else {
-            execlp("./output/echoall", "echoall", "Echoall", "Test", NULL);
+            execlp(argc[2], "echoall", "Echoall", "Test", NULL);
         }
 
     }

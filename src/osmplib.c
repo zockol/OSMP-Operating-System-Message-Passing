@@ -1,21 +1,11 @@
-#include <stdio.h>
-#include "stdlib.h"
-#include <pthread.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <errno.h>
-#include <string.h>
+//
+// Created by fegrue on 24.04.23.
+//
+//In dieser Quelltext-Datei sind Implementierungen der OSMP Bibliothek zu finden.
 
 #include "OSMP.h"
 
-// Authors: Felix Grüning, Patrick Zockol
-// Last Change: 05.04.2023
-// Task: 1. Praktikumstermin | UNIX Prozessmanagement
-
-
-#define CHILD 1
-
-int main(int argv, char* argc[]){
+int OSMP_Init(int *argc, char ***argv){
     //int *ptr = (int*)calloc((int)argc[1], 4*sizeof(int));
     int argProcess = (int)argc[1];
 
@@ -29,8 +19,5 @@ int main(int argv, char* argc[]){
             printf("Elternprozess");
         }
     }
-
-
-    return 0;
 
 }

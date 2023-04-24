@@ -1,5 +1,12 @@
+
+//Hier sind zusätzliche eigene Hilfsfunktionen für die interne Verwendung in der OSMP Bibliothek
+//definiert.
+
+
 #ifndef OSMPlib_h
 #define OSMPlib_h
+#include "osmplib.c"
+
 
 int OSMP_Init(int *argc, char ***argv);
 int OSMP_Size(int *size);
