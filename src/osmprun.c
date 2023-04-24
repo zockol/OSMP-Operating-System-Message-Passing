@@ -23,23 +23,24 @@ void forker(int nprocesses, pid_t pid[])
     {
         if ((pid[nprocesses] = fork()) < 0)
         {
+            //Fehlerbehandlung
             perror("fork");
         }
         else if (pid[nprocesses] == 0)
         {
             //Child stuff here
-            execvp("./output/echoall", "");
+            printf("Kind no %d", nprocesses);
+            execlp("./output/echoall.o", "echoall", "Echoall" , "Test", NULL);
         }
         else if(pid[nprocesses] > 0)
         {
-            waitpid(pid[nprocesses], NULL, WNOHANG);
             //parent
+            waitpid(pid[nprocesses], NULL, WNOHANG);
             forker(nprocesses - 1, pid);
+
         }
     }else{
-        printf("%d", sizeof(*pid));
-        for (int i; i< sizeof(*pid); i++)
-        ;
+        exit(-1);
     }
 
 }
@@ -49,8 +50,4 @@ int main(int argv, char* argc[]) {
     int i = atol(argc[1]);
     pid_t pid[i];
     forker(i, pid);
-    for(int j = 0 ; j <= i ; j++){
-        printf("Wait for pid %d\n", pid[j]);
-        waitpid(pid[j], NULL, WNOHANG);
-    }
 }
