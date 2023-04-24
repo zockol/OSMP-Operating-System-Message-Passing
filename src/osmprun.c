@@ -15,39 +15,29 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-void forker(int nprocesses, pid_t pid[])
-{
-    pid[nprocesses];
+int main(int argv, char* argc[]) {
 
-    if(nprocesses > 0)
-    {
-        if ((pid[nprocesses] = fork()) < 0)
-        {
-            //Fehlerbehandlung
-            perror("fork");
-        }
-        else if (pid[nprocesses] == 0)
-        {
-            //Child stuff here
-            printf("Kind no %d", nprocesses);
-            execlp("./output/echoall.o", "echoall", "Echoall" , "Test", NULL);
-        }
-        else if(pid[nprocesses] > 0)
-        {
-            //parent
-            waitpid(pid[nprocesses], NULL, WNOHANG);
-            forker(nprocesses - 1, pid);
+    int pidAmount = atol(argc[1]);
+    pid_t pid[pidAmount];
 
-        }
-    }else{
+    if (pidAmount == 0) {
+        printf("Bitte gebe eine korrekte Anzahl an Childs ein, die erzeugt werden sollen\n");
         exit(-1);
     }
 
-}
+    int i;
+    pid[0] = 1;
+    for (i = 0; i < pidAmount; i++) {
 
-int main(int argv, char* argc[]) {
+        pid[i] = fork();
 
-    int i = atol(argc[1]);
-    pid_t pid[i];
-    forker(i, pid);
+        if (pid[i] != 0) {
+            printf("Parent with ID: %d\n", pid[i]);
+            waitpid(pid[i], NULL, WNOHANG);
+        } else {
+            execlp("./output/echoall", "echoall", "Echoall", "Test", NULL);
+        }
+
+    }
+    return 0;
 }
