@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <stdio.h>
-
+#define SharedMemSize 100
+#define SharedMemName "/shm"
 
 
 int OSMP_Init() {
