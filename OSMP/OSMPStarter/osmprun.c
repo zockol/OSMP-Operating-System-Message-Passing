@@ -60,6 +60,7 @@ int main(int argv, char* argc[]) {
             shm_unlink(SharedMemName);
             return OSMP_ERROR;
         } else if (pid == 0) {
+            sleep(2);
             printf("%s",(char*)map);
             shm_unlink(SharedMemName);
             return OSMP_SUCCESS;
