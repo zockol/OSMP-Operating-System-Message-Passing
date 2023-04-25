@@ -175,6 +175,7 @@ _deps
 
 # End of https://www.gitignore.io/api/c,linux,cmake,clion+all
 
-./OSMPExecutable/osmpexecutable
-./OSMPLib/osmplib
-./OSMPStarter/osmprun
+./OSMP/OSMPExecutable/osmpexecutable
+./OSMP/OSMPLib/osmplib
+./OSMP/OSMPStarter/osmprun
+./Lib/Echoall/echoall
