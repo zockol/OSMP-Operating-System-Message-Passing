@@ -5,5 +5,7 @@
 #include "../OSMP.h"
 
 int main(){
-    OSMP_Size()
+    int i=3;
+
+    OSMP_Size(&i);
 }

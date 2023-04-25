@@ -6,5 +6,7 @@
 
 #ifndef GRP26_OSMPEXEC1_H
 #define GRP26_OSMPEXEC1_H
+#include "osmpexec1.c"
+
 
 #endif //GRP26_OSMPEXEC1_H
