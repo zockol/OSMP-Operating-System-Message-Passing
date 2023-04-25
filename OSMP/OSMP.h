@@ -9,9 +9,9 @@
 #ifndef GRP26_OSMP_H
 #define GRP26_OSMP_H
 
-#include "osmplib.h"
-#include "osmprun.h"
-#include "osmpexec1.h"
+#include "OSMPLib/osmplib.h"
+#include "OSMPStarter/osmprun.h"
+#include "OSMPExecutable/osmpexecutable.h"
 
 
 #endif //GRP26_OSMP_H
