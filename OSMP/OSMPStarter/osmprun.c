@@ -5,10 +5,17 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
 #include "../OSMP.h"
 
+#define SharedMemSize 100
+#define SharedMemName "/shm"
 
 int main(int argv, char* argc[]) {
+
 
     //Exit wenn keine Argumente mit angegeben
     if (argv==1) {
@@ -20,17 +27,40 @@ int main(int argv, char* argc[]) {
     int pidAmount = atol(argc[1]);
     pid_t pid[pidAmount];
 
-    //wenn pidAmount bei 0 unter drunter liegt wird exit(-1) ausgeführt
+    //wenn pidAmount bei 0 unter drunter liegt wird OSMP_ERROR returned
     if (pidAmount < 1) {
         printf("Bitte gebe eine korrekte Anzahl an Childs ein, die erzeugt werden sollen\n");
-        exit(-1);
+        return OSMP_ERROR;
     }
+
+    int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0666);
+
+    if (fileDescriptor == -1) {
+        return OSMP_ERROR;
+    }
+
+    int ftrunc = ftruncate(fileDescriptor, SharedMemSize);
+
+    if (ftrunc == -1) {
+        printf("Fehler bei ftruncate %s\n", strerror(errno));
+        return OSMP_ERROR;
+    }
+
+
+    void *map = mmap(NULL, SharedMemSize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
+
+    if (map == MAP_FAILED) {
+        printf("Mapping Fail: %s\n", strerror(errno));
+        return OSMP_ERROR;
+    }
+
+    sprintf(map, "%s", "Hallo Welt\n");
 
     //get current working dir und schreibe es in einen Buffer mit dem letzten angegebenen Argument
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
     char pathBuffer[1024];
-    snprintf(pathBuffer, sizeof(pathBuffer), "../../%s", argc[argv-1]);
+    snprintf(pathBuffer, sizeof(pathBuffer), "%s", argc[argv-1]);
 
     //Parent und Child Trennung
     int i;
@@ -47,9 +77,13 @@ int main(int argv, char* argc[]) {
                 execlp(pathBuffer, argc[argv-1], NULL);
             } else {
                 printf("execlp path error\n");
+                shm_unlink(SharedMemName);
                 exit(-1);
             }
         }
     }
+
+    shm_unlink(SharedMemName);
+
     return 0;
 }
