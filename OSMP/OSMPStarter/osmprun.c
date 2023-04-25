@@ -4,7 +4,7 @@
 //In dieser Quelltext-Datei ist die Funktionalität des OSMP-Starters implementiert
 #include <sys/wait.h>
 #include <stdlib.h>
-#include "OSMP.h"
+#include "../OSMP.h"
 
 
 int main(int argv, char* argc[]) {
