@@ -7,7 +7,10 @@
 #define OSMPlib_h
 #include "osmplib.c"
 
-int OSMP_Init();
+#define OSMP_SUCCESS 0
+#define OSMP_ERROR -1
+
+int OSMP_Init(int *argc, char ***argv);
 int OSMP_Finalize();
 int OSMP_Size();
 int OSMP_Rank();
