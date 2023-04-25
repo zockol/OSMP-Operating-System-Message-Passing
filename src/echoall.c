@@ -1,8 +1,6 @@
+// simple ecoall programm
+
 #include <stdio.h>
-#include <string.h>
-#include <pthread.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 int main(int argv, char* argc[]){
 
