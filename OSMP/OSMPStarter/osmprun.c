@@ -26,30 +26,6 @@ int main(int argv, char* argc[]) {
         return OSMP_ERROR;
     }
 
-    int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
-
-    if (fileDescriptor == -1) {
-        return OSMP_ERROR;
-    }
-
-    int ftrunc = ftruncate(fileDescriptor, SharedMemSize);
-
-    if (ftrunc == -1) {
-        printf("Fehler bei ftruncate %s\n", strerror(errno));
-        return OSMP_ERROR;
-    }
-
-
-    void *map = mmap(NULL, SharedMemSize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
-
-    if (map == MAP_FAILED) {
-        printf("Mapping Fail: %s\n", strerror(errno));
-        shm_unlink(SharedMemName);
-        return OSMP_ERROR;
-    }
-
-
-
     //Parent und Child Trennung
     int i;
     for (i = 0; i < pidAmount; i++) {
@@ -73,8 +49,6 @@ int main(int argv, char* argc[]) {
     for(int i = 0; i<pidAmount; i++) {
         waitpid(-1,NULL,0);
     }
-
-
 
     return OSMP_SUCCESS;
 }

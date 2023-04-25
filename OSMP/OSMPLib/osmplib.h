@@ -10,7 +10,7 @@
 #define OSMP_SUCCESS 0
 #define OSMP_ERROR -1
 
-int OSMP_Init();
+int OSMP_Init(int *argc, char ***argv);
 int OSMP_Finalize();
 int OSMP_Size();
 int OSMP_Rank();
