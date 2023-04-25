@@ -2,10 +2,12 @@
 // Created by fegrue on 21.04.23.
 //
 //In dieser Quelltext-Datei ist die Funktionalität des OSMP-Starters implementiert
+#include <sys/wait.h>
+#include <stdlib.h>
 #include "OSMP.h"
 
 
-int startNProcesses(int argv, char* argc[]) {
+int main(int argv, char* argc[]) {
 
     int pidAmount = atol(argc[1]);
     pid_t pid[pidAmount];
@@ -14,6 +16,9 @@ int startNProcesses(int argv, char* argc[]) {
         printf("Bitte gebe eine korrekte Anzahl an Childs ein, die erzeugt werden sollen\n");
         exit(-1);
     }
+
+    char pathBuffer[1024];
+    snprintf(pathBuffer, sizeof(pathBuffer), "./output/%s", argc[argv-1]);
 
     int i;
     pid[0] = 1;
@@ -25,7 +30,7 @@ int startNProcesses(int argv, char* argc[]) {
             printf("Parent with ID: %d\n", pid[i]);
             waitpid(pid[i], NULL, WNOHANG);
         } else {
-            execlp(argc[2], "echoall", "Echoall", "Test", NULL);
+            execlp(pathBuffer, argc[argv-1], NULL);
         }
 
     }
