@@ -9,12 +9,12 @@ int OSMP_Init() {
     return 0;
 }
 
-int OSMP_Finalize(void) {
+int OSMP_Finalize() {
     printf("finalize\n");
     return 0;
 }
 
-int OSMP_Size(int *size) {
+int OSMP_Size() {
     printf("size\n");
     return 0;
 }
