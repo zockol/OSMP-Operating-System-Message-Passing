@@ -3,8 +3,7 @@
 //
 //In dieser Quelltext-Datei ist die Funktionalität des OSMP-Starters implementiert
 
-#include "../OSMP.h"
-
+#include "./osmprun.h"
 
 
 int main(int argv, char* argc[]) {
@@ -23,7 +22,30 @@ int main(int argv, char* argc[]) {
     //wenn pidAmount bei 0 unter drunter liegt wird OSMP_ERROR returned
     if (pidAmount < 1) {
         printf("Bitte gebe eine korrekte Anzahl an Childs ein, die erzeugt werden sollen\n");
-        return OSMP_ERROR;
+        return -1;
+    }
+
+    int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
+
+    if (fileDescriptor == -1) {
+        return -1;
+    }
+
+    int ftrunc = ftruncate(fileDescriptor, SharedMemSize);
+
+    if (ftrunc == -1) {
+        printf("Fehler bei ftruncate %s\n", strerror(errno));
+        return -1;
+    }
+
+
+
+    void *map = mmap(NULL, SharedMemSize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
+
+    if (map == MAP_FAILED) {
+        printf("Mapping Fail: %s\n", strerror(errno));
+        shm_unlink(SharedMemName);
+        return -1;
     }
 
     //Parent und Child Trennung
@@ -34,15 +56,20 @@ int main(int argv, char* argc[]) {
         if (pid < 0) {
             printf("Fehler beim forken\n");
             shm_unlink(SharedMemName);
-            return OSMP_ERROR;
+            return -1;
         } else if (pid == 0) {
+
             sleep(2);
-            printf("%s",(char*)map);
+            int a = execlp("./OSMP/OSMPExecutable/osmpexecutable", "osmpexecutable", NULL);
+            if (a == -1) {
+                printf("execlp failure\n");
+                return -1;
+            }
             shm_unlink(SharedMemName);
-            return OSMP_SUCCESS;
+            return 0;
         } else if (pid > 0) {
+
             sleep(1);
-            sprintf(map, "%s", "Hallo Welt!\n");
         }
     }
 
@@ -50,5 +77,5 @@ int main(int argv, char* argc[]) {
         waitpid(-1,NULL,0);
     }
 
-    return OSMP_SUCCESS;
+    return 0;
 }
