@@ -5,6 +5,49 @@
 
 #include "./osmprun.h"
 
+SharedMem *shm;
+
+int shm_create(int pidAmount) {
+
+
+    shm->processAmount = 0;
+
+    for (int i = 0; i < pidAmount; i++) {
+        shm->p[i].pid = 0;
+        shm->p[i].rank = 0;
+    }
+
+
+    return 0;
+}
+
+int start_shm() {
+
+    int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
+
+    if (fileDescriptor == -1) {
+        return -1;
+    }
+
+    int ftrunc = ftruncate(fileDescriptor, SharedMemSize);
+
+    if (ftrunc == -1) {
+        printf("Fehler bei ftruncate %s\n", strerror(errno));
+        return -1;
+    }
+
+
+
+    shm = mmap(NULL, SharedMemSize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
+
+    if (shm == MAP_FAILED) {
+        printf("Mapping Fail: %s\n", strerror(errno));
+        shm_unlink(SharedMemName);
+        return -1;
+    }
+
+    return 0;
+}
 
 int main(int argv, char* argc[]) {
 
@@ -25,33 +68,17 @@ int main(int argv, char* argc[]) {
         return -1;
     }
 
-    int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
-
-    if (fileDescriptor == -1) {
-        return -1;
-    }
-
-    int ftrunc = ftruncate(fileDescriptor, SharedMemSize);
-
-    if (ftrunc == -1) {
-        printf("Fehler bei ftruncate %s\n", strerror(errno));
-        return -1;
-    }
+    start_shm();
+    shm_create(pidAmount);
 
 
 
-    void *map = mmap(NULL, SharedMemSize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
-
-    if (map == MAP_FAILED) {
-        printf("Mapping Fail: %s\n", strerror(errno));
-        shm_unlink(SharedMemName);
-        return -1;
-    }
-
+    shm->processAmount = pidAmount;
     //Parent und Child Trennung
     int i;
     for (i = 0; i < pidAmount; i++) {
         pid = fork();
+
 
         if (pid < 0) {
             printf("Fehler beim forken\n");

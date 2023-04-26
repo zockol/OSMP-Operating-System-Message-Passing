@@ -11,6 +11,12 @@ int main(int argc, char *argv[])
     rv = OSMP_Size( &size );
     rv = OSMP_Rank( &rank );
 
-    printf("%d\n", rank);
+    if (rank == 0) {
+        OSMP_Bcast();
+    } else {
+        OSMP_Recv();
+    }
+
+
     return OSMP_SUCCESS;
 }

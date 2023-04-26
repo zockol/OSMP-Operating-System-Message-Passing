@@ -18,7 +18,7 @@ int OSMP_Init(int *argc, char ***argv) {
         return OSMP_ERROR;
     }
 
-    shm = mmap(NULL, SharedMemSize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
+    shm = mmap(0, SharedMemSize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
 
 
     int i = 0, breaker = 0;
@@ -27,7 +27,12 @@ int OSMP_Init(int *argc, char ***argv) {
             shm->p[i].pid = getpid();
             breaker = 1;
         }
+    }
 
+    for (int i = 0; i < shm->processAmount; i++) {
+        if (shm->p[i].pid == getpid()) {
+            shm->p[i].rank = i;
+        }
     }
 
     if (shm == MAP_FAILED) {
@@ -52,10 +57,9 @@ int OSMP_Size(int *size) {
 
 int OSMP_Rank(int *rank) {
     for (int i = 0; i < shm->processAmount; i++) {
-/*        if (shm->p[i].pid == getpid()) {
-            *rank = i;
-        }*/
-    printf("Testprint %d\n", shm->p[i].pid);
+        if (shm->p[i].pid == getpid()) {
+            *rank = shm->p[i].rank;
+        }
     }
     return OSMP_SUCCESS;
 }
