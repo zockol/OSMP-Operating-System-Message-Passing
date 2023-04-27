@@ -20,7 +20,7 @@ int OSMP_Init(int *argc, char ***argv) {
 
     shm = mmap(0, SharedMemSize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
 
-
+    //getpid
     int i = 0, breaker = 0;
     for (i = 0; i<shm->processAmount; i++) {
         if (shm->p[i].pid == 0 && breaker == 0) {
@@ -56,8 +56,9 @@ int OSMP_Size(int *size) {
 }
 
 int OSMP_Rank(int *rank) {
+    int getpid = getpid();
     for (int i = 0; i < shm->processAmount; i++) {
-        if (shm->p[i].pid == getpid()) {
+        if (shm->p[i].pid == getpid) {
             *rank = shm->p[i].rank;
         }
     }

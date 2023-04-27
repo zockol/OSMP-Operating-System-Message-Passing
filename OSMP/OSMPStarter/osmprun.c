@@ -9,7 +9,6 @@ SharedMem *shm;
 
 int shm_create(int pidAmount) {
 
-
     shm->processAmount = 0;
 
     for (int i = 0; i < pidAmount; i++) {
