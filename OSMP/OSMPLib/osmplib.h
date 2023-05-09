@@ -12,14 +12,28 @@
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
+#include <semaphore.h>
 
 #ifndef OSMPlib_h
 #define OSMPlib_h
-
+#define message_max_size 1024
+#define max_messages 256
 #define SharedMemSize 100
 #define SharedMemName "/shm"
 #define OSMP_ERROR -1
 #define OSMP_SUCCESS 0
+
+typedef struct{
+    int srcRank;
+    char buffer[message_max_size];
+    size_t msgLen;
+    int nextMsg;
+} message;
+
+typedef struct{
+    int firstEmptySlot;
+    int lastEmptySlot;
+} slots;
 
 typedef struct{
     pid_t pid;
@@ -28,6 +42,8 @@ typedef struct{
 
 typedef struct{
     int processAmount;
+    message msg[max_messages];
+    slots slot;
     process p[];
 } SharedMem;
 
