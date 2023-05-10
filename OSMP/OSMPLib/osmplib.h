@@ -46,11 +46,9 @@ typedef struct{
     message msg[max_messages];
     slots slot;
     process p[];
-    semaphore s;
     sem_t MUTEX;
     sem_t empty;
     sem_t full;
-    int buffer[BUFFER_SIZE];
 } SharedMem;
 
 

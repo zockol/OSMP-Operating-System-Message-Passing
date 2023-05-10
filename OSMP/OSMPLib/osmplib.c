@@ -28,9 +28,9 @@ int OSMP_Init(int *argc, char ***argv) {
     pthread_mutexattr_t mutex_attr;
     pthread_mutexattr_init(&mutex_attr);
     pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED);
-    pthread_mutex_init(shm->MUTEX, &mutex_attr);
-    sem_init(shm->empty, 1, message_max_size);
-    sem_init(shm->full, 1, 0);
+    pthread_mutex_init(&shm->MUTEX, &mutex_attr);
+    sem_init(&shm->empty, 1, message_max_size);
+    sem_init(&shm->full, 1, 0);
 
 
     //getpid
