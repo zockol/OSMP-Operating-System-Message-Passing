@@ -45,19 +45,20 @@ typedef struct{
     int processAmount;
     message msg[max_messages];
     slots slot;
-    process p[];
     sem_t MUTEX;
     sem_t empty;
     sem_t full;
+    process p[];
 } SharedMem;
 
+typedef enum {OSMP_INT, OSMP_SHORT, OSMP_LONG, OSMP_BYTE, OSMP_UNSIGNED_CHAR, OSMP_UNSIGNED_SHORT, OSMP_UNSIGNED, OSMP_FLOAT, OSMP_DOUBLE } OSMP_Datatype;
 
 
 int OSMP_Init(int *argc, char ***argv);
 int OSMP_Finalize();
 int OSMP_Size(int *size);
 int OSMP_Rank(int *rank);
-int OSMP_Send(); 
+int OSMP_Send();
 int OSMP_Recv();
 int OSMP_Bcast();
 

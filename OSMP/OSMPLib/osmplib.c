@@ -100,3 +100,18 @@ int OSMP_Bcast() {
     pthread_mutex_unlock(&shm->MUTEX);
     return 0;
 }
+
+int OSMP_DataSize(OSMP_Datatype datatype){
+
+    if(datatype == 0) return sizeof(int);
+    else if(datatype == 1) return sizeof(short);
+    else if(datatype == 2) return sizeof(long);
+    else if(datatype == 3) return sizeof(char);
+    else if(datatype == 4) return sizeof(unsigned char);
+    else if(datatype == 5) return sizeof(unsigned short);
+    else if(datatype == 6) return sizeof(unsigned);
+    else if(datatype == 7) return sizeof(float);
+    else if(datatype == 8) return sizeof(double);
+
+    return OSMP_ERROR;
+}
