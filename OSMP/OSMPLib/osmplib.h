@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <semaphore.h>
+#include <pthread.h>
 
 #ifndef OSMPlib_h
 #define OSMPlib_h
@@ -45,13 +46,20 @@ typedef struct{
     message msg[max_messages];
     slots slot;
     process p[];
+    semaphore s;
+    sem_t MUTEX;
+    sem_t empty;
+    sem_t full;
+    int buffer[BUFFER_SIZE];
 } SharedMem;
+
+
 
 int OSMP_Init(int *argc, char ***argv);
 int OSMP_Finalize();
 int OSMP_Size(int *size);
 int OSMP_Rank(int *rank);
-int OSMP_Send();
+int OSMP_Send(); 
 int OSMP_Recv();
 int OSMP_Bcast();
 

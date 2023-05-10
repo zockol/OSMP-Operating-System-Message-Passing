@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     rv = OSMP_Rank( &rank );
 
     if (rank == 0) {
-        OSMP_Bcast();
+        OSMP_Send();
     } else {
         OSMP_Recv();
     }

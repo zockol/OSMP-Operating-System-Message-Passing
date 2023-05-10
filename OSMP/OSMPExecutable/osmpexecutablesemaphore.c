@@ -11,12 +11,10 @@ int main(int argc, char *argv[])
     rv = OSMP_Size( &size );
     rv = OSMP_Rank( &rank );
 
-    if (rank == 0) {
-        OSMP_Bcast();
-    } else {
-        OSMP_Recv();
+    if(rank == 0){
+        pthread_mutex_lock(&shm->mutex);
+        
     }
-
 
     return OSMP_SUCCESS;
 }
