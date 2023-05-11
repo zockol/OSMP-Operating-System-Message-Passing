@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <semaphore.h>
+#include <pthread.h>
 
 #ifndef OSMPlib_h
 #define OSMPlib_h
@@ -28,6 +29,9 @@ typedef struct{
     char buffer[message_max_size];
     size_t msgLen;
     int nextMsg;
+    sem_t MUTEX;
+    sem_t empty;
+    sem_t full;
 } message;
 
 typedef struct{
@@ -46,6 +50,9 @@ typedef struct{
     slots slot;
     process p[];
 } SharedMem;
+
+typedef enum {OSMP_INT, OSMP_SHORT, OSMP_LONG, OSMP_BYTE, OSMP_UNSIGNED_CHAR, OSMP_UNSIGNED_SHORT, OSMP_UNSIGNED, OSMP_FLOAT, OSMP_DOUBLE } OSMP_Datatype;
+
 
 int OSMP_Init(int *argc, char ***argv);
 int OSMP_Finalize();
