@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #ifndef OSMPlib_h
 #define OSMPlib_h
