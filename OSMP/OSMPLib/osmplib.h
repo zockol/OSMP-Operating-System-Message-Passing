@@ -29,7 +29,7 @@ typedef struct{
     char buffer[message_max_size];
     size_t msgLen;
     int nextMsg;
-    pthread_mutexattr_t MUTEX;
+    pthread_mutex_t MUTEX;
     sem_t empty;
     sem_t full;
 } message;
