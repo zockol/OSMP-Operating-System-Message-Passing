@@ -2,7 +2,6 @@
 #include "osmplib.h"
 
 SharedMem* shm;
-sem_t FULL;
 
 
 
@@ -28,9 +27,9 @@ int OSMP_Init(int *argc, char ***argv) {
     pthread_mutexattr_t mutex_attr;
     pthread_mutexattr_init(&mutex_attr);
     pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED);
-    pthread_mutex_init(&shm->MUTEX, &mutex_attr);
-    sem_init(&shm->empty, 1, message_max_size);
-    sem_init(&shm->full, 1, 0);
+    pthread_mutex_init(&shm->msg->MUTEX, &mutex_attr);
+    sem_init(&shm->msg->empty, 1, message_max_size);
+    sem_init(&shm->msg->full, 1, 0);
 
 
     //getpid
@@ -79,25 +78,25 @@ int OSMP_Rank(int *rank) {
 }
 
 int OSMP_Send() {
-    pthread_mutex_lock(&shm->MUTEX);
+    pthread_mutex_lock(&shm->msg->MUTEX);
     printf("send\n");
-    pthread_mutex_unlock(&shm->MUTEX);
+    pthread_mutex_unlock(&shm->msg->MUTEX);
 
     return 0;
 }
 
 
 int OSMP_Recv() {
-    pthread_mutex_lock(&shm->MUTEX);
+    pthread_mutex_lock(&shm->msg->MUTEX);
     printf("recieve\n");
-    pthread_mutex_unlock(&shm->MUTEX);
+    pthread_mutex_unlock(&shm->msg->MUTEX);
     return 0;
 }
 
 int OSMP_Bcast() {
-    pthread_mutex_lock(&shm->MUTEX);
+    pthread_mutex_lock(&shm->msg->MUTEX);
     printf("broadcast\n");
-    pthread_mutex_unlock(&shm->MUTEX);
+    pthread_mutex_unlock(&shm->msg->MUTEX);
     return 0;
 }
 

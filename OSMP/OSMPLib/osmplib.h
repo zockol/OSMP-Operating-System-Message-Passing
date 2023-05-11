@@ -29,6 +29,9 @@ typedef struct{
     char buffer[message_max_size];
     size_t msgLen;
     int nextMsg;
+    sem_t MUTEX;
+    sem_t empty;
+    sem_t full;
 } message;
 
 typedef struct{
@@ -45,9 +48,6 @@ typedef struct{
     int processAmount;
     message msg[max_messages];
     slots slot;
-    sem_t MUTEX;
-    sem_t empty;
-    sem_t full;
     process p[];
 } SharedMem;
 
