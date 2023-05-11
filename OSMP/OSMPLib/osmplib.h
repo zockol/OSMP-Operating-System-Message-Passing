@@ -25,6 +25,9 @@
 #define OSMP_ERROR -1
 #define OSMP_SUCCESS 0
 
+//mutex in shm statt bool send
+//keine große unterscheidung zwischen bcast und msg
+
 typedef struct {
     char buffer[message_max_size];
     int msgLen;
@@ -42,6 +45,7 @@ typedef struct{
 } message;
 
 typedef struct{
+    //array/verkettete liste
     int firstEmptySlot;
     int lastEmptySlot;
 } slots;
