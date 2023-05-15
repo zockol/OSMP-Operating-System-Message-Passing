@@ -30,15 +30,7 @@
 
 typedef struct {
     char buffer[message_max_size];
-    int msgLen;
-    int msgLenInByte;
-    bool send;
-    OSMP_Datatype datatype;
-    int srcRank;
-} Bcast;
-
-typedef struct{
-    int srcRank;
+    int mMUTEXsrcRank;
     char buffer[message_max_size];
     size_t msgLen;
     int nextMsg;
@@ -64,8 +56,8 @@ typedef struct{
     int processAmount;
     message msg[max_messages];
     slots slot;
+    //Bcast broadcastMsg;
     process p[];
-    Bcast broadcastMsg;
 } SharedMem;
 
 typedef enum {OSMP_INT, OSMP_SHORT, OSMP_LONG, OSMP_BYTE, OSMP_UNSIGNED_CHAR, OSMP_UNSIGNED_SHORT, OSMP_UNSIGNED, OSMP_FLOAT, OSMP_DOUBLE } OSMP_Datatype;
