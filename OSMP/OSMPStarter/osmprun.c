@@ -15,6 +15,8 @@ int shm_create(int pidAmount) {
     for (int i = 0; i < pidAmount; i++) {
         shm->p[i].pid = 0;
         shm->p[i].rank = 0;
+        shm->p[i].firstmsg = 0;
+        shm->p[i].lastmsg = 0;
     }
 
 

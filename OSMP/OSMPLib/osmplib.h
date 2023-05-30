@@ -1,8 +1,3 @@
-
-//Hier sind zusätzliche eigene Hilfsfunktionen für die interne Verwendung in der OSMP Bibliothek
-//definiert.
-
-
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -16,8 +11,8 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-#ifndef OSMPlib_h
-#define OSMPlib_h
+#ifndef OSMPLIB_H
+#define OSMPLIB_H
 #define message_max_size 1024
 #define max_messages 256
 #define SharedMemSize 100
@@ -28,9 +23,21 @@
 //mutex in shm statt bool send
 //keine große unterscheidung zwischen bcast und msg
 
+typedef enum {OSMP_INT, OSMP_SHORT, OSMP_LONG, OSMP_BYTE, OSMP_UNSIGNED_CHAR, OSMP_UNSIGNED_SHORT, OSMP_UNSIGNED, OSMP_FLOAT, OSMP_DOUBLE } OSMP_Datatype;
+
+
 typedef struct {
     char buffer[message_max_size];
-    int mMUTEXsrcRank;
+    int msgLen;
+    int msgLenInByte;
+    bool send;
+    OSMP_Datatype datatype;
+    int srcRank;
+} Bcast;
+
+typedef struct{
+    int srcRank;
+    char buffer[message_max_size];
     size_t msgLen;
     int nextMsg;
 } message;
@@ -53,13 +60,12 @@ typedef struct{
 
 typedef struct{
     int processAmount;
+    Bcast broadcastMsg;
     message msg[max_messages];
     slots slot;
-    //Bcast broadcastMsg;
     process p[];
 } SharedMem;
 
-typedef enum {OSMP_INT, OSMP_SHORT, OSMP_LONG, OSMP_BYTE, OSMP_UNSIGNED_CHAR, OSMP_UNSIGNED_SHORT, OSMP_UNSIGNED, OSMP_FLOAT, OSMP_DOUBLE } OSMP_Datatype;
 
 
 int OSMP_Init(int *argc, char ***argv);
