@@ -20,7 +20,7 @@ int OSMP_Init(int *argc, char ***argv) {
 
     shm = mmap(0, SharedMemSize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
 
-
+    printf("%d", shm->processAmount);
     int i = 0, breaker = 0;
     for (i = 0; i<shm->processAmount; i++) {
         if (shm->p[i].pid == 0 && breaker == 0) {

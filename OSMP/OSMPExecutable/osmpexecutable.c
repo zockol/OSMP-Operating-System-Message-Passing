@@ -6,8 +6,6 @@ int main(int argc, char *argv[]) {
         rv = OSMP_Size( &size );
         rv = OSMP_Rank( & rank );
 
-        printf("Test");
-
         if (rank == 0) {
             OSMP_Bcast();
         } else {

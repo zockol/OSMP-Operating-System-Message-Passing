@@ -9,14 +9,21 @@ SharedMem *shm;
 
 int shm_create(int pidAmount) {
 
+    shm = (SharedMem*) malloc(sizeof(SharedMem));
 
-    shm->processAmount = 0;
+    shm->processAmount = pidAmount;
+
+    for (int i = 0; i < max_messages; i++) {
+        memcpy(shm->msg[i].buffer, "\0", 1);
+        shm->msg[i].msgLen = 0;
+        shm->msg[i].nextMsg = -1;
+        shm->msg[i].srcRank = -1;
+        shm->msg[i].type = 0;
+    }
 
     for (int i = 0; i < pidAmount; i++) {
-        shm->p[i].pid = 0;
-        shm->p[i].rank = 0;
-        shm->p[i].firstmsg = 0;
-        shm->p[i].lastmsg = 0;
+        shm->p[i].pid = -1;
+        shm->p[i].rank = -1;
     }
 
 
@@ -70,12 +77,15 @@ int main(int argv, char* argc[]) {
         return -1;
     }
 
+
+
     start_shm();
     shm_create(pidAmount);
 
 
 
-    shm->processAmount = pidAmount;
+
+
     //Parent und Child Trennung
     int i;
     for (i = 0; i < pidAmount; i++) {
@@ -105,6 +115,8 @@ int main(int argv, char* argc[]) {
     for(int i = 0; i<pidAmount; i++) {
         waitpid(-1,NULL,0);
     }
+
+    free(shm);
 
     return 0;
 }
