@@ -3,9 +3,6 @@
 
 SharedMem* shm;
 
-
-
-
 int OSMP_Init(int *argc, char ***argv) {
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
@@ -23,16 +20,7 @@ int OSMP_Init(int *argc, char ***argv) {
 
     shm = mmap(0, SharedMemSize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
 
-    
-    pthread_mutexattr_t mutex_attr;
-    pthread_mutexattr_init(&mutex_attr);
-    pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED);
-    pthread_mutex_init(&shm->p->mutex, &mutex_attr);
-    sem_init(&shm->p->empty, 1, message_max_size);
-    sem_init(&shm->p->full, 1, 0);
 
-
-    //getpid
     int i = 0, breaker = 0;
     for (i = 0; i<shm->processAmount; i++) {
         if (shm->p[i].pid == 0 && breaker == 0) {
@@ -68,9 +56,8 @@ int OSMP_Size(int *size) {
 }
 
 int OSMP_Rank(int *rank) {
-    int getpiD = getpid();
     for (int i = 0; i < shm->processAmount; i++) {
-        if (shm->p[i].pid == getpiD) {
+        if (shm->p[i].pid == getpid()) {
             *rank = shm->p[i].rank;
         }
     }
@@ -78,39 +65,16 @@ int OSMP_Rank(int *rank) {
 }
 
 int OSMP_Send() {
-    pthread_mutex_lock(&shm->p->mutex);
     printf("send\n");
-    pthread_mutex_unlock(&shm->p->mutex);
-
     return 0;
 }
 
-
 int OSMP_Recv() {
-    pthread_mutex_lock(&shm->p->mutex);
-    printf("recieve\n");
-    pthread_mutex_unlock(&shm->p->mutex);
+    printf("receive\n");
     return 0;
 }
 
 int OSMP_Bcast() {
-    pthread_mutex_lock(&shm->p->mutex);
     printf("broadcast\n");
-    pthread_mutex_unlock(&shm->p->mutex);
     return 0;
-}
-
-int OSMP_DataSize(OSMP_Datatype datatype){
-
-    if(datatype == 0) return sizeof(int);
-    else if(datatype == 1) return sizeof(short);
-    else if(datatype == 2) return sizeof(long);
-    else if(datatype == 3) return sizeof(char);
-    else if(datatype == 4) return sizeof(unsigned char);
-    else if(datatype == 5) return sizeof(unsigned short);
-    else if(datatype == 6) return sizeof(unsigned);
-    else if(datatype == 7) return sizeof(float);
-    else if(datatype == 8) return sizeof(double);
-
-    return OSMP_ERROR;
 }

@@ -31,7 +31,6 @@
 typedef struct {
     char buffer[message_max_size];
     int mMUTEXsrcRank;
-    char buffer[message_max_size];
     size_t msgLen;
     int nextMsg;
 } message;
