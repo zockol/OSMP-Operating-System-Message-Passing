@@ -8,7 +8,10 @@
 #define SharedMemSize 100
 #define SharedMemName "/shm"
 
+
+
 #include "../OSMPLib/osmplib.h"
+
 
 
 #endif //GRP26_OSMPRUN_H

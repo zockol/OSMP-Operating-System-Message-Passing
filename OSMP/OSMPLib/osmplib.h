@@ -60,6 +60,7 @@ typedef struct{
     process p[];
 } SharedMem;
 
+
 int OSMP_Init(int *argc, char ***argv);
 int OSMP_Finalize();
 int OSMP_Size(int *size);

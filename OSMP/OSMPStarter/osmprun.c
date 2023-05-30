@@ -4,8 +4,9 @@
 //In dieser Quelltext-Datei ist die Funktionalität des OSMP-Starters implementiert
 
 #include "./osmprun.h"
+#include "../OSMPLib/osmplib.c"
 
-SharedMem *shm;
+extern SharedMem *shm;
 
 int shm_create(int pidAmount) {
 
