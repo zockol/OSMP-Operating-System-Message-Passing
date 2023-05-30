@@ -44,7 +44,7 @@ int OSMP_Init(int *argc, char ***argv) {
             breaker = 1;
         }
     }
-    printf("%d", shm->processAmount);
+
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
             shm->p[i].rank = i;
@@ -72,6 +72,12 @@ int OSMP_Size(int *size) {
 }
 
 int OSMP_Rank(int *rank) {
+
+    if (shm == NULL) {
+        printf("shm not initialized");
+        return OSMP_ERROR;
+    }
+
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
             *rank = shm->p[i].rank;

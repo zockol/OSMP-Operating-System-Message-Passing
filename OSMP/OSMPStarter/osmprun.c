@@ -17,11 +17,27 @@ int shm_create(int pidAmount) {
 
     for (int i = 0; i < pidAmount; i++) {
         shm->p[i].pid = 0;
-        shm->p[i].rank = 0;
+        shm->p[i].rank = -1;
+        shm->p[i].firstmsg = -1;
+        shm->p[i].lastmsg = -1;
+
+        //FELIX HIER DEINE SEM INITIALISIEREN
+    }
+
+    for (int i = 0; i < max_messages; i++) {
+        shm->msg[i].srcRank = -1;
+        if (i == max_messages - 1) {
+            shm->msg[i].nextMsg = -1;
+        } else {
+            shm->msg[i].nextMsg = i + 1;
+        }
+        shm->msg[i].msgLen = 0;
+        memcpy(shm->msg[i].buffer, "\0", 1);
+
     }
 
 
-    return 0;
+    return OSMP_SUCCESS;
 }
 
 int start_shm(int pidAmount) {
