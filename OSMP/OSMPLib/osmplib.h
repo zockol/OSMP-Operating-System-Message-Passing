@@ -4,6 +4,7 @@
 
 
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -22,11 +23,25 @@
 #define OSMP_SUCCESS 0
 #define message_max_size 1024
 #define max_messages 256
+#include <stdbool.h>
 
+typedef enum {OSMP_INT, OSMP_SHORT, OSMP_LONG, OSMP_BYTE, OSMP_UNSIGNED_CHAR, OSMP_UNSIGNED_SHORT, OSMP_UNSIGNED, OSMP_FLOAT, OSMP_DOUBLE } OSMP_Datatype;
+
+
+
+typedef struct {
+    char buffer[message_max_size];
+    int msgLen;
+    int msgLenInByte;
+    bool send;
+    OSMP_Datatype datatype;
+    int srcRank;
+} Bcast;
 
 typedef struct{
     int srcRank;
     char buffer[message_max_size];
+    OSMP_Datatype datatype;
     size_t msgLen;
     int nextMsg;
 } message;
@@ -45,15 +60,16 @@ typedef struct{
     pthread_mutex_t mutex;
     sem_t empty;
     sem_t full;
-
 } process;
 
 typedef struct{
-    message msg[max_messages];
     int processAmount;
+    message msg[max_messages];
     slots slot;
+    Bcast broadcastMsg;
     process p[];
 } SharedMem;
+
 
 int OSMP_Init(int *argc, char ***argv);
 int OSMP_Finalize();

@@ -26,7 +26,7 @@ int shm_create(int pidAmount) {
 
 int start_shm(int pidAmount) {
 
-    size_t sizeOfSharedMem = (sizeof(process) + max_messages * sizeof(message) + pidAmount * sizeof(process));
+    size_t sizeOfSharedMem = (max_messages * sizeof(message) + pidAmount * sizeof(process) + sizeof(Bcast));
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
