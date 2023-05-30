@@ -3,7 +3,9 @@
 
 SharedMem* shm;
 
+
 int OSMP_Init(int *argc, char ***argv) {
+
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
     if (fileDescriptor == -1) {
@@ -11,14 +13,28 @@ int OSMP_Init(int *argc, char ***argv) {
         return OSMP_ERROR;
     }
 
-    int ftrunc = ftruncate(fileDescriptor, sizeOfSharedMem);
 
-    if (ftrunc == -1) {
-        printf("Fehler bei ftruncate %s\n", strerror(errno));
+    struct stat *shm_stat = calloc(1, sizeof(struct stat));
+    if (shm_stat == NULL) {
+        printf("Error beim shm_stat\n");
         return OSMP_ERROR;
     }
 
-    shm = mmap(NULL, sizeOfSharedMem, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
+    if (fstat(fileDescriptor, shm_stat) != 0) {
+        printf("Error beim fstat\n");
+        return OSMP_ERROR;
+    }
+    size_t shm_size = (size_t) shm_stat->st_size;
+    free(shm_stat);
+
+
+
+    shm = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
+
+    if (shm == MAP_FAILED) {
+        printf("Error beim mmap\n");
+        return OSMP_ERROR;
+    }
 
 
     int i = 0, breaker = 0;

@@ -6,7 +6,8 @@
 #include "./osmprun.h"
 
 SharedMem *shm;
-size_t sizeOfSharedMem;
+
+
 
 int shm_create(int pidAmount) {
 
@@ -25,7 +26,7 @@ int shm_create(int pidAmount) {
 
 int start_shm(int pidAmount) {
 
-    sizeOfSharedMem = (sizeof(process) + max_messages * sizeof(message) + pidAmount * sizeof(process));
+    size_t sizeOfSharedMem = (sizeof(process) + max_messages * sizeof(message) + pidAmount * sizeof(process));
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 

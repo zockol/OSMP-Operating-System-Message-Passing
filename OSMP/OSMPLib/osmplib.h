@@ -16,14 +16,13 @@
 #ifndef OSMPlib_h
 #define OSMPlib_h
 
-#define SharedMemSize 100000
+#define SharedMemSize 1000
 #define SharedMemName "/shm"
 #define OSMP_ERROR -1
 #define OSMP_SUCCESS 0
 #define message_max_size 1024
 #define max_messages 256
 
-extern size_t sizeOfSharedMem;
 
 typedef struct{
     int srcRank;
