@@ -4,34 +4,28 @@
 //In dieser Quelltext-Datei ist die Funktionalität des OSMP-Starters implementiert
 
 #include "./osmprun.h"
-#include "../OSMPLib/osmplib.c"
 
-extern SharedMem *shm;
+SharedMem *shm;
+size_t sizeOfSharedMem;
 
 int shm_create(int pidAmount) {
 
-    shm = (SharedMem*) malloc(sizeof(SharedMem));
 
-    shm->processAmount = pidAmount;
 
-    for (int i = 0; i < max_messages; i++) {
-        memcpy(shm->msg[i].buffer, "\0", 1);
-        shm->msg[i].msgLen = 0;
-        shm->msg[i].nextMsg = -1;
-        shm->msg[i].srcRank = -1;
-        shm->msg[i].type = 0;
-    }
+    shm->processAmount = 0;
 
     for (int i = 0; i < pidAmount; i++) {
-        shm->p[i].pid = -1;
-        shm->p[i].rank = -1;
+        shm->p[i].pid = 0;
+        shm->p[i].rank = 0;
     }
 
 
     return 0;
 }
 
-int start_shm() {
+int start_shm(int pidAmount) {
+
+    sizeOfSharedMem = (sizeof(process) + max_messages * sizeof(message) + pidAmount * sizeof(process));
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
@@ -39,7 +33,7 @@ int start_shm() {
         return -1;
     }
 
-    int ftrunc = ftruncate(fileDescriptor, SharedMemSize);
+    int ftrunc = ftruncate(fileDescriptor, sizeOfSharedMem);
 
     if (ftrunc == -1) {
         printf("Fehler bei ftruncate %s\n", strerror(errno));
@@ -48,7 +42,7 @@ int start_shm() {
 
 
 
-    shm = mmap(NULL, SharedMemSize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
+    shm = mmap(NULL, sizeOfSharedMem, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
 
     if (shm == MAP_FAILED) {
         printf("Mapping Fail: %s\n", strerror(errno));
@@ -78,15 +72,12 @@ int main(int argv, char* argc[]) {
         return -1;
     }
 
-
-
-    start_shm();
+    start_shm(pidAmount);
     shm_create(pidAmount);
 
 
 
-
-
+    shm->processAmount = pidAmount;
     //Parent und Child Trennung
     int i;
     for (i = 0; i < pidAmount; i++) {
@@ -116,8 +107,6 @@ int main(int argv, char* argc[]) {
     for(int i = 0; i<pidAmount; i++) {
         waitpid(-1,NULL,0);
     }
-
-    free(shm);
 
     return 0;
 }

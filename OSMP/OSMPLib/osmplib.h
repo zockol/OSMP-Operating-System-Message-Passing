@@ -16,25 +16,21 @@
 #ifndef OSMPlib_h
 #define OSMPlib_h
 
-#define SharedMemSize 100
+#define SharedMemSize 100000
 #define SharedMemName "/shm"
 #define OSMP_ERROR -1
 #define OSMP_SUCCESS 0
-#define max_messages 256
 #define message_max_size 1024
+#define max_messages 256
 
-typedef enum {OSMP_INT, OSMP_SHORT, OSMP_LONG, OSMP_BYTE, OSMP_UNSIGNED_CHAR, OSMP_UNSIGNED_SHORT, OSMP_UNSIGNED, OSMP_FLOAT, OSMP_DOUBLE } OSMP_Datatype;
-
-
+extern size_t sizeOfSharedMem;
 
 typedef struct{
     int srcRank;
-    OSMP_Datatype type;
-    int msgLen;
-    int nextMsg;
     char buffer[message_max_size];
+    size_t msgLen;
+    int nextMsg;
 } message;
-
 
 typedef struct{
     //array/verkettete liste
@@ -50,16 +46,15 @@ typedef struct{
     pthread_mutex_t mutex;
     sem_t empty;
     sem_t full;
+
 } process;
 
-
 typedef struct{
-    int processAmount;
     message msg[max_messages];
+    int processAmount;
     slots slot;
     process p[];
 } SharedMem;
-
 
 int OSMP_Init(int *argc, char ***argv);
 int OSMP_Finalize();
