@@ -3,7 +3,6 @@
 //
 //In dieser Quelltext-Datei ist die Funktionalität des OSMP-Starters implementiert
 
-#include <btparse.h>
 #include "./osmprun.h"
 
 SharedMem *shm;
@@ -54,7 +53,7 @@ int shm_create(int pidAmount) {
 
 int start_shm(int pidAmount) {
 
-    size_t sizeOfSharedMem = (max_messages * sizeof(message) + pidAmount * sizeof(process) + sizeof(Bcast));
+    size_t sizeOfSharedMem = (sizeof(send_recieve) + sizeof(slots) + max_messages * sizeof(message) + pidAmount * sizeof(process) + sizeof(Bcast));
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
@@ -101,7 +100,12 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+
+
     start_shm(pidAmount);
+
+
+
     shm_create(pidAmount);
 
 
@@ -114,6 +118,7 @@ int main(int argc, char* argv[]) {
         pid = fork();
 
 
+
         if (pid < 0) {
             printf("Fehler beim forken\n");
             shm_unlink(SharedMemName);
@@ -121,13 +126,15 @@ int main(int argc, char* argv[]) {
         } else if (pid == 0) {
 
             sleep(2);
-            if(argc>=2) {
+            if(argc>2) {
+
                 int a = execlp(argv[2], "osmpexecutable", NULL);
                 if (a == -1) {
                     printf("execlp failure\n");
                     return -1;
                 }
             }else{
+
                 int a = execlp("./OSMP/OSMPExecutable/osmpexecutable", "osmpexecutable", NULL);
                 if (a == -1) {
                     printf("execlp failure\n");
@@ -138,7 +145,6 @@ int main(int argc, char* argv[]) {
             shm_unlink(SharedMemName);
             return 0;
         } else if (pid > 0) {
-
             sleep(1);
         }
     }
