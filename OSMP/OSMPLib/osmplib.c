@@ -4,6 +4,7 @@
 //#include "../OSMPStarter/osmprun.c"
 SharedMem *shm;
 
+int rankNow = 0;
 
 int OSMP_Init(int *argc, char ***argv) {
 
@@ -54,7 +55,7 @@ int OSMP_Init(int *argc, char ***argv) {
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
             shm->p[i].rank = i;
-            printf("%d", i);
+            rankNow = i;
         }
     }
 
@@ -118,8 +119,8 @@ int OSMP_Rank(int *rank) {
 
 int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     for (int i = 0; i < shm->processAmount; i++) {
-        printf("i = %d\ndest = %d\nthisrank = %d, \n\n", i, dest, shm->p[i].rank);
-        if (getSrcRank() == dest) {
+        printf("i = %d\ndest = %d\nthisrank = %d, \n\n", i, dest, rankNow);
+        if (shm->p[i].rank == dest) {
             printf("hello");
             calculateStruct(&shm->p[i].rank);
             int k = 0;
@@ -140,7 +141,7 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
 
             printf("empty");
         }
-
+        printf("schreibdieeinfachum");
     }
     return 0;
 }
@@ -152,7 +153,7 @@ int getSrcRank() {
             return shm->p[i].rank;
         }
     }
-    return shm->p[i].rank;
+
 }
 
 int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len) {
