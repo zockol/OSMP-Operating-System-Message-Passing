@@ -6,13 +6,29 @@
 #include "./osmprun.h"
 
 SharedMem *shm;
+int pidAmount;
+char loggingPath[];
 
 
 int evaluateArgs(int argc, char* argv[]) {
 
+    char falscheSyntax[] = "Syntax: ./osmprun (int) [-l loggingpath [-v logginglevel]] (path), (int): Anzahl der zu erzeugenden Prozesse, [-l loggingpath [-v logginglevel]: Dateipfad der zu erstellenden Datei und mit -v optional das Level angeben, (path) Pfad der executable\n";
+
     if (argc < 2) {
-        printf("Syntax: ./osmprun (int) [-l loggingpath [-v logginglevel]] (path), (int): Anzahl der zu erzeugenden Prozesse, [-l loggingpath [-v logginglevel]: Name des Executables, welches ausgeführt werden soll\n");
+        printf("%s", falscheSyntax);
+        exit(-1);
     }
+
+    pidAmount = atol(argv[1]);
+    if (pidAmount < 1 || pidAmount > 200) {
+        printf("Bitte gebe eine Prozessanzahl zwischen 1 und 200 an");
+        exit(-1);
+    }
+
+    if (argc > 2) {
+
+    }
+
 
     return OSMP_SUCCESS;
 }
@@ -91,17 +107,10 @@ int start_shm(int pidAmount) {
 
 int main(int argc, char* argv[]) {
 
-
-
-
-    //Exit wenn keine Argumente mit angegeben
-    if (argc==1) {
-        printf("Bitte gebe Argumente an. Syntax hierbei wäre ./osmprun <ChildNumber> <executable>\n");
-        exit(-1);
-    }
+    evaluateArgs(argc, argv);
 
     //argc[1] wird zum Integer umgewandelt, bei falschangabe automatisch 0
-    int pidAmount = atol(argv[1]);
+
     pid_t pid;
 
     //wenn pidAmount bei 0 unter drunter liegt wird OSMP_ERROR returned
