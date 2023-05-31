@@ -47,47 +47,50 @@ typedef struct {
     char buffer[message_max_size];
     int msgLen;
     int msgLenInByte;
-    bool send;
+    //bool send;
     OSMP_Datatype datatype;
     int srcRank;
 } Bcast;
 
 typedef struct {
-    bool empty;
+    bool full;
     int srcRank;
     int destRank;
     char buffer[message_max_size];
     OSMP_Datatype datatype;
     int msgLen;
     int nextMsg;
+    pthread_cond_t read;
 } message;
 
 typedef struct {
     //array/verkettete liste
     int firstEmptySlot;
-    int lastEmptySlot;
+    //int lastEmptySlot;
 } slots;
 
 
 typedef struct {
-    message msg[max_messages];
+    message msg[OSMP_MAX_MESSAGES_PROC];
     pid_t pid;
     int rank;
     slots slots;
+    int numberOfMessages;
     int firstmsg;
     int lastmsg;
 
-    //pthread_mutex_t mutex;
     sem_t empty;
     sem_t full;
 } process;
 
 typedef struct {
     int processAmount;
+    int processesCreated;
     pthread_mutex_t mutex;
     pthread_cond_t cattr;
     Bcast broadcastMsg;
     int barrier_all;
+    pthread_cond_t allCreated;
     process p[];
 } SharedMem;
 

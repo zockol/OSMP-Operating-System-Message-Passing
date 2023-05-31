@@ -12,12 +12,14 @@ int shm_create(int pidAmount) {
 
 
     shm->processAmount = 0;
+    shm->processesCreated = 0;
 
     for (int i = 0; i < pidAmount; i++) {
         shm->p[i].pid = 0;
         shm->p[i].rank = i;
         shm->p[i].firstmsg = -1;
-        shm->p[i].lastmsg = -1;
+        shm->p[i].numberOfMessages = 0;
+        shm->p[i].slots.firstEmptySlot = 0;
 
         pthread_mutexattr_t mutex_attr;
         pthread_mutexattr_init(&mutex_attr);
@@ -31,20 +33,25 @@ int shm_create(int pidAmount) {
         // pthread_mutex_init(&shm->p[i].msg[k].send, &mutex_attr2);
 
 
+        pthread_condattr_t barrier;
+        pthread_condattr_init(&barrier);
+        pthread_condattr_setpshared(&barrier, PTHREAD_PROCESS_SHARED);
+        pthread_cond_init(&shm->cattr, &barrier);
 
 
-        pthread_condattr_t condition_attr;
-        pthread_condattr_init(&condition_attr);
-        pthread_condattr_setpshared(&condition_attr, PTHREAD_PROCESS_SHARED);
-        pthread_cond_init(&shm->cattr, &condition_attr);
+        pthread_condattr_t create;
+        pthread_condattr_init(&create);
+        pthread_condattr_setpshared(&create, PTHREAD_PROCESS_SHARED);
+        pthread_cond_init(&shm->allCreated, &create);
+
 
         sem_init(&shm->p[i].empty, 1, OSMP_MAX_MESSAGES_PROC);
         sem_init(&shm->p[i].full, 1, 0);
 
 
-        for (int j = 0; j < max_messages; j++) {
+        for (int j = 0; j < OSMP_MAX_MESSAGES_PROC; j++) {
             shm->p[i].msg[j].srcRank = -1;
-            if (i == max_messages - 1) {
+            if (i == OSMP_MAX_MESSAGES_PROC - 1) {
                 shm->p[i].msg[j].nextMsg = -1;
             } else {
                 shm->p[i].msg[j].nextMsg = i + 1;
@@ -52,8 +59,13 @@ int shm_create(int pidAmount) {
             shm->p[i].msg[j].msgLen = 0;
             memcpy(shm->p[i].msg[j].buffer, "\0", 1);
 
-            shm->p[i].msg[j].empty = true;
+            shm->p[i].msg[j].full = false;
 
+            shm->p[i].msg[j].nextMsg = 0;
+            pthread_condattr_t read;
+            pthread_condattr_init(&read);
+            pthread_condattr_setpshared(&read, PTHREAD_PROCESS_SHARED);
+            pthread_cond_init(&shm->p[i].msg[j].read, &read);
         }
     }
 
@@ -62,7 +74,8 @@ int shm_create(int pidAmount) {
 
 int start_shm(int pidAmount) {
 
-    size_t sizeOfSharedMem = (sizeof(slots) + max_messages * pidAmount * sizeof(message) + pidAmount * sizeof(process) +
+    size_t sizeOfSharedMem = (pidAmount * sizeof(slots) + max_messages * pidAmount * sizeof(message) +
+                              pidAmount * sizeof(process) +
                               sizeof(Bcast));
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
