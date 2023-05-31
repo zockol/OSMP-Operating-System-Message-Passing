@@ -136,12 +136,12 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             sem_wait(&shm->p[i].empty);
             pthread_mutex_lock(&shm->mutex);
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].msgLen = count * sizeof(datatype);
-            printf("msglen = %d\n", count * sizeof(datatype));
+            printf("msglen = %d\n", shm->p[i].msg[shm->p[i].slots.firstEmptySlot].msgLen);
             printf("sizeof Datatype = %d\n", sizeof(datatype));
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].datatype = datatype;
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].srcRank = getSrcRank();
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].destRank = dest;
-            
+
             memcpy(shm->p[i].msg[shm->p[i].slots.firstEmptySlot].buffer, buf,
                    shm->p[i].msg[shm->p[i].slots.firstEmptySlot].msgLen);
             shm->p[i].msg[shm->p[i].firstmsg].full = true;
@@ -174,7 +174,6 @@ int getSrcRank() {
 
 int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len) {
     int i = 0;
-
     for (i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
 
@@ -186,11 +185,11 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
             datatype = shm->p[i].msg[shm->p[i].firstmsg].datatype;
 
             source = &shm->p[i].msg[shm->p[i].firstmsg].srcRank;
-            len = &shm->p[i].msg[shm->p[i].firstmsg].msgLen;
+            *len = shm->p[i].msg[shm->p[i].firstmsg].msgLen;
             printf("-------------------");
-            printf("%d", &shm->p[i].msg[shm->p[i].firstmsg].msgLen);
+            // printf("%d", shm->p[i].msg[shm->p[i].firstmsg].msgLen);
             printf("firstmsg  = %d\n", shm->p[i].firstmsg);
-            printf("length =  %d \n", len);
+            printf("length =  %d \n", *len);
             printf("count =  %d \n", count);
             printf("source =  %d \n", *source);
             memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, count * sizeof(datatype));
