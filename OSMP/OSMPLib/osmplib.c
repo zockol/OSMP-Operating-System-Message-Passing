@@ -3,8 +3,42 @@
 //#include "../OSMPStarter/osmprun.c"
 SharedMem* shm;
 
+int rankNow = 0;
+
+int debug(char *functionName, int srcRank, char *error, char* memory ) {
+
+    if (shm->log.logIntensity == -1) return OSMP_SUCCESS;
+
+    char buffer[1024];
+
+    int timestamp = (int)time(NULL);
+
+    if (error != NULL && memory != NULL) {
+        sprintf(buffer, "Timestamp: %d, Error: MEMORY AND DEBUG != NULL IN debug(), Funktion: %s, OSMPRank: %d\n", timestamp, functionName, srcRank);
+    } else {
+        if (shm->log.logIntensity >= 2 && error != NULL) {
+            sprintf(buffer, "Timestamp: %d, Error: %s, Funktion: %s, OSMPRank: %d\n", timestamp, error, functionName, srcRank);
+        } else if (shm->log.logIntensity == 3 && memory != NULL) {
+            sprintf(buffer, "Timestamp: %d, Memory: %s, Funktion: %s, OSMPRank: %d\n", timestamp, memory, functionName, srcRank);
+        } else {
+            sprintf(buffer, "Timestamp: %d, Funktion: %s, OSMPRank: %d\n", timestamp, functionName, srcRank);
+        }
+    }
+
+    FILE* file = fopen(shm->log.logPath, "a");
+    if (file) {
+        fprintf(file, "%s", buffer);
+        fclose(file);
+    } else {
+      printf("Fehler beim öffnen der Datei\n");
+        return OSMP_ERROR;
+    }
+
+    return OSMP_SUCCESS;
+}
 
 int OSMP_Init(int *argc, char ***argv) {
+
 
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
@@ -15,6 +49,8 @@ int OSMP_Init(int *argc, char ***argv) {
     }
 
     struct stat *shm_stat = calloc(1, sizeof(struct stat));
+
+
     if (shm_stat == NULL) {
         printf("Error beim shm_stat\n");
         return OSMP_ERROR;
@@ -25,9 +61,6 @@ int OSMP_Init(int *argc, char ***argv) {
         return OSMP_ERROR;
     }
     size_t shm_size = (size_t) shm_stat->st_size;
-    free(shm_stat);
-
-
 
     shm = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
 
@@ -35,7 +68,10 @@ int OSMP_Init(int *argc, char ***argv) {
         printf("Error beim mmap\n");
         return OSMP_ERROR;
     }
+    debug("OSMP_INIT", rankNow, NULL, "calloc");
 
+    free(shm_stat);
+    debug("OSMP_INIT", rankNow, NULL, "free");
 
     int i = 0, breaker = 0;
     for (i = 0; i<shm->processAmount; i++) {
@@ -50,6 +86,7 @@ int OSMP_Init(int *argc, char ***argv) {
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
             shm->p[i].rank = i;
+            rankNow = i;
         }
     }
 
@@ -59,6 +96,8 @@ int OSMP_Init(int *argc, char ***argv) {
         return OSMP_ERROR;
     }
 
+    debug("OSMP_INIT", rankNow, NULL, NULL);
+
     return OSMP_SUCCESS;
 
 }
@@ -66,6 +105,8 @@ int OSMP_Init(int *argc, char ***argv) {
 
 
 int OSMP_Barrier(){
+
+    debug("OSMP_BARRIER", rankNow, NULL, NULL);
 
     pthread_mutex_lock(&shm->mutex);
     shm->barrier_all--;
@@ -82,16 +123,19 @@ int OSMP_Barrier(){
 }
 
 int OSMP_Finalize() {
+    debug("OSMP_FINALIZE", rankNow, NULL, NULL);
     printf("finalize\n");
     return 0;
 }
 
 int OSMP_Size(int *size) {
+    debug("OSMP_SIZE", rankNow, NULL, NULL);
     *size = shm->processAmount;
     return OSMP_SUCCESS;
 }
 
 int OSMP_Rank(int *rank) {
+    debug("OSMP_RANK", rankNow, NULL, NULL);
 
     if (shm == NULL) {
         printf("shm not initialized");
@@ -107,16 +151,19 @@ int OSMP_Rank(int *rank) {
 }
 
 int OSMP_Send() {
+    debug("OSMP_SEND", rankNow, NULL, NULL);
     printf("send\n");
     return 0;
 }
 
 int OSMP_Recv() {
+    debug("OSMP_RECV", rankNow, NULL, NULL);
     printf("receive\n");
     return 0;
 }
 
 int OSMP_Bcast() {
+    debug("OSMP_BCAST", rankNow, NULL, NULL);
     printf("broadcast\n");
     return 0;
 }

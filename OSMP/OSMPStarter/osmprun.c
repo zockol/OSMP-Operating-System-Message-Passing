@@ -6,8 +6,131 @@
 #include "./osmprun.h"
 
 SharedMem *shm;
+char* pathToExecutable;
+
+int evaluateArgs(int argc, char* argv[]) {
+
+    char falscheSyntax[] = "Syntax: ./osmprun (int) [-L Path wo die LoggingFiles erstellt werden [-v logginglevel minimum 1 maximum 3]] (path), (int): Anzahl der zu erzeugenden Prozesse, [-l loggingpath [-v logginglevel]: Dateipfad der zu erstellenden Datei und mit -v optional das Level angeben, (path) Pfad der executable\n";
+
+    int executePathIndex = 0;
+    char* pathToLoggingFile = NULL;
+    int loggingVerbosity = 1;
+    shm->log.logIntensity = -1;
+    pathToExecutable = NULL;
+    int processAmount = 0;
+
+    if (argc == 2) {
+        printf("%s", falscheSyntax);
+        exit(-1);
+    }
+
+    int i = 1;
+    while (i < argc) {
+        if (i == 1) {
+            if (processAmount == 0) {
+                processAmount = atoi(argv[i]);
+                if (processAmount == 0 || processAmount > 150) {
+                    printf("Bitte gebe eine Prozessanzahl zwischen 0 und 150 ein");
+                    exit(-1);
+                }
+            }
+        }
 
 
+        if (i == 2) {
+            if (strcmp(argv[i], "-L") == 0) {
+                if (i + 1 < argc) {
+                    pathToLoggingFile = argv[i+1];
+                    shm->log.logIntensity = 1;
+                    i+=2;
+                    if (i < argc) {
+                        if (strcmp(argv[i], "-v") == 0) {
+                            if (i + 1 < argc) {
+                                loggingVerbosity = atoi(argv[i + 1]);
+                                if (loggingVerbosity < 1 || loggingVerbosity > 3) {
+                                    printf("%s", falscheSyntax);
+                                    shm_unlink(SharedMemName);
+                                    exit(-1);
+                                } else {
+                                    shm->log.logIntensity = loggingVerbosity;
+                                    i += 2;
+                                    if (i < argc) {
+                                        pathToExecutable = argv[i];
+                                        executePathIndex = i;
+                                    } else {
+                                        printf("%s", falscheSyntax);
+                                        shm_unlink(SharedMemName);
+                                        exit(-1);
+                                    }
+                                }
+
+                            } else {
+                                printf("%s", falscheSyntax);
+                                shm_unlink(SharedMemName);
+                                exit(-1);
+                            }
+                        } else {
+                            pathToExecutable = argv[i];
+                            executePathIndex = i;
+                        }
+                    } else {
+                        printf("%s", falscheSyntax);
+                        shm_unlink(SharedMemName);
+                        exit(-1);
+                    }
+                } else {
+                    printf("%s", falscheSyntax);
+                    shm_unlink(SharedMemName);
+                    exit(-1);
+                }
+            } else {
+
+                if (strcmp(argv[i], "-v") == 0) {
+                    printf("%s", falscheSyntax);
+                    shm_unlink(SharedMemName);
+                    exit(-1);
+                }
+
+                pathToExecutable = argv[i];
+                executePathIndex = i;
+            }
+        }
+
+    i++;
+    }
+
+    if (pathToLoggingFile != NULL) {
+
+        char* baseName = "Log";
+        char extension[] = ".txt";
+        int i = 1;
+        char fileName[256];
+
+        while(1) {
+            sprintf(fileName, "%s%s%d%s", pathToLoggingFile, baseName, i, extension);
+
+            FILE* file = fopen(fileName, "r");
+            if (file) {
+                fclose(file);
+                i++;
+            } else {
+                file = fopen(fileName, "w");
+                if (file) {
+
+                    strcpy(shm->log.logPath, fileName);
+                    break;
+                } else {
+                    printf("Fehler beim Erstellen der Datei: %s\n", fileName);
+                    shm_unlink(SharedMemName);
+                    exit(-1);
+                }
+            }
+        }
+
+    }
+
+    return executePathIndex+1;
+}
 
 int shm_create(int pidAmount) {
 
@@ -53,7 +176,7 @@ int shm_create(int pidAmount) {
 
 int start_shm(int pidAmount) {
 
-    size_t sizeOfSharedMem = (sizeof(send_recieve) + sizeof(slots) + max_messages * sizeof(message) + pidAmount * sizeof(process) + sizeof(Bcast));
+    size_t sizeOfSharedMem = (sizeof(logger) + sizeof(send_recieve) + sizeof(slots) + max_messages * sizeof(message) + pidAmount * sizeof(process) + sizeof(Bcast));
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
@@ -83,31 +206,26 @@ int start_shm(int pidAmount) {
 
 int main(int argc, char* argv[]) {
 
-
-    //Exit wenn keine Argumente mit angegeben
-    if (argc==1) {
-        printf("Bitte gebe Argumente an. Syntax hierbei wäre ./osmprun <ChildNumber> <executable>\n");
-        exit(-1);
-    }
-
-    //argc[1] wird zum Integer umgewandelt, bei falschangabe automatisch 0
-    int pidAmount = atol(argv[1]);
+    int pidAmount = atoi(argv[1]);
     pid_t pid;
-
-    //wenn pidAmount bei 0 unter drunter liegt wird OSMP_ERROR returned
-    if (pidAmount < 1) {
-        printf("Bitte gebe eine korrekte Anzahl an Childs ein, die erzeugt werden sollen\n");
-        return -1;
-    }
-
-
 
     start_shm(pidAmount);
 
+    int firstOptionalArgs = evaluateArgs(argc, argv);
+    //printf("%d %d\n",argc, firstOptionalArgs);
+    char *optionalArgs[argc-firstOptionalArgs+2];
+    optionalArgs[0] = "osmpexecutable";
+    int optionalArgsIndex = 1;
 
+    while (argv[firstOptionalArgs] != NULL) {
+        optionalArgs[optionalArgsIndex] = strdup(argv[firstOptionalArgs]);
+        firstOptionalArgs++;
+        optionalArgsIndex++;
+    }
+
+    optionalArgs[optionalArgsIndex] = NULL;
 
     shm_create(pidAmount);
-
 
 
     shm->processAmount = pidAmount;
@@ -126,24 +244,11 @@ int main(int argc, char* argv[]) {
         } else if (pid == 0) {
 
             sleep(2);
-            if(argc>2) {
-
-                int a = execlp(argv[2], "osmpexecutable", NULL);
-                if (a == -1) {
-                    printf("execlp failure\n");
-                    return -1;
-                }
-            }else{
-
-                int a = execlp("./OSMP/OSMPExecutable/osmpexecutable", "osmpexecutable", NULL);
-                if (a == -1) {
-                    printf("execlp failure\n");
-                    return -1;
-                }
+            int a = execvp(pathToExecutable, optionalArgs);
+            if (a == -1) {
+                printf("execlp failure\n");
+                return -1;
             }
-
-            shm_unlink(SharedMemName);
-            return 0;
         } else if (pid > 0) {
             sleep(1);
         }
@@ -152,6 +257,8 @@ int main(int argc, char* argv[]) {
     for(int i = 0; i<pidAmount; i++) {
         waitpid(-1,NULL,0);
     }
+
+    shm_unlink(SharedMemName);
 
     return 0;
 }
