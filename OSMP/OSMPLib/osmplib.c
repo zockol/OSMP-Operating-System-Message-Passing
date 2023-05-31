@@ -62,11 +62,7 @@ int OSMP_Init(int *argc, char ***argv) {
     }
     size_t shm_size = (size_t) shm_stat->st_size;
 
-
-
-
     shm = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
-
 
     if (shm == MAP_FAILED) {
         printf("Error beim mmap\n");
