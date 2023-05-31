@@ -72,6 +72,11 @@ typedef struct{
     sem_t full;
 } process;
 
+typedef struct {
+    int logIntensity;
+    char *logPath;
+} logger;
+
 typedef struct{
     int processAmount;
     message msg[max_messages];
@@ -80,6 +85,7 @@ typedef struct{
     pthread_cond_t cattr;
     Bcast broadcastMsg;
     int barrier_all;
+    logger log;
     process p[];
 } SharedMem;
 

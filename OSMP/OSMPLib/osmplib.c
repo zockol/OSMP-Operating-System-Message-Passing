@@ -3,7 +3,7 @@
 //#include "../OSMPStarter/osmprun.c"
 SharedMem* shm;
 
-int debug(char functionName[], int srcRank, char error[], int memory ) {
+int debug(char *functionName, int srcRank, char error[], int memory ) {
 
     //file deklarieren
 
