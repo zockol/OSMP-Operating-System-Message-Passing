@@ -14,7 +14,7 @@ void evaluateArgs(int argc, char* argv[]) {
 
     char* pathToLoggingFile = NULL;
     int loggingVerbosity = 1;
-    shm->log.logIntensity = 1;
+    shm->log.logIntensity = -1;
     pathToExecutable = NULL;
     int processAmount = 0;
 
@@ -40,6 +40,7 @@ void evaluateArgs(int argc, char* argv[]) {
             if (strcmp(argv[i], "-L") == 0) {
                 if (i + 1 < argc) {
                     pathToLoggingFile = argv[i+1];
+                    shm->log.logIntensity = 1;
                     i+=2;
                     if (i < argc) {
                         if (strcmp(argv[i], "-v") == 0) {

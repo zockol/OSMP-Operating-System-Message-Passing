@@ -5,18 +5,25 @@ SharedMem* shm;
 
 int rankNow = 0;
 
-int debug(char *functionName, int srcRank, char error[], int memory ) {
+int debug(char *functionName, int srcRank, char *error, char* memory ) {
+
+    if (shm->log.logIntensity == -1) return OSMP_SUCCESS;
 
     char buffer[1024];
 
     int timestamp = (int)time(NULL);
 
-    sprintf(buffer, "Timestamp: %d, Funktion: %s, OSMPRank: %d\n", timestamp, functionName, srcRank);
-
-    // if level 2 -> log to file error
-
-    // if level 3 -> memory 1 = log
-
+    if (error != NULL && memory != NULL) {
+        sprintf(buffer, "Timestamp: %d, Error: MEMORY AND DEBUG != NULL IN debug(), Funktion: %s, OSMPRank: %d\n", timestamp, functionName, srcRank);
+    } else {
+        if (shm->log.logIntensity >= 2 && error != NULL) {
+            sprintf(buffer, "Timestamp: %d, Error: %s, Funktion: %s, OSMPRank: %d\n", timestamp, error, functionName, srcRank);
+        } else if (shm->log.logIntensity == 3 && memory != NULL) {
+            sprintf(buffer, "Timestamp: %d, Memory: %s, Funktion: %s, OSMPRank: %d\n", timestamp, memory, functionName, srcRank);
+        } else {
+            sprintf(buffer, "Timestamp: %d, Funktion: %s, OSMPRank: %d\n", timestamp, functionName, srcRank);
+        }
+    }
 
     FILE* file = fopen(shm->log.logPath, "a");
     if (file) {
@@ -42,6 +49,8 @@ int OSMP_Init(int *argc, char ***argv) {
     }
 
     struct stat *shm_stat = calloc(1, sizeof(struct stat));
+    debug("OSMP_INIT", rankNow, NULL, "calloc");
+
     if (shm_stat == NULL) {
         printf("Error beim shm_stat\n");
         return OSMP_ERROR;
@@ -52,8 +61,9 @@ int OSMP_Init(int *argc, char ***argv) {
         return OSMP_ERROR;
     }
     size_t shm_size = (size_t) shm_stat->st_size;
-    free(shm_stat);
 
+    free(shm_stat);
+    //debug("OSMP_INIT", rankNow, NULL, "free");
 
 
     shm = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
