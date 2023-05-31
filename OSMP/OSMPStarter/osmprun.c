@@ -8,10 +8,11 @@
 SharedMem *shm;
 char* pathToExecutable;
 
-void evaluateArgs(int argc, char* argv[]) {
+int evaluateArgs(int argc, char* argv[]) {
 
     char falscheSyntax[] = "Syntax: ./osmprun (int) [-L Path wo die LoggingFiles erstellt werden [-v logginglevel minimum 1 maximum 3]] (path), (int): Anzahl der zu erzeugenden Prozesse, [-l loggingpath [-v logginglevel]: Dateipfad der zu erstellenden Datei und mit -v optional das Level angeben, (path) Pfad der executable\n";
 
+    int executePathIndex = 0;
     char* pathToLoggingFile = NULL;
     int loggingVerbosity = 1;
     shm->log.logIntensity = -1;
@@ -55,6 +56,7 @@ void evaluateArgs(int argc, char* argv[]) {
                                     i += 2;
                                     if (i < argc) {
                                         pathToExecutable = argv[i];
+                                        executePathIndex = i;
                                     } else {
                                         printf("%s", falscheSyntax);
                                         shm_unlink(SharedMemName);
@@ -69,6 +71,7 @@ void evaluateArgs(int argc, char* argv[]) {
                             }
                         } else {
                             pathToExecutable = argv[i];
+                            executePathIndex = i;
                         }
                     } else {
                         printf("%s", falscheSyntax);
@@ -89,8 +92,10 @@ void evaluateArgs(int argc, char* argv[]) {
                 }
 
                 pathToExecutable = argv[i];
+                executePathIndex = i;
             }
         }
+
     i++;
     }
 
@@ -124,7 +129,7 @@ void evaluateArgs(int argc, char* argv[]) {
 
     }
 
-
+    return executePathIndex+1;
 }
 
 int shm_create(int pidAmount) {
@@ -206,10 +211,21 @@ int main(int argc, char* argv[]) {
 
     start_shm(pidAmount);
 
-    evaluateArgs(argc, argv);
+    int firstOptionalArgs = evaluateArgs(argc, argv);
+    //printf("%d %d\n",argc, firstOptionalArgs);
+    char *optionalArgs[argc-firstOptionalArgs+2];
+    optionalArgs[0] = "osmpexecutable";
+    int optionalArgsIndex = 1;
+
+    while (argv[firstOptionalArgs] != NULL) {
+        optionalArgs[optionalArgsIndex] = strdup(argv[firstOptionalArgs]);
+        firstOptionalArgs++;
+        optionalArgsIndex++;
+    }
+
+    optionalArgs[optionalArgsIndex] = NULL;
 
     shm_create(pidAmount);
-
 
 
     shm->processAmount = pidAmount;
@@ -228,7 +244,7 @@ int main(int argc, char* argv[]) {
         } else if (pid == 0) {
 
             sleep(2);
-            int a = execlp(pathToExecutable, "osmpexecutable", NULL);
+            int a = execvp(pathToExecutable, optionalArgs);
             if (a == -1) {
                 printf("execlp failure\n");
                 return -1;
