@@ -113,7 +113,7 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             pthread_mutex_lock(&shm->mutex);
             shm->p[i].msg[shm->p[i].firstmsg].srcRank = getSrcRank();
             for (int j = 0; j <= count; j++){
-                shm->p[i].msg[shm->p[i].firstmsg].buffer = &(buf+i);
+               /// shm->p[i].msg[shm->p[i].firstmsg].buffer = &(buf+i);
             }
             sem_post(&(shm->p[i].full));
             pthread_mutex_unlock(&shm->mutex);
