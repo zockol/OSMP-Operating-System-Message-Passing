@@ -74,7 +74,7 @@ typedef struct{
 
 typedef struct {
     int logIntensity;
-    char *logPath;
+    char logPath[256];
 } logger;
 
 typedef struct{

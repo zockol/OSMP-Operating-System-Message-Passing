@@ -14,6 +14,7 @@ void evaluateArgs(int argc, char* argv[]) {
 
     char* pathToLoggingFile = NULL;
     int loggingVerbosity = 1;
+    shm->log.logIntensity = 1;
     pathToExecutable = NULL;
     int processAmount = 0;
 
@@ -109,8 +110,8 @@ void evaluateArgs(int argc, char* argv[]) {
             } else {
                 file = fopen(fileName, "w");
                 if (file) {
-                    fclose(file);
-                    shm->log.logPath = fileName;
+
+                    strcpy(shm->log.logPath, fileName);
                     break;
                 } else {
                     printf("Fehler beim Erstellen der Datei: %s\n", fileName);

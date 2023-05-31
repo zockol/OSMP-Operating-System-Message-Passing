@@ -3,21 +3,36 @@
 //#include "../OSMPStarter/osmprun.c"
 SharedMem* shm;
 
+int rankNow = 0;
+
 int debug(char *functionName, int srcRank, char error[], int memory ) {
 
-    int i = 0;
+    char buffer[1024];
 
     int timestamp = (int)time(NULL);
 
+    sprintf(buffer, "Timestamp: %d, Funktion: %s, OSMPRank: %d\n", timestamp, functionName, srcRank);
 
     // if level 2 -> log to file error
 
     // if level 3 -> memory 1 = log
+
+
+    FILE* file = fopen(shm->log.logPath, "a");
+    if (file) {
+        fprintf(file, "%s", buffer);
+        fclose(file);
+    } else {
+      printf("Fehler beim öffnen der Datei\n");
+        return OSMP_ERROR;
+    }
+
+    return OSMP_SUCCESS;
 }
 
 int OSMP_Init(int *argc, char ***argv) {
 
-    debug("Test", 1, "Test2", 1);
+
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
@@ -62,6 +77,7 @@ int OSMP_Init(int *argc, char ***argv) {
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
             shm->p[i].rank = i;
+            rankNow = i;
         }
     }
 
@@ -71,6 +87,8 @@ int OSMP_Init(int *argc, char ***argv) {
         return OSMP_ERROR;
     }
 
+    debug("OSMP_INIT", rankNow, NULL, 0);
+
     return OSMP_SUCCESS;
 
 }
@@ -78,6 +96,8 @@ int OSMP_Init(int *argc, char ***argv) {
 
 
 int OSMP_Barrier(){
+
+    debug("OSMP_BARRIER", rankNow, NULL, 0);
 
     pthread_mutex_lock(&shm->mutex);
     shm->barrier_all--;
@@ -94,16 +114,19 @@ int OSMP_Barrier(){
 }
 
 int OSMP_Finalize() {
+    debug("OSMP_FINALIZE", rankNow, NULL, 0);
     printf("finalize\n");
     return 0;
 }
 
 int OSMP_Size(int *size) {
+    debug("OSMP_SIZE", rankNow, NULL, 0);
     *size = shm->processAmount;
     return OSMP_SUCCESS;
 }
 
 int OSMP_Rank(int *rank) {
+    debug("OSMP_RANK", rankNow, NULL, 0);
 
     if (shm == NULL) {
         printf("shm not initialized");
@@ -119,16 +142,19 @@ int OSMP_Rank(int *rank) {
 }
 
 int OSMP_Send() {
+    debug("OSMP_SEND", rankNow, NULL, 0);
     printf("send\n");
     return 0;
 }
 
 int OSMP_Recv() {
+    debug("OSMP_RECV", rankNow, NULL, 0);
     printf("receive\n");
     return 0;
 }
 
 int OSMP_Bcast() {
+    debug("OSMP_BCAST", rankNow, NULL, 0);
     printf("broadcast\n");
     return 0;
 }
