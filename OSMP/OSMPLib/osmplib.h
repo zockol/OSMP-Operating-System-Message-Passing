@@ -58,7 +58,7 @@ typedef struct {
     int destRank;
     char buffer[message_max_size];
     OSMP_Datatype datatype;
-    size_t msgLen;
+    int msgLen;
     int nextMsg;
 } message;
 

@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     else
     { // OSMP process 1
         rv = OSMP_Recv( bufout, 2, OSMP_INT, &source, &len );
-        printf("OSMP process %d received %d byte from %d [%d:%d] \n", rank, len, source, bufout[0], bufout[1]);
+        //printf("OSMP process %d received %d byte from %d [%d:%d] \n", rank, len, source, bufout[0], bufout[1]);
     }
     rv = OSMP_Finalize();
     return 0;

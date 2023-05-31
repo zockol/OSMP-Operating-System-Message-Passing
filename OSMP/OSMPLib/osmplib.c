@@ -90,7 +90,7 @@ int OSMP_Finalize() {
 
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
-            printf("FINALIZED %d", shm->p[i].rank);
+            printf("FINALIZED %d\n", shm->p[i].rank);
         }
     }
     return OSMP_SUCCESS;
@@ -119,9 +119,7 @@ int OSMP_Rank(int *rank) {
 
 int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     for (int i = 0; i < shm->processAmount; i++) {
-        printf("i = %d\ndest = %d\nthisrank = %d, \n\n", i, dest, rankNow);
         if (shm->p[i].rank == dest) {
-            printf("hello");
             calculateStruct(&shm->p[i].rank);
             int k = 0;
 
@@ -137,11 +135,7 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             pthread_mutex_unlock(&shm->mutex);
             //calculateStruct(&shm->p[i].rank);
             sem_post(&shm->p[i].full);
-
-
-            printf("empty");
         }
-        printf("schreibdieeinfachum");
     }
     return 0;
 }
@@ -172,7 +166,6 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
             printf("FIRSTFULL = %d\n", firstfull);
             datatype = shm->p[i].msg[firstfull].datatype;
             source = &shm->p[i].msg[shm->p[i].firstmsg].srcRank;
-            printf("OSMP process received %d byte from %d \n", len, source);
 
             memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, *len);
             shm->p[i].msg[firstfull].empty = true;
