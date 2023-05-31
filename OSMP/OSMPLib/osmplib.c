@@ -118,21 +118,30 @@ int OSMP_Rank(int *rank) {
 }
 
 int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
+    int j;
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].rank == dest) {
-            calculateStruct(&shm->p[i].rank);
+            for (j = 0; i < OSMP_MAX_MESSAGES_PROC; i++) {
+                if (shm->p[i].msg[j].empty) {
+                    printf("J = %d\n", j);
+                    break;
+                }
+
+            }
+
             int k = 0;
 
             sem_wait(&shm->p[i].empty);
             pthread_mutex_lock(&shm->mutex);
-            int msg = shm->p[i].firstmsg;
-            shm->p[i].msg[msg].srcRank = getSrcRank();
-            shm->p[i].msg[msg].destRank = dest;
+            //shm->p[i].slots.firstEmptySlot = msg+1;
+            shm->p[i].msg[j].srcRank = getSrcRank();
+            shm->p[i].msg[j].destRank = dest;
 
-            memcpy(shm->p[i].msg[msg].buffer, buf, count);
-            shm->p[i].msg[msg].empty = false;
+            memcpy(shm->p[i].msg[j].buffer, buf, count);
+            shm->p[i].msg[j].empty = false;
 
             pthread_mutex_unlock(&shm->mutex);
+
             //calculateStruct(&shm->p[i].rank);
             sem_post(&shm->p[i].full);
         }
@@ -155,13 +164,10 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 
     for (i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
-//            if (shm->p[i].slots.firstEmptySlot <= 0) {
-//                sem_wait(&shm->p[i].full);
-//            }
-            printf("rcv-rank = %d\n", getSrcRank());
-            //sem_wait(&shm->p[i].full);
+            //printf("rcv-rank = %d\n", getSrcRank());
+            sem_wait(&shm->p[i].full);
             pthread_mutex_lock(&shm->mutex);
-//
+            calculateStruct(&shm->p[i].rank);
             int firstfull = shm->p[i].firstmsg;
             printf("FIRSTFULL = %d\n", firstfull);
             datatype = shm->p[i].msg[firstfull].datatype;
@@ -170,7 +176,7 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
             memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, *len);
             shm->p[i].msg[firstfull].empty = true;
 
-            calculateStruct(&shm->p[i].rank);
+            //calculateStruct(&shm->p[i].rank);
             pthread_mutex_unlock(&shm->mutex);
             sem_post(&shm->p[i].empty);
 
