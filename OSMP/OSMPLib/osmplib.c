@@ -3,9 +3,21 @@
 //#include "../OSMPStarter/osmprun.c"
 SharedMem* shm;
 
+int debug(char functionName[], int srcRank, char error[], int memory ) {
+
+    //file deklarieren
+
+    int timestamp = (int)time(NULL);
+
+
+    // if level 2 -> log to file error
+
+    // if level 3 -> memory 1 = log
+}
 
 int OSMP_Init(int *argc, char ***argv) {
 
+    debug("Test", 1, "Test2", 1);
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 

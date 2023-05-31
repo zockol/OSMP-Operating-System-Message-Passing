@@ -8,6 +8,14 @@
 SharedMem *shm;
 
 
+int evaluateArgs(int argc, char* argv[]) {
+
+    if (argc < 2) {
+        printf("Syntax: ./osmprun (int) [-l loggingpath [-v logginglevel]] (path), (int): Anzahl der zu erzeugenden Prozesse, [-l loggingpath [-v logginglevel]: Name des Executables, welches ausgeführt werden soll\n");
+    }
+
+    return OSMP_SUCCESS;
+}
 
 int shm_create(int pidAmount) {
 
@@ -82,6 +90,8 @@ int start_shm(int pidAmount) {
 }
 
 int main(int argc, char* argv[]) {
+
+
 
 
     //Exit wenn keine Argumente mit angegeben

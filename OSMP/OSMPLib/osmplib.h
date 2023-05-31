@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <semaphore.h>
+#include <time.h>
 
 #ifndef OSMPlib_h
 #define OSMPlib_h
