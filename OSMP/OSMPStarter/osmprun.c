@@ -10,7 +10,7 @@ char* pathToExecutable;
 
 void evaluateArgs(int argc, char* argv[]) {
 
-    char falscheSyntax[] = "Syntax: ./osmprun (int) [-l loggingpath [-v logginglevel]] (path), (int): Anzahl der zu erzeugenden Prozesse, [-l loggingpath [-v logginglevel]: Dateipfad der zu erstellenden Datei und mit -v optional das Level angeben, (path) Pfad der executable\n";
+    char falscheSyntax[] = "Syntax: ./osmprun (int) [-L Path wo die LoggingFiles erstellt werden [-v logginglevel minimum 1 maximum 3]] (path), (int): Anzahl der zu erzeugenden Prozesse, [-l loggingpath [-v logginglevel]: Dateipfad der zu erstellenden Datei und mit -v optional das Level angeben, (path) Pfad der executable\n";
 
     char* pathToLoggingFile = NULL;
     int loggingVerbosity = 1;
@@ -24,25 +24,27 @@ void evaluateArgs(int argc, char* argv[]) {
 
     int i = 1;
     while (i < argc) {
-        if (processAmount == 0) {
-            processAmount = atoi(argv[i]);
-            if (processAmount == 0 || processAmount > 150) {
-                printf("Bitte gebe eine Prozessanzahl zwischen 0 und 150 ein");
-                exit(-1);
+        if (i == 1) {
+            if (processAmount == 0) {
+                processAmount = atoi(argv[i]);
+                if (processAmount == 0 || processAmount > 150) {
+                    printf("Bitte gebe eine Prozessanzahl zwischen 0 und 150 ein");
+                    exit(-1);
+                }
             }
         }
 
-        if (i < argc && i == 2) {
+
+        if (i == 2) {
             if (strcmp(argv[i], "-L") == 0) {
                 if (i + 1 < argc) {
                     pathToLoggingFile = argv[i+1];
-                    shm->log.logPath = pathToLoggingFile;
                     i+=2;
                     if (i < argc) {
                         if (strcmp(argv[i], "-v") == 0) {
                             if (i + 1 < argc) {
                                 loggingVerbosity = atoi(argv[i + 1]);
-                                if (loggingVerbosity == 0) {
+                                if (loggingVerbosity < 1 || loggingVerbosity > 3) {
                                     printf("%s", falscheSyntax);
                                     shm_unlink(SharedMemName);
                                     exit(-1);
@@ -90,7 +92,35 @@ void evaluateArgs(int argc, char* argv[]) {
     i++;
     }
 
+    if (pathToLoggingFile != NULL) {
 
+        char* baseName = "Log";
+        char extension[] = ".txt";
+        int i = 1;
+        char fileName[256];
+
+        while(1) {
+            sprintf(fileName, "%s%s%d%s", pathToLoggingFile, baseName, i, extension);
+
+            FILE* file = fopen(fileName, "r");
+            if (file) {
+                fclose(file);
+                i++;
+            } else {
+                file = fopen(fileName, "w");
+                if (file) {
+                    fclose(file);
+                    shm->log.logPath = fileName;
+                    break;
+                } else {
+                    printf("Fehler beim Erstellen der Datei: %s\n", fileName);
+                    shm_unlink(SharedMemName);
+                    exit(-1);
+                }
+            }
+        }
+
+    }
 
 
 }

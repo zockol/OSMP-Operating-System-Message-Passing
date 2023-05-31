@@ -5,7 +5,7 @@ SharedMem* shm;
 
 int debug(char *functionName, int srcRank, char error[], int memory ) {
 
-    //file deklarieren
+    int i = 0;
 
     int timestamp = (int)time(NULL);
 
