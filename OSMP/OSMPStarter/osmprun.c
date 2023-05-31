@@ -60,6 +60,7 @@ int shm_create(int pidAmount) {
             memcpy(shm->p[i].msg[j].buffer, "\0", 1);
 
             shm->p[i].msg[j].full = false;
+            
 
             shm->p[i].msg[j].nextMsg = 0;
             pthread_condattr_t read;

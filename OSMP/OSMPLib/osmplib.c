@@ -131,28 +131,30 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     for (int i = 0; i < shm->processAmount; i++) {
         printf("Dest = %d\n", dest);
         if (shm->p[i].rank == dest) {
-            printf("test");
             //printf("c");
             //int k = 0;
             sem_wait(&shm->p[i].empty);
             pthread_mutex_lock(&shm->mutex);
-            //shm->p[i].slots.firstEmptySlot = msg+1;
+            shm->p[i].msg[shm->p[i].slots.firstEmptySlot].msgLen = count * sizeof(datatype);
+            printf("msglen = %d\n", count * sizeof(datatype));
+            printf("sizeof Datatype = %d\n", sizeof(datatype));
+            shm->p[i].msg[shm->p[i].slots.firstEmptySlot].datatype = datatype;
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].srcRank = getSrcRank();
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].destRank = dest;
+            
+            memcpy(shm->p[i].msg[shm->p[i].slots.firstEmptySlot].buffer, buf,
+                   shm->p[i].msg[shm->p[i].slots.firstEmptySlot].msgLen);
+            shm->p[i].msg[shm->p[i].firstmsg].full = true;
             shm->p[i].slots.firstEmptySlot++;
             shm->p[i].numberOfMessages++;
-
-
-            memcpy(shm->p[i].msg[shm->p[i].firstmsg].buffer, buf, count);
-            shm->p[i].msg[shm->p[i].firstmsg].full = true;
+            shm->p[i].firstmsg++;
 
 
             sem_post(&shm->p[i].full);
 
             pthread_mutex_unlock(&shm->mutex);
+
             OSMP_Barrier();
-            //sleep(2);
-            printf("nach dem mutex freigeben");
 
 
         }
@@ -175,31 +177,33 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 
     for (i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
-            //printf("rcv-rank = %d\n", getSrcRank());
 
             sem_wait(&shm->p[i].full);
-            //for (int j = 0; j < shm->p[i].numberOfMessages; j++) {
+
             printf("Number of Messages %d \n", shm->p[i].numberOfMessages);
             pthread_mutex_lock(&shm->mutex);
-            //calculateStruct(&shm->p[i].rank);
-            datatype = shm->p[i].msg[shm->p[i].firstmsg].datatype;
-            source = &shm->p[i].msg[shm->p[i].firstmsg].srcRank;
-            memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, *len);
-            //shm->p[i].msg[shm->p[i].firstmsg].full = false;
 
+            datatype = shm->p[i].msg[shm->p[i].firstmsg].datatype;
+
+            source = &shm->p[i].msg[shm->p[i].firstmsg].srcRank;
+            len = &shm->p[i].msg[shm->p[i].firstmsg].msgLen;
+            printf("-------------------");
+            printf("%d", &shm->p[i].msg[shm->p[i].firstmsg].msgLen);
+            printf("firstmsg  = %d\n", shm->p[i].firstmsg);
+            printf("length =  %d \n", len);
+            printf("count =  %d \n", count);
+            printf("source =  %d \n", *source);
+            memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, count * sizeof(datatype));
+            shm->p[i].firstmsg--;
+            shm->p[i].slots.firstEmptySlot--;
             pthread_mutex_unlock(&shm->mutex);
 
             OSMP_Barrier();
 
-            //pthread_cond_broadcast(&shm->p[i].msg[j].read);
 
         }
-        // }
+
     }
-
-
-    //}
-    //}
 
 
     return OSMP_SUCCESS;
