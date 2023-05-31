@@ -68,19 +68,15 @@ int OSMP_Init(int *argc, char ***argv) {
 int OSMP_Barrier(){
 
     pthread_mutex_lock(&shm->mutex);
-
     shm->barrier_all--;
-    printf("%d\n", shm->barrier_all);
 
     if( shm->barrier_all == 0) {
         pthread_cond_broadcast(&shm->cattr);
     }else{
         while( shm->barrier_all != 0) {
-            //pthread_cond_broadcast(&shm->cattr);
             pthread_cond_wait(&shm->cattr, &shm->mutex);
         }
     }
-// eventuell globale Daten verändern
     pthread_mutex_unlock(&shm->mutex);
     return 0;
 }
