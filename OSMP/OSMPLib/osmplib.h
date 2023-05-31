@@ -24,7 +24,9 @@
 #define message_max_size 1024
 #define max_messages 256
 #include <stdbool.h>
-
+#include "semaphore.h"
+#include "pthread.h"
+#define TRUE 1
 typedef enum {OSMP_INT, OSMP_SHORT, OSMP_LONG, OSMP_BYTE, OSMP_UNSIGNED_CHAR, OSMP_UNSIGNED_SHORT, OSMP_UNSIGNED, OSMP_FLOAT, OSMP_DOUBLE } OSMP_Datatype;
 
 
@@ -53,6 +55,13 @@ typedef struct{
 } slots;
 
 typedef struct{
+    bool activated;
+    pthread_mutex_t ready;
+    sem_t full;
+} send_recieve;
+
+
+typedef struct{
     pid_t pid;
     int rank;
     int firstmsg;
@@ -66,7 +75,10 @@ typedef struct{
     int processAmount;
     message msg[max_messages];
     slots slot;
+    pthread_mutex_t mutex;
+    pthread_cond_t cattr;
     Bcast broadcastMsg;
+    int barrier_all;
     process p[];
 } SharedMem;
 
@@ -78,6 +90,7 @@ int OSMP_Rank(int *rank);
 int OSMP_Send();
 int OSMP_Recv();
 int OSMP_Bcast();
+int OSMP_Barrier();
 
 
 #endif

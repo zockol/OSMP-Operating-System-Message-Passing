@@ -3,6 +3,7 @@
 //
 //In dieser Quelltext-Datei ist die Funktionalität des OSMP-Starters implementiert
 
+#include <btparse.h>
 #include "./osmprun.h"
 
 SharedMem *shm;
@@ -21,7 +22,18 @@ int shm_create(int pidAmount) {
         shm->p[i].firstmsg = -1;
         shm->p[i].lastmsg = -1;
 
-        //FELIX HIER DEINE SEM INITIALISIEREN
+        pthread_mutexattr_t mutex_attr;
+        pthread_mutexattr_init(&mutex_attr);
+        pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED);
+
+        pthread_condattr_t condition_attr;
+        pthread_condattr_init(&condition_attr);
+        pthread_condattr_setpshared(&condition_attr, PTHREAD_PROCESS_SHARED);
+        pthread_cond_init(&shm->cattr, &condition_attr);
+
+        pthread_mutex_init(&shm->mutex, &mutex_attr);
+        sem_init(&shm->p[i].empty, 1, message_max_size);
+        sem_init(&shm->p[i].full, 1, 0);
     }
 
     for (int i = 0; i < max_messages; i++) {
@@ -70,17 +82,17 @@ int start_shm(int pidAmount) {
     return 0;
 }
 
-int main(int argv, char* argc[]) {
+int main(int argc, char* argv[]) {
 
 
     //Exit wenn keine Argumente mit angegeben
-    if (argv==1) {
+    if (argc==1) {
         printf("Bitte gebe Argumente an. Syntax hierbei wäre ./osmprun <ChildNumber> <executable>\n");
         exit(-1);
     }
 
     //argc[1] wird zum Integer umgewandelt, bei falschangabe automatisch 0
-    int pidAmount = atol(argc[1]);
+    int pidAmount = atol(argv[1]);
     pid_t pid;
 
     //wenn pidAmount bei 0 unter drunter liegt wird OSMP_ERROR returned
@@ -95,6 +107,7 @@ int main(int argv, char* argc[]) {
 
 
     shm->processAmount = pidAmount;
+    shm->barrier_all = pidAmount;
     //Parent und Child Trennung
     int i;
     for (i = 0; i < pidAmount; i++) {
@@ -108,11 +121,20 @@ int main(int argv, char* argc[]) {
         } else if (pid == 0) {
 
             sleep(2);
-            int a = execlp("./OSMP/OSMPExecutable/osmpexecutable", "osmpexecutable", NULL);
-            if (a == -1) {
-                printf("execlp failure\n");
-                return -1;
+            if(argc>=2) {
+                int a = execlp(argv[2], "osmpexecutable", NULL);
+                if (a == -1) {
+                    printf("execlp failure\n");
+                    return -1;
+                }
+            }else{
+                int a = execlp("./OSMP/OSMPExecutable/osmpexecutable", "osmpexecutable", NULL);
+                if (a == -1) {
+                    printf("execlp failure\n");
+                    return -1;
+                }
             }
+
             shm_unlink(SharedMemName);
             return 0;
         } else if (pid > 0) {

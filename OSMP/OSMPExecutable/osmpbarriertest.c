@@ -10,10 +10,13 @@ int main(int argc, char *argv[])
     rv = OSMP_Init( &argc, &argv );
     rv = OSMP_Size( &size );
     rv = OSMP_Rank( &rank );
+    printf("before\n");
 
-    printf("before Barrier %d\n", &rank);
+
     OSMP_Barrier();
-    printf("after Barrier");
+
+
+    printf("after \n");
 
 
     return OSMP_SUCCESS;

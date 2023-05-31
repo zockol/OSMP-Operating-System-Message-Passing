@@ -1,10 +1,11 @@
 
 #include "osmplib.h"
-
+//#include "../OSMPStarter/osmprun.c"
 SharedMem* shm;
 
 
 int OSMP_Init(int *argc, char ***argv) {
+
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
@@ -12,7 +13,6 @@ int OSMP_Init(int *argc, char ***argv) {
         printf("Error beim shm_open\n");
         return OSMP_ERROR;
     }
-
 
     struct stat *shm_stat = calloc(1, sizeof(struct stat));
     if (shm_stat == NULL) {
@@ -45,6 +45,8 @@ int OSMP_Init(int *argc, char ***argv) {
         }
     }
 
+
+
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
             shm->p[i].rank = i;
@@ -57,8 +59,30 @@ int OSMP_Init(int *argc, char ***argv) {
         return OSMP_ERROR;
     }
 
-
     return OSMP_SUCCESS;
+
+}
+
+
+
+int OSMP_Barrier(){
+
+    pthread_mutex_lock(&shm->mutex);
+
+    shm->barrier_all--;
+    printf("%d\n", shm->barrier_all);
+
+    if( shm->barrier_all == 0) {
+        pthread_cond_broadcast(&shm->cattr);
+    }else{
+        while( shm->barrier_all != 0) {
+            //pthread_cond_broadcast(&shm->cattr);
+            pthread_cond_wait(&shm->cattr, &shm->mutex);
+        }
+    }
+// eventuell globale Daten verändern
+    pthread_mutex_unlock(&shm->mutex);
+    return 0;
 }
 
 int OSMP_Finalize() {
