@@ -27,10 +27,10 @@ int shm_create(int pidAmount) {
         pthread_mutexattr_t mutex_attr2;
         pthread_mutexattr_init(&mutex_attr2);
         pthread_mutexattr_setpshared(&mutex_attr2, PTHREAD_PROCESS_SHARED);
-        for (int k = 0; k < 16; i++) {
-            pthread_mutex_init(&shm->p[i].msg[k].send, &mutex_attr2);
 
-        }
+        // pthread_mutex_init(&shm->p[i].msg[k].send, &mutex_attr2);
+
+
 
 
         pthread_condattr_t condition_attr;

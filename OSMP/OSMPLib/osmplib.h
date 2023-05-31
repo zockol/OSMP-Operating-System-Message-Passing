@@ -58,7 +58,6 @@ typedef struct {
     int destRank;
     char buffer[message_max_size];
     OSMP_Datatype datatype;
-    pthread_mutex_t send;
     size_t msgLen;
     int nextMsg;
 } message;
@@ -109,7 +108,7 @@ int OSMP_Bcast();
 
 int OSMP_Barrier();
 
-int calculateFirstEmptyMessage(int *rank);
+int calculateStruct(int *rank);
 
 
 int getSrcRank();
