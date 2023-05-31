@@ -6,7 +6,6 @@
 #include "./osmprun.h"
 
 SharedMem *shm;
-int pidAmount;
 char* pathToExecutable;
 
 void evaluateArgs(int argc, char* argv[]) {
@@ -16,7 +15,7 @@ void evaluateArgs(int argc, char* argv[]) {
     char* pathToLoggingFile = NULL;
     int loggingVerbosity = 1;
     pathToExecutable = NULL;
-    pidAmount = 0;
+    int processAmount = 0;
 
     if (argc == 2) {
         printf("%s", falscheSyntax);
@@ -25,9 +24,9 @@ void evaluateArgs(int argc, char* argv[]) {
 
     int i = 1;
     while (i < argc) {
-        if (pidAmount == 0) {
-            pidAmount = atoi(argv[i]);
-            if (pidAmount == 0 || pidAmount > 150) {
+        if (processAmount == 0) {
+            processAmount = atoi(argv[i]);
+            if (processAmount == 0 || processAmount > 150) {
                 printf("Bitte gebe eine Prozessanzahl zwischen 0 und 150 ein");
                 exit(-1);
             }
@@ -37,6 +36,7 @@ void evaluateArgs(int argc, char* argv[]) {
             if (strcmp(argv[i], "-L") == 0) {
                 if (i + 1 < argc) {
                     pathToLoggingFile = argv[i+1];
+                    shm->log.logPath = pathToLoggingFile;
                     i+=2;
                     if (i < argc) {
                         if (strcmp(argv[i], "-v") == 0) {
@@ -44,17 +44,23 @@ void evaluateArgs(int argc, char* argv[]) {
                                 loggingVerbosity = atoi(argv[i + 1]);
                                 if (loggingVerbosity == 0) {
                                     printf("%s", falscheSyntax);
+                                    shm_unlink(SharedMemName);
                                     exit(-1);
-                                }
-                                i += 2;
-                                if (i < argc) {
-                                    pathToExecutable = argv[i];
                                 } else {
-                                    printf("%s", falscheSyntax);
-                                    exit(-1);
+                                    shm->log.logIntensity = loggingVerbosity;
+                                    i += 2;
+                                    if (i < argc) {
+                                        pathToExecutable = argv[i];
+                                    } else {
+                                        printf("%s", falscheSyntax);
+                                        shm_unlink(SharedMemName);
+                                        exit(-1);
+                                    }
                                 }
+
                             } else {
                                 printf("%s", falscheSyntax);
+                                shm_unlink(SharedMemName);
                                 exit(-1);
                             }
                         } else {
@@ -62,16 +68,19 @@ void evaluateArgs(int argc, char* argv[]) {
                         }
                     } else {
                         printf("%s", falscheSyntax);
+                        shm_unlink(SharedMemName);
                         exit(-1);
                     }
                 } else {
                     printf("%s", falscheSyntax);
+                    shm_unlink(SharedMemName);
                     exit(-1);
                 }
             } else {
 
                 if (strcmp(argv[i], "-v") == 0) {
                     printf("%s", falscheSyntax);
+                    shm_unlink(SharedMemName);
                     exit(-1);
                 }
 
@@ -80,6 +89,8 @@ void evaluateArgs(int argc, char* argv[]) {
         }
     i++;
     }
+
+
 
 
 }
@@ -158,23 +169,12 @@ int start_shm(int pidAmount) {
 
 int main(int argc, char* argv[]) {
 
-    evaluateArgs(argc, argv);
-
-    //argc[1] wird zum Integer umgewandelt, bei falschangabe automatisch 0
-
+    int pidAmount = atoi(argv[1]);
     pid_t pid;
-
-    //wenn pidAmount bei 0 unter drunter liegt wird OSMP_ERROR returned
-    if (pidAmount < 1) {
-        printf("Bitte gebe eine korrekte Anzahl an Childs ein, die erzeugt werden sollen\n");
-        return -1;
-    }
-
-
 
     start_shm(pidAmount);
 
-
+    evaluateArgs(argc, argv);
 
     shm_create(pidAmount);
 
@@ -201,8 +201,6 @@ int main(int argc, char* argv[]) {
                 printf("execlp failure\n");
                 return -1;
             }
-            shm_unlink(SharedMemName);
-            return 0;
         } else if (pid > 0) {
             sleep(1);
         }
@@ -211,6 +209,8 @@ int main(int argc, char* argv[]) {
     for(int i = 0; i<pidAmount; i++) {
         waitpid(-1,NULL,0);
     }
+
+    shm_unlink(SharedMemName);
 
     return 0;
 }
