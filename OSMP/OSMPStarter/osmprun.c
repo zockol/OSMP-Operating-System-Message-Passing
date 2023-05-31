@@ -8,9 +8,7 @@
 SharedMem *shm;
 
 
-
 int shm_create(int pidAmount) {
-
 
 
     shm->processAmount = 0;
@@ -24,36 +22,48 @@ int shm_create(int pidAmount) {
         pthread_mutexattr_t mutex_attr;
         pthread_mutexattr_init(&mutex_attr);
         pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED);
+        pthread_mutex_init(&shm->mutex, &mutex_attr);
+
+        pthread_mutexattr_t mutex_attr2;
+        pthread_mutexattr_init(&mutex_attr2);
+        pthread_mutexattr_setpshared(&mutex_attr2, PTHREAD_PROCESS_SHARED);
+        for (int k = 0; k < 16; i++) {
+            pthread_mutex_init(&shm->p[i].msg[k].send, &mutex_attr2);
+
+        }
+
 
         pthread_condattr_t condition_attr;
         pthread_condattr_init(&condition_attr);
         pthread_condattr_setpshared(&condition_attr, PTHREAD_PROCESS_SHARED);
         pthread_cond_init(&shm->cattr, &condition_attr);
 
-        pthread_mutex_init(&shm->mutex, &mutex_attr);
-        sem_init(&shm->p[i].empty, 1, message_max_size);
+        sem_init(&shm->p[i].empty, 1, OSMP_MAX_MESSAGES_PROC);
         sem_init(&shm->p[i].full, 1, 0);
-    }
 
-    for (int i = 0; i < max_messages; i++) {
-        shm->msg[i].srcRank = -1;
-        if (i == max_messages - 1) {
-            shm->msg[i].nextMsg = -1;
-        } else {
-            shm->msg[i].nextMsg = i + 1;
+
+        for (int j = 0; j < max_messages; j++) {
+            shm->p[i].msg[j].srcRank = -1;
+            if (i == max_messages - 1) {
+                shm->p[i].msg[j].nextMsg = -1;
+            } else {
+                shm->p[i].msg[j].nextMsg = i + 1;
+            }
+            shm->p[i].msg[j].msgLen = 0;
+            memcpy(shm->p[i].msg[j].buffer, "\0", 1);
+
+            shm->p[i].msg[j].empty = true;
+
         }
-        shm->msg[i].msgLen = 0;
-        memcpy(shm->msg[i].buffer, "\0", 1);
-
     }
-
 
     return OSMP_SUCCESS;
 }
 
 int start_shm(int pidAmount) {
 
-    size_t sizeOfSharedMem = (sizeof(send_recieve) + sizeof(slots) + max_messages * sizeof(message) + pidAmount * sizeof(process) + sizeof(Bcast));
+    size_t sizeOfSharedMem = (sizeof(slots) + max_messages * pidAmount * sizeof(message) + pidAmount * sizeof(process) +
+                              sizeof(Bcast));
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
@@ -69,7 +79,6 @@ int start_shm(int pidAmount) {
     }
 
 
-
     shm = mmap(NULL, sizeOfSharedMem, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
 
     if (shm == MAP_FAILED) {
@@ -81,11 +90,11 @@ int start_shm(int pidAmount) {
     return 0;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
 
 
     //Exit wenn keine Argumente mit angegeben
-    if (argc==1) {
+    if (argc == 1) {
         printf("Bitte gebe Argumente an. Syntax hierbei wäre ./osmprun <ChildNumber> <executable>\n");
         exit(-1);
     }
@@ -101,22 +110,20 @@ int main(int argc, char* argv[]) {
     }
 
 
-
     start_shm(pidAmount);
-
 
 
     shm_create(pidAmount);
 
 
-
     shm->processAmount = pidAmount;
     shm->barrier_all = pidAmount;
+
+
     //Parent und Child Trennung
     int i;
     for (i = 0; i < pidAmount; i++) {
         pid = fork();
-
 
 
         if (pid < 0) {
@@ -126,14 +133,14 @@ int main(int argc, char* argv[]) {
         } else if (pid == 0) {
 
             sleep(2);
-            if(argc>2) {
+            if (argc > 2) {
 
                 int a = execlp(argv[2], "osmpexecutable", NULL);
                 if (a == -1) {
                     printf("execlp failure\n");
                     return -1;
                 }
-            }else{
+            } else {
 
                 int a = execlp("./OSMP/OSMPExecutable/osmpexecutable", "osmpexecutable", NULL);
                 if (a == -1) {
@@ -149,8 +156,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    for(int i = 0; i<pidAmount; i++) {
-        waitpid(-1,NULL,0);
+    for (int i = 0; i < pidAmount; i++) {
+        waitpid(-1, NULL, 0);
     }
 
     return 0;

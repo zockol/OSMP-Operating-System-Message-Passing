@@ -24,12 +24,23 @@
 #define message_max_size 1024
 #define max_messages 256
 #define OSMP_MAX_MESSAGES_PROC 16
+
 #include <stdbool.h>
 #include "semaphore.h"
 #include "pthread.h"
-#define TRUE 1
-typedef enum {OSMP_INT, OSMP_SHORT, OSMP_LONG, OSMP_BYTE, OSMP_UNSIGNED_CHAR, OSMP_UNSIGNED_SHORT, OSMP_UNSIGNED, OSMP_FLOAT, OSMP_DOUBLE } OSMP_Datatype;
 
+#define TRUE 1
+typedef enum {
+    OSMP_INT,
+    OSMP_SHORT,
+    OSMP_LONG,
+    OSMP_BYTE,
+    OSMP_UNSIGNED_CHAR,
+    OSMP_UNSIGNED_SHORT,
+    OSMP_UNSIGNED,
+    OSMP_FLOAT,
+    OSMP_DOUBLE
+} OSMP_Datatype;
 
 
 typedef struct {
@@ -41,35 +52,39 @@ typedef struct {
     int srcRank;
 } Bcast;
 
-typedef struct{
+typedef struct {
+    bool empty;
     int srcRank;
+    int destRank;
     char buffer[message_max_size];
     OSMP_Datatype datatype;
+    pthread_mutex_t send;
     size_t msgLen;
     int nextMsg;
 } message;
 
-typedef struct{
+typedef struct {
     //array/verkettete liste
     int firstEmptySlot;
     int lastEmptySlot;
 } slots;
 
 
-typedef struct{
+typedef struct {
     message msg[max_messages];
     pid_t pid;
     int rank;
+    slots slots;
     int firstmsg;
     int lastmsg;
-    pthread_mutex_t mutex;
+
+    //pthread_mutex_t mutex;
     sem_t empty;
     sem_t full;
 } process;
 
-typedef struct{
+typedef struct {
     int processAmount;
-    slots slot;
     pthread_mutex_t mutex;
     pthread_cond_t cattr;
     Bcast broadcastMsg;
@@ -79,13 +94,22 @@ typedef struct{
 
 
 int OSMP_Init(int *argc, char ***argv);
+
 int OSMP_Finalize();
+
 int OSMP_Size(int *size);
+
 int OSMP_Rank(int *rank);
-int OSMP_Send();
-int OSMP_Recv();
+
+int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest);
+
+int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len);
+
 int OSMP_Bcast();
+
 int OSMP_Barrier();
+
+int calculateFirstEmptyMessage(int *rank);
 
 
 int getSrcRank();
