@@ -106,13 +106,31 @@ int OSMP_Rank(int *rank) {
     return OSMP_SUCCESS;
 }
 
-int OSMP_Send() {
-    printf("send\n");
+int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
+    for(int i = 0; i<shm->processAmount;i++ ){
+        if (shm->p[i].rank = dest) {
+            sem_wait(&shm->p[i].full);
+            pthread_mutex_lock(&shm->mutex);
+            shm->p[i].msg[shm->p[i].firstmsg].srcRank = getSrcRank();
+            for (int j = 0; j <= count; j++){
+                shm->p[i].msg[shm->p[i].firstmsg].buffer = &(buf+i);
+            }
+            sem_post(&(shm->p[i].full));
+            pthread_mutex_unlock(&shm->mutex);
+        }
+    }
     return 0;
 }
 
+int getSrcRank(){
+    for (int i = 0; i < shm->processAmount; i++) {
+        if (shm->p[i].pid == getpid()) {
+            return shm->p[i].rank;
+        }
+    }
+}
+
 int OSMP_Recv() {
-    printf("receive\n");
     return 0;
 }
 

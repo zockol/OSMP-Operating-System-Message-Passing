@@ -23,6 +23,7 @@
 #define OSMP_SUCCESS 0
 #define message_max_size 1024
 #define max_messages 256
+#define OSMP_MAX_MESSAGES_PROC 16
 #include <stdbool.h>
 #include "semaphore.h"
 #include "pthread.h"
@@ -54,14 +55,9 @@ typedef struct{
     int lastEmptySlot;
 } slots;
 
-typedef struct{
-    bool activated;
-    pthread_mutex_t ready;
-    sem_t full;
-} send_recieve;
-
 
 typedef struct{
+    message msg[max_messages];
     pid_t pid;
     int rank;
     int firstmsg;
@@ -73,7 +69,6 @@ typedef struct{
 
 typedef struct{
     int processAmount;
-    message msg[max_messages];
     slots slot;
     pthread_mutex_t mutex;
     pthread_cond_t cattr;
@@ -91,6 +86,9 @@ int OSMP_Send();
 int OSMP_Recv();
 int OSMP_Bcast();
 int OSMP_Barrier();
+
+
+int getSrcRank();
 
 
 #endif
