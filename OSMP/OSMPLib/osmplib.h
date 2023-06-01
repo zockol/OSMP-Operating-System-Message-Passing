@@ -47,8 +47,6 @@ typedef enum {
 typedef struct {
     char buffer[message_max_size];
     int msgLen;
-    int msgLenInByte;
-    //bool send;
     OSMP_Datatype datatype;
     int srcRank;
 } Bcast;
@@ -113,7 +111,7 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest);
 
 int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len);
 
-int OSMP_Bcast();
+int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *source, int *len);
 
 int OSMP_Barrier();
 
