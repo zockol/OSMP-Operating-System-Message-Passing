@@ -1,6 +1,0 @@
-Timestamp: 1685557303, Funktion: OSMP_INIT, OSMPRank: 0
-Timestamp: 1685557303, Funktion: OSMP_INIT, OSMPRank: 0
-Timestamp: 1685557303, Funktion: OSMP_INIT, OSMPRank: 0
-Timestamp: 1685557303, Funktion: OSMP_SIZE, OSMPRank: 0
-Timestamp: 1685557303, Funktion: OSMP_RANK, OSMPRank: 0
-Timestamp: 1685557303, Funktion: OSMP_BCAST, OSMPRank: 0
