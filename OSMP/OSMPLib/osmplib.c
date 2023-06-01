@@ -162,6 +162,8 @@ int OSMP_Finalize() {
             sem_destroy(&shm->p[i].empty);
             sem_destroy(&shm->p[i].full);
 
+            shm->processesCreated--;
+
             if (munmap(shm, (shm->processAmount * sizeof(slots) + max_messages * shm->processAmount * sizeof(message) +
                              shm->processAmount * sizeof(process) + sizeof(logger) +
                              sizeof(Bcast))) == OSMP_ERROR) {
@@ -174,8 +176,6 @@ int OSMP_Finalize() {
 
         }
     }
-
-    debug("OSMP_FINALIZE END", rankNow, NULL, NULL);
 
     return OSMP_SUCCESS;
 
