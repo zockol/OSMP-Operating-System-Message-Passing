@@ -23,7 +23,7 @@ int debug(char *functionName, int srcRank, char *error, char *memory) {
         } else if (shm->log.logIntensity == 3 && memory != NULL) {
             sprintf(buffer, "Timestamp: %d, Memory: %s, Funktion: %s, OSMPRank: %d\n", timestamp, memory, functionName,
                     srcRank);
-        } else {
+        } else if (error == NULL && memory == NULL) {
             sprintf(buffer, "Timestamp: %d, Funktion: %s, OSMPRank: %d\n", timestamp, functionName, srcRank);
         }
     }
