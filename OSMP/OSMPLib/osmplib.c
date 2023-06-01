@@ -201,6 +201,7 @@ int OSMP_Rank(int *rank) {
 
 
 int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
+    debug("OSMP_SEND START", rankNow, NULL, NULL);
     int j;
 
     for (int i = 0; i < shm->processAmount; i++) {
@@ -210,7 +211,7 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             pthread_mutex_lock(&shm->mutex);
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].msgLen = count * sizeof(datatype);
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].datatype = datatype;
-            shm->p[i].msg[shm->p[i].slots.firstEmptySlot].srcRank = getSrcRank();
+            shm->p[i].msg[shm->p[i].slots.firstEmptySlot].srcRank = rankNow;
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].destRank = dest;
 
             memcpy(shm->p[i].msg[shm->p[i].slots.firstEmptySlot].buffer, buf,
@@ -230,22 +231,12 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
 
         }
     }
+    debug("OSMP_SEND END", rankNow, NULL, NULL);
     return 0;
 }
 
-int getSrcRank() {
-    int i, j;
-    for (i = 0; i < shm->processAmount; i++) {
-        if (shm->p[i].pid == getpid()) {
-
-            j = shm->p[i].rank;
-            return j;
-        }
-    }
-
-}
-
 int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len) {
+    debug("OSMP_RECV START", rankNow, NULL, NULL);
     int i = 0;
     for (i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
@@ -273,7 +264,7 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 
     }
 
-
+    debug("OSMP_RECV END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
 }
 
