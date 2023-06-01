@@ -92,13 +92,6 @@ int OSMP_Init(int *argc, char ***argv) {
         }
     }
 
-    for (i = 0; i < shm->processAmount; i++) {
-        shm->p[i].slots.firstEmptySlot = 0;
-        // shm->p[i].slots.lastEmptySlot = 0;
-        shm->p[i].numberOfMessages = 0;
-
-    }
-
 
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
@@ -211,6 +204,8 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     debug("OSMP_SEND START", rankNow, NULL, NULL);
     int j;
 
+
+
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].rank == dest) {
 
@@ -226,6 +221,8 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             shm->p[i].slots.firstEmptySlot++;
             shm->p[i].numberOfMessages++;
             shm->p[i].firstmsg++;
+
+            //printf("firstmessage: %d | firstempty: %d\n" , shm->p[i].firstmsg, shm->p[i].slots.firstEmptySlot);
 
             pthread_mutex_unlock(&shm->mutex);
 
@@ -258,6 +255,7 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 
 
             sem_post(&shm->p[i].empty);
+
 
 
         }
