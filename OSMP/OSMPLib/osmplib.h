@@ -67,7 +67,6 @@ typedef struct{
     int rank;
     int firstmsg;
     int lastmsg;
-    pthread_mutex_t mutex;
     sem_t empty;
     sem_t full;
 } process;
