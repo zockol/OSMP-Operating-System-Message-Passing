@@ -28,14 +28,21 @@ int debug(char *functionName, int srcRank, char *error, char *memory) {
         }
     }
 
-    FILE *file = fopen(shm->log.logPath, "a");
-    if (file) {
-        fprintf(file, "%s", buffer);
-        fclose(file);
-    } else {
-        printf("Fehler beim öffnen der Datei\n");
-        return OSMP_ERROR;
+    char *result = NULL;
+
+    result = strstr(buffer, "Timestamp");
+
+    if (result != NULL) {
+        FILE *file = fopen(shm->log.logPath, "a");
+        if (file) {
+            fprintf(file, "%s", buffer);
+            fclose(file);
+        } else {
+            printf("Fehler beim öffnen der Datei\n");
+            return OSMP_ERROR;
+        }
     }
+
 
     return OSMP_SUCCESS;
 }
@@ -139,7 +146,7 @@ int OSMP_Barrier() {
 }
 
 int OSMP_Finalize() {
-    debug("OSMP_FINALIZE", rankNow, NULL, NULL);
+    debug("OSMP_FINALIZE START", rankNow, NULL, NULL);
 
     if (shm == NULL) {
         printf("OSMPLIB.c OSMP_FINALIZE shm not initialized");
@@ -182,7 +189,7 @@ int OSMP_Size(int *size) {
 }
 
 int OSMP_Rank(int *rank) {
-    debug("OSMP_RANK", rankNow, NULL, NULL);
+    debug("OSMP_RANK START", rankNow, NULL, NULL);
 
     if (shm == NULL) {
         printf("shm not initialized");
