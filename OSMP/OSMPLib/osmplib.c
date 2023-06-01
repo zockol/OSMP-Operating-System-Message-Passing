@@ -275,9 +275,23 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
     return OSMP_SUCCESS;
 }
 
-int OSMP_Bcast() {
+int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *source, int *len) {
     debug("OSMP_BCAST START", rankNow, NULL, NULL);
-    printf("broadcast\n");
+
+    if (send == true) {
+
+        shm->broadcastMsg.datatype = datatype;
+        shm->broadcastMsg.msgLen = count * sizeof(datatype);
+        shm->broadcastMsg.srcRank = rankNow;
+        memcpy(shm->broadcastMsg.buffer, buf, shm->broadcastMsg.msgLen);
+    }
+    OSMP_Barrier();
+    if (send == false) {
+        memcpy(buf, shm->broadcastMsg.buffer, shm->broadcastMsg.msgLen);
+        *source = shm->broadcastMsg.srcRank;
+        *len = shm->broadcastMsg.msgLen;
+    }
+
     debug("OSMP_BCAST END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
 }
