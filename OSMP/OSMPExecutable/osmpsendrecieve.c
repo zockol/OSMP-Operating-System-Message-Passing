@@ -18,14 +18,15 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
     if (rank == 0) { // OSMP process
-        for(int i = 0; i < 100; i++) {
-            bufin[0] = i+1;
+        for(int i = 0; i < 20; i++) {
+            bufin[0] = i + 1;
+            printf("%d\n",bufin[0]);
             rv = OSMP_Send(bufin, 1, OSMP_INT, 1);
         }
 
     } else { // OSMP process 1
-        for(int i = 0; i < 100; i++) {
-            sleep(5);
+        for(int i = 0; i < 20; i++) {
+            sleep(1);
             rv = OSMP_Recv(bufout, 1, OSMP_INT, &source, &len);
             printf("OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufout[0]);
         }
