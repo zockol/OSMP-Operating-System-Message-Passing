@@ -286,28 +286,3 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
     debug("OSMP_BCAST END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
 }
-
-
-int calculateStruct(int *rank) {
-    int i = 0, j = 0, all = 0, b = 0;
-
-    for (i = 0; i < shm->processAmount; i++) {
-        if (shm->p[i].rank == *rank) {
-            for (j = 0; j < OSMP_MAX_MESSAGES_PROC; j++) {
-                if (!(shm->p[i].msg[j].full) && b == 0) {
-                    shm->p[i].slots.firstEmptySlot = j;
-                    b += 1;
-                }
-                if ((shm->p[i].msg[j].full)) {
-                    all++;
-                    printf("number of messages = %d", all);
-                }
-            }
-        }
-        shm->p[i].numberOfMessages = all;
-
-        all = 0;
-        b = 0;
-    }
-    return 0;
-}
