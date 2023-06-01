@@ -77,8 +77,6 @@ typedef struct {
     slots slots;
     int numberOfMessages;
     int firstmsg;
-    int lastmsg;
-
     sem_t empty;
     sem_t full;
 } process;
