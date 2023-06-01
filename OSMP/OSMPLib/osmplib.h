@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <semaphore.h>
+#include <time.h>
 
 #ifndef OSMPlib_h
 #define OSMPlib_h
@@ -82,6 +83,12 @@ typedef struct {
 } process;
 
 typedef struct {
+    int logIntensity;
+    char logPath[256];
+} logger;
+
+typedef struct {
+
     int processAmount;
     int processesCreated;
     pthread_mutex_t mutex;
@@ -89,6 +96,7 @@ typedef struct {
     Bcast broadcastMsg;
     int barrier_all;
     pthread_cond_t allCreated;
+    logger log;
     process p[];
 } SharedMem;
 
