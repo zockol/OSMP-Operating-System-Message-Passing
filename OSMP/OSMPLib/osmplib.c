@@ -126,13 +126,19 @@ int OSMP_Barrier() {
     shm->barrier_all--;
 
     if (shm->barrier_all == 0) {
+        shm->barrier_all = shm->processAmount;
         pthread_cond_broadcast(&shm->cattr);
+
     } else {
         while (shm->barrier_all != 0) {
             pthread_cond_wait(&shm->cattr, &shm->mutex);
+            if (shm->barrier_all == shm->processAmount) {
+                continue;
+            }
         }
     }
     pthread_mutex_unlock(&shm->mutex);
+
 
     debug("OSMP_BARRIER END", rankNow, NULL, NULL);
     return 0;
@@ -205,7 +211,6 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     int j;
 
 
-
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].rank == dest) {
 
@@ -216,7 +221,8 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].srcRank = rankNow;
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].destRank = dest;
 
-            memcpy(shm->p[i].msg[shm->p[i].slots.firstEmptySlot].buffer, buf, shm->p[i].msg[shm->p[i].slots.firstEmptySlot].msgLen);
+            memcpy(shm->p[i].msg[shm->p[i].slots.firstEmptySlot].buffer, buf,
+                   shm->p[i].msg[shm->p[i].slots.firstEmptySlot].msgLen);
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].full = true;
             shm->p[i].slots.firstEmptySlot++;
             shm->p[i].numberOfMessages++;
@@ -255,7 +261,6 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 
 
             sem_post(&shm->p[i].empty);
-
 
 
         }
