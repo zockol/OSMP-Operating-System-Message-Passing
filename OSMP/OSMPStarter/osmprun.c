@@ -272,16 +272,13 @@ int main(int argc, char *argv[]) {
             return -1;
         } else if (pid == 0) {
 
-            sleep(2);
+
 
             int a = execvp(pathToExecutable, optionalArgs);
             if (a == -1) {
                 printf("execlp failure\n");
                 return -1;
-
             }
-        } else if (pid > 0) {
-            sleep(1);
         }
     }
     if (shm->processesCreated = shm->processAmount) {

@@ -15,12 +15,27 @@ int main(int argc, char *argv[]) {
     OSMP_Barrier();
 
 
-    printf("after %d\n", rank);
-    sleep(10);
+    printf("1. after %d\n", rank);
 
     OSMP_Barrier();
 
     printf("2.after  %d\n", rank);
+
+    OSMP_Barrier();
+
+    printf("3.after  %d\n", rank);
+
+    OSMP_Barrier();
+
+    printf("4.after  %d\n", rank);
+
+    OSMP_Barrier();
+
+    printf("5.after  %d\n", rank);
+
+    OSMP_Barrier();
+
+    printf("6.after  %d\n", rank);
 
     return OSMP_SUCCESS;
 }
