@@ -1,0 +1,48 @@
+Timestamp: 1685793147, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685793147, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685793147, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685793147, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_INIT END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_INIT END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SIZE START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SIZE START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SIZE END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SIZE END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_RANK START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_RANK START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_RANK END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_RANK END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1685793147, Funktion: OSMP_SEND START, OSMPRank: 0

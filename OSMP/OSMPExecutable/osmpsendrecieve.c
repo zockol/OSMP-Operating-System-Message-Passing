@@ -15,17 +15,18 @@ int main(int argc, char *argv[]) {
     rv = OSMP_Size(&size);
     rv = OSMP_Rank(&rank);
     if (size != 2) {
+        debug("OSMPSENDRECIEVE EXECUTABLE", rank, "SIZE != 2", NULL);
         exit(-1);
     }
     if (rank == 0) { // OSMP process
         for (int i = 0; i < 20; i++) {
             bufin[0] = i + 1;
-            printf("%d\n", bufin[0]);
             rv = OSMP_Send(bufin, 1, OSMP_INT, 1);
         }
 
     } else { // OSMP process 1
         for (int i = 0; i < 20; i++) {
+            printf("Moment bitte, 2 Sekunden Kaffepause\n");
             sleep(2);
             rv = OSMP_Recv(bufout, 1, OSMP_INT, &source, &len);
             printf("OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufout[0]);
