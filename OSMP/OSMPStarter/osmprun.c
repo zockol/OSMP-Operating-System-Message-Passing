@@ -5,13 +5,17 @@
 
 #include "./osmprun.h"
 
+//SharedMem Variable deklarieren
 SharedMem *shm;
+//PathToExecutable ist lediglich nur der Path der Executable wie z.B. /OSMP/OSMPExecutable/osmpbcast
 char *pathToExecutable;
 
+//evaluateArgs Funktion wertet alle Argumente der Kommandozeile aus und speichert die ab
+//returned den index der executable datei
 int evaluateArgs(int argc, char *argv[]) {
 
+    //fixer syntax string
     char falscheSyntax[] = "Syntax: ./osmprun (int) [-L Path wo die LoggingFiles erstellt werden [-v logginglevel minimum 1 maximum 3]] (path), (int): Anzahl der zu erzeugenden Prozesse, [-l loggingpath [-v logginglevel]: Dateipfad der zu erstellenden Datei und mit -v optional das Level angeben, (path) Pfad der executable\n";
-
     int executePathIndex = 0;
     char *pathToLoggingFile = NULL;
     int loggingVerbosity = 1;
@@ -19,13 +23,16 @@ int evaluateArgs(int argc, char *argv[]) {
     pathToExecutable = NULL;
     int processAmount = 0;
 
+    //sollte es nur 2 Argumente geben kann es nicht Prozessanzahl & executablepfad geben
     if (argc == 2) {
         printf("%s", falscheSyntax);
         exit(-1);
     }
 
+
     int i = 1;
     while (i < argc) {
+        //Speichert die angegebene Prozessanzahl ab.
         if (i == 1) {
             if (processAmount == 0) {
                 processAmount = atoi(argv[i]);
@@ -37,6 +44,7 @@ int evaluateArgs(int argc, char *argv[]) {
         }
 
 
+        //Speichert die Optionalen Werte wie -L (Pfad) und möglicherweise auf -v (wert) ab
         if (i == 2) {
             if (strcmp(argv[i], "-L") == 0) {
                 if (i + 1 < argc) {
@@ -99,6 +107,8 @@ int evaluateArgs(int argc, char *argv[]) {
         i++;
     }
 
+    //Wenn ein -L PFAD angegeben wurde, dann erstelle die Datei Log(i).txt am gegebenen Pfad
+    //Übergebe diesen Pfad an shm->log.logPath
     if (pathToLoggingFile != NULL) {
 
         char *baseName = "Log";
@@ -132,8 +142,8 @@ int evaluateArgs(int argc, char *argv[]) {
     return executePathIndex + 1;
 }
 
-int shm_create(int pidAmount) {
-
+//Hauptinitialisierung des SHM nach der erstellung
+int shm_init(int pidAmount) {
 
     shm->processAmount = 0;
     shm->processesCreated = 0;
@@ -194,9 +204,14 @@ int shm_create(int pidAmount) {
         }
     }
 
+    shm->processAmount = pidAmount;
+    shm->barrier_all = pidAmount;
+    shm->barrier_all2 = 0;
+
     return OSMP_SUCCESS;
 }
 
+//Erstellt das SHM Objekt
 int start_shm(int pidAmount) {
 
     size_t sizeOfSharedMem = (pidAmount * sizeof(slots) + max_messages * pidAmount * sizeof(message) +
@@ -228,66 +243,55 @@ int start_shm(int pidAmount) {
     return 0;
 }
 
+//main
 int main(int argc, char *argv[]) {
 
-
+    //nimmt die Prozessanzahl
     int pidAmount = atoi(argv[1]);
     pid_t pid;
 
+    //erstellt das SHM Objekt
     start_shm(pidAmount);
+    //initialisiert die Werte des SHM
+    shm_init(pidAmount);
 
+    //Aufbau um jegliche optionalen Argumente nach der executable abzuspeichern und weiterzugeben
     int firstOptionalArgs = evaluateArgs(argc, argv);
-    //printf("%d %d\n",argc, firstOptionalArgs);
     char *optionalArgs[argc - firstOptionalArgs + 2];
     optionalArgs[0] = "osmpexecutable";
     int optionalArgsIndex = 1;
-
-
     while (argv[firstOptionalArgs] != NULL) {
         optionalArgs[optionalArgsIndex] = strdup(argv[firstOptionalArgs]);
         firstOptionalArgs++;
         optionalArgsIndex++;
     }
-
     optionalArgs[optionalArgsIndex] = NULL;
-
-
-    shm_create(pidAmount);
-
-
-    shm->processAmount = pidAmount;
-    shm->barrier_all = pidAmount;
-    shm->barrier_all2 = 0;
-
+    //Alle optionalen Argumente gespeichert.
 
     //Parent und Child Trennung
     int i;
     for (i = 0; i < pidAmount; i++) {
         pid = fork();
 
-
         if (pid < 0) {
             printf("Fehler beim forken\n");
             shm_unlink(SharedMemName);
             return -1;
         } else if (pid == 0) {
-
-
-
             int a = execvp(pathToExecutable, optionalArgs);
+            //wenn execvp nicht erfolgreich, gebe fehlermeldung aus.
             if (a == -1) {
                 printf("execlp failure\n");
                 return -1;
             }
         }
     }
-    if (shm->processesCreated = shm->processAmount) {
-        pthread_cond_broadcast(&shm->allCreated);
-    }
+    //synchrochronisiere
     for (int i = 0; i < pidAmount; i++) {
         waitpid(-1, NULL, 0);
     }
 
+    //unlinke shm der main
     shm_unlink(SharedMemName);
 
     return 0;
