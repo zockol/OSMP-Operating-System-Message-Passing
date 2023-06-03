@@ -93,6 +93,7 @@ typedef struct {
     pthread_cond_t cattr;
     Bcast broadcastMsg;
     int barrier_all;
+    int barrier_all2;
     pthread_cond_t allCreated;
     logger log;
     process p[];

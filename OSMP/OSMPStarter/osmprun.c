@@ -257,6 +257,7 @@ int main(int argc, char *argv[]) {
 
     shm->processAmount = pidAmount;
     shm->barrier_all = pidAmount;
+    shm->barrier_all2 = 0;
 
 
     //Parent und Child Trennung

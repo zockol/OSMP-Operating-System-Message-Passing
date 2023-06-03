@@ -123,21 +123,39 @@ int OSMP_Barrier() {
     debug("OSMP_BARRIER START", rankNow, NULL, NULL);
 
     pthread_mutex_lock(&shm->mutex);
-    shm->barrier_all--;
 
-    if (shm->barrier_all == 0) {
-        shm->barrier_all = shm->processAmount;
-        pthread_cond_broadcast(&shm->cattr);
+    if (shm->barrier_all != 0) {
+        shm->barrier_all--;
 
-    } else {
-        while (shm->barrier_all != 0) {
-            pthread_cond_wait(&shm->cattr, &shm->mutex);
-            if (shm->barrier_all == shm->processAmount) {
-                continue;
+        if (shm->barrier_all == 0) {
+            shm->barrier_all2 = shm->processAmount;
+            pthread_cond_broadcast(&shm->cattr);
+
+
+        } else {
+
+            while (shm->barrier_all != 0) {
+                pthread_cond_wait(&shm->cattr, &shm->mutex);
             }
         }
+    } else if (shm->barrier_all2 != 0) {
+        shm->barrier_all2--;
+        if (shm->barrier_all2 == 0) {
+            shm->barrier_all = shm->processAmount;
+            pthread_cond_broadcast(&shm->cattr);
+
+
+        } else {
+            while (shm->barrier_all2 != 0) {
+                pthread_cond_wait(&shm->cattr, &shm->mutex);
+            }
+        }
+
+    } else {
+        debug("OSMP_BARRIER ERROR", rankNow, "BARRIER_ALL & BARRIER_ALL2 ZERO", NULL);
     }
     pthread_mutex_unlock(&shm->mutex);
+
 
 
     debug("OSMP_BARRIER END", rankNow, NULL, NULL);

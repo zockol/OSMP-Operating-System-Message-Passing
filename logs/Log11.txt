@@ -1,20 +1,84 @@
-Timestamp: 1685619417, Funktion: OSMP_INIT END, OSMPRank: 0
-Timestamp: 1685619417, Funktion: OSMP_SIZE START, OSMPRank: 0
-Timestamp: 1685619417, Funktion: OSMP_SIZE END, OSMPRank: 0
-Timestamp: 1685619417, Funktion: OSMP_RANK START, OSMPRank: 0
-Timestamp: 1685619417, Funktion: OSMP_RANK END, OSMPRank: 0
-Timestamp: 1685619417, Funktion: OSMP_SEND START, OSMPRank: 0
-Timestamp: 1685619417, Funktion: OSMP_BARRIER START, OSMPRank: 0
-Timestamp: 1685619418, Funktion: OSMP_INIT END, OSMPRank: 1
-Timestamp: 1685619418, Funktion: OSMP_SIZE START, OSMPRank: 1
-Timestamp: 1685619418, Funktion: OSMP_SIZE END, OSMPRank: 1
-Timestamp: 1685619418, Funktion: OSMP_RANK START, OSMPRank: 1
-Timestamp: 1685619418, Funktion: OSMP_RANK END, OSMPRank: 1
-Timestamp: 1685619418, Funktion: OSMP_RECV START, OSMPRank: 1
-Timestamp: 1685619418, Funktion: OSMP_BARRIER START, OSMPRank: 1
-Timestamp: 1685619418, Funktion: OSMP_BARRIER END, OSMPRank: 1
-Timestamp: 1685619418, Funktion: OSMP_RECV END, OSMPRank: 1
-Timestamp: 1685619418, Funktion: OSMP_FINALIZE START, OSMPRank: 1
-Timestamp: 1685619418, Funktion: OSMP_BARRIER END, OSMPRank: 0
-Timestamp: 1685619418, Funktion: OSMP_SEND END, OSMPRank: 0
-Timestamp: 1685619418, Funktion: OSMP_FINALIZE START, OSMPRank: 0
+Timestamp: 1685790787, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790787, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790787, Funktion: OSMP_INIT END, OSMPRank: 0
+Timestamp: 1685790787, Funktion: OSMP_SIZE START, OSMPRank: 0
+Timestamp: 1685790787, Funktion: OSMP_SIZE END, OSMPRank: 0
+Timestamp: 1685790787, Funktion: OSMP_RANK START, OSMPRank: 0
+Timestamp: 1685790787, Funktion: OSMP_RANK END, OSMPRank: 0
+Timestamp: 1685790787, Funktion: OSMP_BARRIER START, OSMPRank: 0
+Timestamp: 1685790788, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790788, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790788, Funktion: OSMP_INIT END, OSMPRank: 1
+Timestamp: 1685790788, Funktion: OSMP_SIZE START, OSMPRank: 1
+Timestamp: 1685790788, Funktion: OSMP_SIZE END, OSMPRank: 1
+Timestamp: 1685790788, Funktion: OSMP_RANK START, OSMPRank: 1
+Timestamp: 1685790788, Funktion: OSMP_RANK END, OSMPRank: 1
+Timestamp: 1685790788, Funktion: OSMP_BARRIER START, OSMPRank: 1
+Timestamp: 1685790789, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790789, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790789, Funktion: OSMP_INIT END, OSMPRank: 2
+Timestamp: 1685790789, Funktion: OSMP_SIZE START, OSMPRank: 2
+Timestamp: 1685790789, Funktion: OSMP_SIZE END, OSMPRank: 2
+Timestamp: 1685790789, Funktion: OSMP_RANK START, OSMPRank: 2
+Timestamp: 1685790789, Funktion: OSMP_RANK END, OSMPRank: 2
+Timestamp: 1685790789, Funktion: OSMP_BARRIER START, OSMPRank: 2
+Timestamp: 1685790790, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790790, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790790, Funktion: OSMP_INIT END, OSMPRank: 3
+Timestamp: 1685790790, Funktion: OSMP_SIZE START, OSMPRank: 3
+Timestamp: 1685790790, Funktion: OSMP_SIZE END, OSMPRank: 3
+Timestamp: 1685790790, Funktion: OSMP_RANK START, OSMPRank: 3
+Timestamp: 1685790790, Funktion: OSMP_RANK END, OSMPRank: 3
+Timestamp: 1685790790, Funktion: OSMP_BARRIER START, OSMPRank: 3
+Timestamp: 1685790791, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790791, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790791, Funktion: OSMP_INIT END, OSMPRank: 4
+Timestamp: 1685790791, Funktion: OSMP_SIZE START, OSMPRank: 4
+Timestamp: 1685790791, Funktion: OSMP_SIZE END, OSMPRank: 4
+Timestamp: 1685790791, Funktion: OSMP_RANK START, OSMPRank: 4
+Timestamp: 1685790791, Funktion: OSMP_RANK END, OSMPRank: 4
+Timestamp: 1685790791, Funktion: OSMP_BARRIER START, OSMPRank: 4
+Timestamp: 1685790792, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790792, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790792, Funktion: OSMP_INIT END, OSMPRank: 5
+Timestamp: 1685790792, Funktion: OSMP_SIZE START, OSMPRank: 5
+Timestamp: 1685790792, Funktion: OSMP_SIZE END, OSMPRank: 5
+Timestamp: 1685790792, Funktion: OSMP_RANK START, OSMPRank: 5
+Timestamp: 1685790792, Funktion: OSMP_RANK END, OSMPRank: 5
+Timestamp: 1685790792, Funktion: OSMP_BARRIER START, OSMPRank: 5
+Timestamp: 1685790793, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790793, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790793, Funktion: OSMP_INIT END, OSMPRank: 6
+Timestamp: 1685790793, Funktion: OSMP_SIZE START, OSMPRank: 6
+Timestamp: 1685790793, Funktion: OSMP_SIZE END, OSMPRank: 6
+Timestamp: 1685790793, Funktion: OSMP_RANK START, OSMPRank: 6
+Timestamp: 1685790793, Funktion: OSMP_RANK END, OSMPRank: 6
+Timestamp: 1685790793, Funktion: OSMP_BARRIER START, OSMPRank: 6
+Timestamp: 1685790794, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790794, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790794, Funktion: OSMP_INIT END, OSMPRank: 7
+Timestamp: 1685790794, Funktion: OSMP_SIZE START, OSMPRank: 7
+Timestamp: 1685790794, Funktion: OSMP_SIZE END, OSMPRank: 7
+Timestamp: 1685790794, Funktion: OSMP_RANK START, OSMPRank: 7
+Timestamp: 1685790794, Funktion: OSMP_RANK END, OSMPRank: 7
+Timestamp: 1685790794, Funktion: OSMP_BARRIER START, OSMPRank: 7
+Timestamp: 1685790795, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790795, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790795, Funktion: OSMP_INIT END, OSMPRank: 8
+Timestamp: 1685790795, Funktion: OSMP_SIZE START, OSMPRank: 8
+Timestamp: 1685790795, Funktion: OSMP_SIZE END, OSMPRank: 8
+Timestamp: 1685790795, Funktion: OSMP_RANK START, OSMPRank: 8
+Timestamp: 1685790795, Funktion: OSMP_RANK END, OSMPRank: 8
+Timestamp: 1685790795, Funktion: OSMP_BARRIER START, OSMPRank: 8
+Timestamp: 1685790796, Memory: calloc, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790796, Memory: free, Funktion: OSMP_INIT, OSMPRank: 0
+Timestamp: 1685790796, Funktion: OSMP_INIT END, OSMPRank: 9
+Timestamp: 1685790796, Funktion: OSMP_SIZE START, OSMPRank: 9
+Timestamp: 1685790796, Funktion: OSMP_SIZE END, OSMPRank: 9
+Timestamp: 1685790796, Funktion: OSMP_RANK START, OSMPRank: 9
+Timestamp: 1685790796, Funktion: OSMP_RANK END, OSMPRank: 9
+Timestamp: 1685790796, Funktion: OSMP_BARRIER START, OSMPRank: 9
+Timestamp: 1685790807, Funktion: OSMP_BARRIER END, OSMPRank: 1
+Timestamp: 1685790807, Funktion: OSMP_BARRIER START, OSMPRank: 1
+Timestamp: 1685790807, Funktion: OSMP_BARRIER END, OSMPRank: 9
+Timestamp: 1685790807, Funktion: OSMP_BARRIER START, OSMPRank: 9

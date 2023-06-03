@@ -9,17 +9,18 @@ int main(int argc, char *argv[]) {
     rv = OSMP_Init(&argc, &argv);
     rv = OSMP_Size(&size);
     rv = OSMP_Rank(&rank);
-    printf("before\n");
+    printf("before %d\n", rank);
 
 
     OSMP_Barrier();
 
 
-    printf("after \n");
+    printf("after %d\n", rank);
+    sleep(10);
 
     OSMP_Barrier();
 
-    printf("after 2  \n");
+    printf("2.after  %d\n", rank);
 
     return OSMP_SUCCESS;
 }
