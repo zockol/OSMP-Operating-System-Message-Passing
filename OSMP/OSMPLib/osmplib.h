@@ -116,10 +116,9 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
 
 int OSMP_Barrier();
 
-int calculateStruct(int *rank);
+int debug(char *functionName, int srcRank, char *error, char *memory);
 
 
-int getSrcRank();
 
 
 #endif
