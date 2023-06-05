@@ -52,7 +52,6 @@ typedef struct {
 } Bcast;
 
 typedef struct {
-    bool full;
     int srcRank;
     int destRank;
     char buffer[message_max_size];
@@ -63,18 +62,11 @@ typedef struct {
 } message;
 
 typedef struct {
-    //array/verkettete liste
-    int firstEmptySlot;
-    //int lastEmptySlot;
-} slots;
-
-
-typedef struct {
     message msg[OSMP_MAX_MESSAGES_PROC];
     pid_t pid;
     int rank;
-    slots slots;
     int numberOfMessages;
+    int firstEmptySlot;
     int firstmsg;
     sem_t empty;
     sem_t full;

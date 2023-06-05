@@ -153,7 +153,7 @@ int shm_init(int pidAmount) {
         shm->p[i].rank = i;
         shm->p[i].firstmsg = -1;
         shm->p[i].numberOfMessages = 0;
-        shm->p[i].slots.firstEmptySlot = 0;
+        shm->p[i].firstEmptySlot = 0;
 
         pthread_mutexattr_t mutex_attr;
         pthread_mutexattr_init(&mutex_attr);
@@ -193,9 +193,6 @@ int shm_init(int pidAmount) {
             shm->p[i].msg[j].msgLen = 0;
             memcpy(shm->p[i].msg[j].buffer, "\0", 1);
 
-            shm->p[i].msg[j].full = false;
-
-
             shm->p[i].msg[j].nextMsg = 0;
             pthread_condattr_t read;
             pthread_condattr_init(&read);
@@ -214,7 +211,7 @@ int shm_init(int pidAmount) {
 //Erstellt das SHM Objekt
 int start_shm(int pidAmount) {
 
-    size_t sizeOfSharedMem = (pidAmount * sizeof(slots) + max_messages * pidAmount * sizeof(message) +
+    size_t sizeOfSharedMem = (max_messages * pidAmount * sizeof(message) +
                               pidAmount * sizeof(process) + sizeof(logger) +
                               sizeof(Bcast));
 
