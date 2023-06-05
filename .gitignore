@@ -141,6 +141,10 @@ modules.xml
 # Sonarlint plugin
 .idea/sonarlint
 
+Makefile
+
+build
+
 ### CMake ###
 CMakeLists.txt.user
 CMakeCache.txt
