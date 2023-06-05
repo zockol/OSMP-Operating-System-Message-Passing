@@ -107,6 +107,7 @@ int OSMP_Init(int *argc, char ***argv) {
         }
     }
 
+    //setzt auf den jetzigen p[i] den rang
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
             shm->p[i].rank = i;
@@ -114,33 +115,30 @@ int OSMP_Init(int *argc, char ***argv) {
         }
     }
 
+    //wenn shm MAP_FAILED returned, gebe OSMP ERROR
     if (shm == MAP_FAILED) {
         printf("Mapping Fail: %s\n", strerror(errno));
         shm_unlink(SharedMemName);
         return OSMP_ERROR;
     }
 
-
-    if (shm->processesCreated = shm->processAmount) {
-        pthread_cond_broadcast(&shm->allCreated);
-    }
     debug("OSMP_INIT END", rankNow, NULL, NULL);
-
-
     return OSMP_SUCCESS;
 
 }
 
-
+//locked jeden OSMP hier, bis alle an dieser Stelle angekommen sind
 int OSMP_Barrier() {
-
     debug("OSMP_BARRIER START", rankNow, NULL, NULL);
 
+    //locked den mutex
     pthread_mutex_lock(&shm->mutex);
 
+    //if-else konstrukt für ein flip zwischen barrier_all und barrier_all2
     if (shm->barrier_all != 0) {
         shm->barrier_all--;
 
+        //wenn shm->barrier_all == 0 dann lasse alle anderen unten aus der while raus.
         if (shm->barrier_all == 0) {
             shm->barrier_all2 = shm->processAmount;
             pthread_cond_broadcast(&shm->cattr);
@@ -153,12 +151,11 @@ int OSMP_Barrier() {
             }
         }
     } else if (shm->barrier_all2 != 0) {
+        //genau das selbe wie dadrüber nur der flip
         shm->barrier_all2--;
         if (shm->barrier_all2 == 0) {
             shm->barrier_all = shm->processAmount;
             pthread_cond_broadcast(&shm->cattr);
-
-
         } else {
             while (shm->barrier_all2 != 0) {
                 pthread_cond_wait(&shm->cattr, &shm->mutex);
@@ -166,24 +163,25 @@ int OSMP_Barrier() {
         }
 
     } else {
+        //wenn beide Barriers 0 sind, dann error ausgeben
         debug("OSMP_BARRIER ERROR", rankNow, "BARRIER_ALL & BARRIER_ALL2 ZERO", NULL);
     }
     pthread_mutex_unlock(&shm->mutex);
-
-
-
     debug("OSMP_BARRIER END", rankNow, NULL, NULL);
     return 0;
 }
 
+//muss jeder OSMP durchlaufen bevor er sich beendet und "resetted" sich damit selber
 int OSMP_Finalize() {
     debug("OSMP_FINALIZE START", rankNow, NULL, NULL);
 
+    //wenn shm nicht initialisiert, dann error
     if (shm == NULL) {
         printf("OSMPLIB.c OSMP_FINALIZE shm not initialized");
         return OSMP_ERROR;
     }
 
+    //kompletter reset code
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].rank == rankNow) {
             shm->p[i].pid = 0;
@@ -200,7 +198,6 @@ int OSMP_Finalize() {
                              sizeof(Bcast))) == OSMP_ERROR) {
                 debug("OSMP_FINALIZE", rankNow, "MUNMAP == OSMP_ERROR", NULL);
             }
-
             if (i == (shm->processAmount - 1)) {
                 shm = NULL;
             }
@@ -209,9 +206,9 @@ int OSMP_Finalize() {
     }
 
     return OSMP_SUCCESS;
-
 }
 
+//beschreibt den pointer size mit dem processAmount angegeben im shm struct
 int OSMP_Size(int *size) {
     debug("OSMP_SIZE START", rankNow, NULL, NULL);
     *size = shm->processAmount;
@@ -219,14 +216,17 @@ int OSMP_Size(int *size) {
     return OSMP_SUCCESS;
 }
 
+//beschreibt den pointer rank mit dem derzeitigen rank des prozesses
 int OSMP_Rank(int *rank) {
     debug("OSMP_RANK START", rankNow, NULL, NULL);
 
+    //ERROR wenn shm nicht initialisiert durch OSMP_INIT
     if (shm == NULL) {
         printf("shm not initialized");
         return OSMP_ERROR;
     }
 
+    //checkt welcher rang dem laufenden prozess zugewiesen wurde in der OSMP INIT
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
             *rank = shm->p[i].rank;
@@ -237,15 +237,13 @@ int OSMP_Rank(int *rank) {
     return OSMP_SUCCESS;
 }
 
-
+//sendet eine nachricht an die gewünschte destination
 int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     debug("OSMP_SEND START", rankNow, NULL, NULL);
-    int j;
 
-
+    //code um den Postkasten der destination zu beschreiben sobald in diesem Platz frei ist
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].rank == dest) {
-
             sem_wait(&shm->p[i].empty);
             pthread_mutex_lock(&shm->mutex);
             shm->p[i].msg[shm->p[i].slots.firstEmptySlot].msgLen = count * sizeof(datatype);
@@ -260,25 +258,20 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             shm->p[i].numberOfMessages++;
             shm->p[i].firstmsg++;
 
-            //printf("firstmessage: %d | firstempty: %d\n" , shm->p[i].firstmsg, shm->p[i].slots.firstEmptySlot);
-
             pthread_mutex_unlock(&shm->mutex);
-
             sem_post(&shm->p[i].full);
-
-
         }
     }
     debug("OSMP_SEND END", rankNow, NULL, NULL);
     return 0;
 }
 
+//falls Nachrichten in dem OSMP vorhanden sind, schreibe sie in buf rein
 int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len) {
     debug("OSMP_RECV START", rankNow, NULL, NULL);
     int i = 0;
     for (i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
-            pthread_cond_broadcast(&shm->allCreated);
 
             sem_wait(&shm->p[i].full);
 
@@ -290,11 +283,7 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
             shm->p[i].firstmsg--;
             shm->p[i].slots.firstEmptySlot--;
             pthread_mutex_unlock(&shm->mutex);
-
-
             sem_post(&shm->p[i].empty);
-
-
         }
 
     }
@@ -303,11 +292,13 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
     return OSMP_SUCCESS;
 }
 
+//wenn send == true ist, schreibe *buf in den broadcast buffer und warte bis alle da sind
+//wenn send == false ist, warte zuvor auf alle prozesse und schreibe dann den broadcust buffer in *buf
 int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *source, int *len) {
     debug("OSMP_BCAST START", rankNow, NULL, NULL);
 
     if (send == true) {
-
+        //sender code
         shm->broadcastMsg.datatype = datatype;
         shm->broadcastMsg.msgLen = count * sizeof(datatype);
         shm->broadcastMsg.srcRank = rankNow;
@@ -315,6 +306,7 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
     }
     OSMP_Barrier();
     if (send == false) {
+        //recv code
         memcpy(buf, shm->broadcastMsg.buffer, shm->broadcastMsg.msgLen);
         *source = shm->broadcastMsg.srcRank;
         *len = shm->broadcastMsg.msgLen;
