@@ -259,6 +259,10 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     debug("OSMP_SEND END", rankNow, NULL, NULL);
     return 0;
 }
+int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSMP_Request request){
+    return 0;
+}
+
 
 //falls Nachrichten in dem OSMP vorhanden sind, schreibe sie in buf rein
 int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len) {
