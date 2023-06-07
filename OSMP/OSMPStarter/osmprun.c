@@ -155,10 +155,8 @@ int shm_init(int pidAmount) {
         shm->p[i].numberOfMessages = 0;
         shm->p[i].firstEmptySlot = 0;
 
-        pthread_mutexattr_t mutex_attr;
-        pthread_mutexattr_init(&mutex_attr);
-        pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED);
-        pthread_mutex_init(&shm->mutex, &mutex_attr);
+        
+    
 
         pthread_mutexattr_t mutex_attr2;
         pthread_mutexattr_init(&mutex_attr2);

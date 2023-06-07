@@ -259,8 +259,48 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     debug("OSMP_SEND END", rankNow, NULL, NULL);
     return 0;
 }
+void *isend(void * request){
+    debug("OSMP_SEND START", rankNow, NULL, NULL);
+
+    //code um den Postkasten der destination zu beschreiben sobald in diesem Platz frei ist
+    for (int i = 0; i < shm->processAmount; i++) {
+        OSMP_Request r = *((OSMP_Request*)(request));
+
+        if (shm->p[i].rank == r.dest) {
+            sem_wait(&shm->p[i].empty);
+            pthread_mutex_lock(&shm->mutex);
+            shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen = r.count * sizeof(r.datatype);
+            shm->p[i].msg[shm->p[i].firstEmptySlot].datatype = r.datatype;
+            shm->p[i].msg[shm->p[i].firstEmptySlot].srcRank = rankNow;
+            shm->p[i].msg[shm->p[i].firstEmptySlot].destRank = r.dest;
+
+            memcpy(shm->p[i].msg[shm->p[i].firstEmptySlot].buffer, &r.buf,
+                   shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen);
+            shm->p[i].firstEmptySlot++;
+            shm->p[i].numberOfMessages++;
+            shm->p[i].firstmsg++;
+
+            pthread_mutex_unlock(&shm->mutex);
+            sem_post(&shm->p[i].full);
+        }
+    }
+    debug("OSMP_SEND END", rankNow, NULL, NULL);
+}
+
 int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSMP_Request request){
-    return 0;
+    pthread_t thread;
+    for (int i = 0; i < shm->processAmount; i++) {
+        if (shm->p[i].rank == dest) {
+            memcpy(&request.buf, buf, count);
+            request.count = count;
+            request.datatype = datatype;
+            request.dest = dest;
+            request.source = rankNow;
+            pthread_create(&thread, NULL, &isend, &request);
+        }
+        return OSMP_SUCCESS;
+    
+    }
 }
 
 
@@ -290,6 +330,12 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
     return OSMP_SUCCESS;
 }
 
+int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len, OSMP_Request request){
+    return 0;
+    
+}
+
+
 //wenn send == true ist, schreibe *buf in den broadcast buffer und warte bis alle da sind
 //wenn send == false ist, warte zuvor auf alle prozesse und schreibe dann den broadcust buffer in *buf
 int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *source, int *len) {
@@ -311,5 +357,37 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
     }
 
     debug("OSMP_BCAST END", rankNow, NULL, NULL);
+    return OSMP_SUCCESS;
+}
+
+
+int OSMP_CreateRequest(OSMP_Request *request){
+    pthread_condattr_t request_cond_attr;
+    pthread_condattr_init(&request_cond_attr);
+    pthread_condattr_setpshared(&request_cond_attr, PTHREAD_PROCESS_SHARED);
+    
+    pthread_mutexattr_t mutex_request_attr;
+    pthread_mutexattr_init(&mutex_request_attr);
+    pthread_mutexattr_setpshared(&mutex_request_attr, PTHREAD_PROCESS_SHARED);
+
+    request = malloc(sizeof(OSMP_Request));
+    request->thread = 0;
+    memcpy(&request->buf, "\0", 1);
+    request->count = 0;
+    request->datatype = 0;
+    request->dest = -1;
+    request->source = -1;
+    request->len = 0;
+    pthread_cond_init(&request->request_cond, &request_cond_attr);
+    pthread_mutex_init(&request->request_mutex, &mutex_request_attr);
+    request->request_status = 0;
+    
+    return OSMP_SUCCESS;   
+}
+
+
+
+int OSMP_RemoveRequest(OSMP_Request *request){
+    free(request);
     return OSMP_SUCCESS;
 }
