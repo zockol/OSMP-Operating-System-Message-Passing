@@ -81,7 +81,7 @@ typedef struct {
     int dest;
     int ret;
     int source;
-    int* len;
+    int len;
     pthread_cond_t request_cond;
     pthread_mutex_t request_mutex;
     bool complete; //Status der Operation 0=pending; 1=complete;

@@ -15,10 +15,10 @@ int main(int argc, char *argv[]) {
     rv = OSMP_Init(&argc, &argv);
     rv = OSMP_Size(&size);
     rv = OSMP_Rank(&rank);
-    
+
     
     if (size != 2) {
-        
+        printf("size != 2\n");
         exit(-1);
     }
     if (rank == 0) { // OSMP process 0 
@@ -28,10 +28,9 @@ int main(int argc, char *argv[]) {
         }
 
     } else { // OSMP process 1
-    printf("Halloooooooooooooooo");
-        // bufout = malloc(size); // check for != NULL
-        // rv = OSMP_CreateRequest( &request );
-        // rv = OSMP_Irecv( bufout, size, OSMP_INT, &source, &len, request );
+        bufout = malloc(size); // check for != NULL
+        rv = OSMP_CreateRequest( &request );
+        rv = OSMP_Irecv( bufout, size, OSMP_INT, &source, &len, request );
         // // do something important…
         // // check if operation is completed and wait if not
         // rv = OSMP_Wait( request );
