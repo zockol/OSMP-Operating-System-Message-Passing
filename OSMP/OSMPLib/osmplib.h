@@ -79,11 +79,12 @@ typedef struct {
     int count;
     OSMP_Datatype datatype;
     int dest;
+    int ret;
     int source;
     int* len;
     pthread_cond_t request_cond;
     pthread_mutex_t request_mutex;
-    int request_status; //Status der Operation 0=pending; 1=complete;
+    bool complete; //Status der Operation 0=pending; 1=complete;
 }OSMP_Request;
 
 typedef struct {
@@ -131,7 +132,6 @@ int OSMP_CreateRequest(OSMP_Request *request);
 
 int OSMP_RemoveRequest(OSMP_Request *request);
 
-int getSrcRank();
-
+int OSMP_Wait(OSMP_Request request);
 
 #endif

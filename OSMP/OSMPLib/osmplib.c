@@ -260,13 +260,13 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     return 0;
 }
 void *isend(OSMP_Request *request){
-    debug("OSMP_SEND START", rankNow, NULL, NULL);
+    debug("*ISEND START", rankNow, NULL, NULL);
     OSMP_Send(&request->buf, request->count, request->datatype, request->dest);
-    debug("OSMP_SEND END", rankNow, NULL, NULL);
+    debug("*ISEND END", rankNow, NULL, NULL);
 }
 
 int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSMP_Request request){
-    pthread_t thread;
+        debug("OSMP_Isend START", rankNow, NULL, NULL);
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].rank == dest) {
             memcpy(&request.buf, buf, count);
@@ -274,11 +274,17 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
             request.datatype = datatype;
             request.dest = dest;
             request.source = rankNow;
-            pthread_create(&thread, NULL, (void * (*) (void * ))isend, &request);
+            pthread_create(&request.thread, NULL, (void * (*) (void * ))isend, &request);
         }
+        debug("OSMP_Isend END", rankNow, NULL, NULL);
+
         return OSMP_SUCCESS;
     
     }
+}
+
+int OSMP_Test(OSMP_Request *request, int flag){
+    return request->complete;
 }
 
 
@@ -290,8 +296,9 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
         if (shm->p[i].pid == getpid()) {
 
             sem_wait(&shm->p[i].full);
-
+            
             pthread_mutex_lock(&shm->mutex);
+            debug("OSMP_RECV START", rankNow, NULL, NULL);
 
             *source = shm->p[i].msg[shm->p[i].firstmsg].srcRank;
             *len = shm->p[i].msg[shm->p[i].firstmsg].msgLen;
@@ -310,26 +317,27 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 
 
 void *ircv(OSMP_Request *request){
-    debug("OSMP_SEND START", rankNow, NULL, NULL);
+    debug("*IRCV START", rankNow, NULL, NULL);
     OSMP_Recv(&request->buf, request->count, request->datatype, &request->source, request->len);
-    debug("OSMP_SEND END", rankNow, NULL, NULL);
+    debug("*IRCV END", rankNow, NULL, NULL);
 }
 
 
 int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len, OSMP_Request request){
-    pthread_t thread;
-    for (int i = 0; i < shm->processAmount; i++) {
-        if (shm->p[i].pid == getpid()) {
+     debug("OSMP_IRECV START", rankNow, NULL, NULL);
+
             memcpy(&request.buf, buf, count);
-            count = request.count;
-            datatype = request.datatype;
-            source = &request.source;
-            pthread_create(&thread, NULL, (void * (*) (void * ))ircv, &request);
-        }
+            request.count = count;
+            request.datatype = datatype;
+            request.source = source;
+            pthread_create(&request.thread, NULL, (void * (*) (void * ))ircv, &request);
+        
+    debug("OSMP_IRECV END", rankNow, NULL, NULL);
+
     return 0;
     
     }
-}
+
 
 
 //wenn send == true ist, schreibe *buf in den broadcast buffer und warte bis alle da sind
@@ -358,6 +366,8 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
 
 
 int OSMP_CreateRequest(OSMP_Request *request){
+    debug("OSMP_CreateRequest START", rankNow, NULL, NULL);
+
     pthread_condattr_t request_cond_attr;
     pthread_condattr_init(&request_cond_attr);
     pthread_condattr_setpshared(&request_cond_attr, PTHREAD_PROCESS_SHARED);
@@ -376,12 +386,19 @@ int OSMP_CreateRequest(OSMP_Request *request){
     request->len = 0;
     pthread_cond_init(&request->request_cond, &request_cond_attr);
     pthread_mutex_init(&request->request_mutex, &mutex_request_attr);
-    request->request_status = 0;
-    
+    request->complete = 0;
+    debug("OSMP_CreateRequest END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;   
 }
 
+int OSMP_Wait(OSMP_Request request){
+    debug("OSMP_Wait START", rankNow, NULL, NULL);
+    pthread_join( request.thread, &request.ret);
+    debug("OSMP_WAIT END", rankNow, NULL, NULL);
+    return OSMP_SUCCESS;
+        
 
+}
 
 int OSMP_RemoveRequest(OSMP_Request *request){
     free(request);
