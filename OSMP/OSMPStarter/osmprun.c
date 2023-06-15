@@ -209,9 +209,7 @@ int shm_init(int pidAmount) {
 //Erstellt das SHM Objekt
 int start_shm(int pidAmount) {
 
-    size_t sizeOfSharedMem = (max_messages * pidAmount * sizeof(message) +
-                              pidAmount * sizeof(process) + sizeof(logger) +
-                              sizeof(Bcast));
+    size_t sizeOfSharedMem = (OSMP_MAX_MESSAGES_PROC * pidAmount * sizeof(message) + pidAmount * sizeof(process) + sizeof(logger) + sizeof(Bcast) + sizeof(int) * 4 + sizeof(pthread_mutex_t) + sizeof(pthread_cond_t) * 2);
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 

@@ -1,0 +1,15 @@
+Timestamp: 1686851022, Funktion: OSMP_INIT END, OSMPRank: 0
+Timestamp: 1686851022, Funktion: OSMP_SIZE START, OSMPRank: 0
+Timestamp: 1686851022, Funktion: OSMP_SIZE END, OSMPRank: 0
+Timestamp: 1686851022, Funktion: OSMP_RANK START, OSMPRank: 0
+Timestamp: 1686851022, Funktion: OSMP_RANK END, OSMPRank: 0
+Timestamp: 1686851022, Funktion: OSMP_INIT END, OSMPRank: 1
+Timestamp: 1686851022, Funktion: OSMP_SIZE START, OSMPRank: 1
+Timestamp: 1686851022, Funktion: OSMP_SIZE END, OSMPRank: 1
+Timestamp: 1686851022, Funktion: OSMP_RANK START, OSMPRank: 1
+Timestamp: 1686851022, Funktion: OSMP_RANK END, OSMPRank: 1
+Timestamp: 1686851022, Funktion: OSMP_CREATEREQUEST START, OSMPRank: 1
+Timestamp: 1686851025, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1686851025, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1686851025, Funktion: OSMP_BCAST START, OSMPRank: 0
+Timestamp: 1686851025, Funktion: OSMP_BARRIER START, OSMPRank: 0

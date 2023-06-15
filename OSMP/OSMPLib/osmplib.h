@@ -85,7 +85,7 @@ typedef struct {
     pthread_cond_t request_cond;
     pthread_mutex_t request_mutex;
     bool complete; //Status der Operation 0=pending; 1=complete;
-}OSMP_Request;
+} OSMP_Request;
 
 typedef struct {
     int logIntensity;
