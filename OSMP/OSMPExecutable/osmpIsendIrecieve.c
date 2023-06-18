@@ -11,7 +11,8 @@
 int main(int argc, char *argv[]) {
     int rv, size, rank, source, bcastSource;
     OSMP_Request request = NULL;
-    int bufin[1],bufout[1], len, bcastLen;
+    int len, bcastLen;
+    float bufin[1],bufout[1];
     char *bcastbufin, *bcastbufout;
     rv = OSMP_Init(&argc, &argv);
     rv = OSMP_Size(&size);
@@ -24,8 +25,8 @@ int main(int argc, char *argv[]) {
     if (rank == 1) { // OSMP process 0
 
         sleep(4);
-        bufin[0] = 1337;
-        rv = OSMP_Send(bufin, 1, OSMP_INT, 0);
+        bufin[0] = 1.234245;
+        rv = OSMP_Send(bufin, 1, OSMP_FLOAT, 0);
         bcastbufin = malloc(strlen("Hello World!") + 1);
         strncpy(bcastbufin, "Hello World!", strlen("Hello World!") + 1);
         rv = OSMP_Bcast( bcastbufin, strlen("Hello World!") + 1, OSMP_BYTE, true, NULL, NULL);
@@ -33,13 +34,13 @@ int main(int argc, char *argv[]) {
     } else { // OSMP process 1
         rv = OSMP_CreateRequest( &request );
 
-        rv = OSMP_Irecv( bufout, 1, OSMP_INT, &source, &len, request );
+        rv = OSMP_Irecv( bufout, 1, OSMP_FLOAT, &source, &len, request );
         bcastbufout = malloc(strlen("Hello World!") + 1);
         rv = OSMP_Bcast( bcastbufout, strlen("Hello World!") + 1, OSMP_BYTE, false, &bcastSource, &bcastLen);
         printf("BROADCAST: OSMP process %d received %d byte from %d [%s] \n", rank, bcastLen, bcastSource, bcastbufout);
         sleep(2);
         rv = OSMP_Wait( request );
-        printf("IRECV: OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufout[0]);
+        printf("IRECV: OSMP process %d received %d byte from %d [%f] \n", rank, len, source, bufout[0]);
         rv = OSMP_RemoveRequest( &request );
     }
     rv = OSMP_Finalize();

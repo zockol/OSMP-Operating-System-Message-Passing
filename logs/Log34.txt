@@ -1,0 +1,38 @@
+Timestamp: 1687123996, Funktion: OSMP_INIT END, OSMPRank: 0
+Timestamp: 1687123996, Funktion: OSMP_INIT END, OSMPRank: 1
+Timestamp: 1687123996, Funktion: OSMP_SIZE START, OSMPRank: 0
+Timestamp: 1687123996, Funktion: OSMP_SIZE START, OSMPRank: 1
+Timestamp: 1687123996, Funktion: OSMP_SIZE END, OSMPRank: 0
+Timestamp: 1687123996, Funktion: OSMP_SIZE END, OSMPRank: 1
+Timestamp: 1687123996, Funktion: OSMP_RANK START, OSMPRank: 1
+Timestamp: 1687123996, Funktion: OSMP_RANK START, OSMPRank: 0
+Timestamp: 1687123996, Funktion: OSMP_RANK END, OSMPRank: 1
+Timestamp: 1687123996, Funktion: OSMP_RANK END, OSMPRank: 0
+Timestamp: 1687123996, Funktion: OSMP_CREATEREQUEST START, OSMPRank: 0
+Timestamp: 1687123996, Funktion: OSMP_CREATEREQUEST END, OSMPRank: 0
+Timestamp: 1687123996, Funktion: OSMP_IRECV START, OSMPRank: 0
+Timestamp: 1687123996, Funktion: *IRCV START, OSMPRank: 0
+Timestamp: 1687123996, Funktion: OSMP_RECV START, OSMPRank: 0
+Timestamp: 1687123999, Funktion: OSMP_IRECV END, OSMPRank: 0
+Timestamp: 1687123999, Funktion: OSMP_BCAST START, OSMPRank: 0
+Timestamp: 1687123999, Funktion: OSMP_BARRIER START, OSMPRank: 0
+Timestamp: 1687124000, Funktion: OSMP_SEND START, OSMPRank: 1
+Timestamp: 1687124000, Funktion: OSMP_SEND END, OSMPRank: 1
+Timestamp: 1687124000, Funktion: OSMP_BCAST START, OSMPRank: 1
+Timestamp: 1687124000, Funktion: OSMP_BARRIER START, OSMPRank: 1
+Timestamp: 1687124000, Funktion: OSMP_BARRIER END, OSMPRank: 1
+Timestamp: 1687124000, Error: Kam ich raus?, Funktion: OSMP_BCAST ERROR, OSMPRank: 1
+Timestamp: 1687124000, Funktion: OSMP_BCAST END, OSMPRank: 1
+Timestamp: 1687124000, Funktion: OSMP_FINALIZE START, OSMPRank: 1
+Timestamp: 1687124000, Funktion: OSMP_BARRIER END, OSMPRank: 0
+Timestamp: 1687124000, Funktion: OSMP_RECV END, OSMPRank: 0
+Timestamp: 1687124000, Error: Kam ich raus?, Funktion: OSMP_BCAST ERROR, OSMPRank: 0
+Timestamp: 1687124000, Error: VOR MEMCPY, Funktion: OSMP_BCAST ERROR, OSMPRank: 0
+Timestamp: 1687124000, Funktion: *IRCV END, OSMPRank: 0
+Timestamp: 1687124000, Error: NACH MEMCPY, Funktion: OSMP_BCAST ERROR, OSMPRank: 0
+Timestamp: 1687124000, Funktion: OSMP_BCAST END, OSMPRank: 0
+Timestamp: 1687124002, Funktion: OSMP_WAIT START, OSMPRank: 0
+Timestamp: 1687124002, Funktion: OSMP_WAIT END, OSMPRank: 0
+Timestamp: 1687124002, Funktion: OSMP_REMOVEREQUEST START, OSMPRank: 0
+Timestamp: 1687124002, Funktion: OSMP_REMOVEREQUEST END, OSMPRank: 0
+Timestamp: 1687124002, Funktion: OSMP_FINALIZE START, OSMPRank: 0
