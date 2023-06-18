@@ -1,16 +1,31 @@
-Timestamp: 1686851113, Funktion: OSMP_INIT END, OSMPRank: 0
-Timestamp: 1686851113, Funktion: OSMP_SIZE START, OSMPRank: 0
-Timestamp: 1686851113, Funktion: OSMP_SIZE END, OSMPRank: 0
-Timestamp: 1686851113, Funktion: OSMP_INIT END, OSMPRank: 1
-Timestamp: 1686851113, Funktion: OSMP_RANK START, OSMPRank: 0
-Timestamp: 1686851113, Funktion: OSMP_RANK END, OSMPRank: 0
-Timestamp: 1686851113, Funktion: OSMP_SIZE START, OSMPRank: 1
-Timestamp: 1686851113, Funktion: OSMP_SIZE END, OSMPRank: 1
-Timestamp: 1686851113, Funktion: OSMP_RANK START, OSMPRank: 1
-Timestamp: 1686851113, Funktion: OSMP_RANK END, OSMPRank: 1
-Timestamp: 1686851113, Funktion: OSMP_CREATEREQUEST START, OSMPRank: 1
-Timestamp: 1686851113, Error: THREAD, Funktion: OSMP_CREATEREQUEST ERROR, OSMPRank: 1
-Timestamp: 1686851116, Funktion: OSMP_SEND START, OSMPRank: 0
-Timestamp: 1686851116, Funktion: OSMP_SEND END, OSMPRank: 0
-Timestamp: 1686851116, Funktion: OSMP_BCAST START, OSMPRank: 0
-Timestamp: 1686851116, Funktion: OSMP_BARRIER START, OSMPRank: 0
+Timestamp: 1687121482, Funktion: OSMP_INIT END, OSMPRank: 0
+Timestamp: 1687121482, Funktion: OSMP_SIZE START, OSMPRank: 0
+Timestamp: 1687121482, Funktion: OSMP_SIZE END, OSMPRank: 0
+Timestamp: 1687121482, Funktion: OSMP_INIT END, OSMPRank: 1
+Timestamp: 1687121482, Funktion: OSMP_RANK START, OSMPRank: 0
+Timestamp: 1687121482, Funktion: OSMP_RANK END, OSMPRank: 0
+Timestamp: 1687121482, Funktion: OSMP_SIZE START, OSMPRank: 1
+Timestamp: 1687121482, Funktion: OSMP_CREATEREQUEST START, OSMPRank: 0
+Timestamp: 1687121482, Funktion: OSMP_SIZE END, OSMPRank: 1
+Timestamp: 1687121482, Funktion: OSMP_CREATEREQUEST END, OSMPRank: 0
+Timestamp: 1687121482, Funktion: OSMP_RANK START, OSMPRank: 1
+Timestamp: 1687121482, Funktion: OSMP_IRECV START, OSMPRank: 0
+Timestamp: 1687121482, Funktion: OSMP_RANK END, OSMPRank: 1
+Timestamp: 1687121482, Funktion: *IRCV START, OSMPRank: 0
+Timestamp: 1687121482, Funktion: OSMP_RECV START, OSMPRank: 0
+Timestamp: 1687121485, Funktion: OSMP_IRECV END, OSMPRank: 0
+Timestamp: 1687121485, Funktion: OSMP_BCAST START, OSMPRank: 0
+Timestamp: 1687121485, Funktion: OSMP_BARRIER START, OSMPRank: 0
+Timestamp: 1687121486, Funktion: OSMP_SEND START, OSMPRank: 1
+Timestamp: 1687121486, Funktion: OSMP_SEND END, OSMPRank: 1
+Timestamp: 1687121486, Funktion: OSMP_BCAST START, OSMPRank: 1
+Timestamp: 1687121486, Funktion: OSMP_RECV END, OSMPRank: 0
+Timestamp: 1687121486, Funktion: OSMP_BARRIER START, OSMPRank: 1
+Timestamp: 1687121486, Funktion: *IRCV END, OSMPRank: 0
+Timestamp: 1687121486, Funktion: OSMP_BARRIER END, OSMPRank: 1
+Timestamp: 1687121486, Error: Kam ich raus?, Funktion: OSMP_BCAST ERROR, OSMPRank: 1
+Timestamp: 1687121486, Funktion: OSMP_BCAST END, OSMPRank: 1
+Timestamp: 1687121486, Funktion: OSMP_FINALIZE START, OSMPRank: 1
+Timestamp: 1687121486, Funktion: OSMP_BARRIER END, OSMPRank: 0
+Timestamp: 1687121486, Error: Kam ich raus?, Funktion: OSMP_BCAST ERROR, OSMPRank: 0
+Timestamp: 1687121486, Error: VOR MEMCPY, Funktion: OSMP_BCAST ERROR, OSMPRank: 0

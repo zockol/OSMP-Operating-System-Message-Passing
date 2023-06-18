@@ -30,6 +30,8 @@
 #include "semaphore.h"
 #include "pthread.h"
 
+typedef void* OSMP_Request;
+
 #define TRUE 1
 typedef enum {
     OSMP_INT,
@@ -73,20 +75,6 @@ typedef struct {
     sem_t full;
 } process;
 
- typedef struct{
-    pthread_t thread;
-    char buf;
-    int count;
-    OSMP_Datatype datatype;
-    int dest;
-    int ret;
-    int source;
-    int len;
-    pthread_cond_t request_cond;
-    pthread_mutex_t request_mutex;
-    bool complete; //Status der Operation 0=pending; 1=complete;
-} OSMP_Request;
-
 typedef struct {
     int logIntensity;
     char logPath[256];
@@ -124,14 +112,16 @@ int OSMP_Barrier();
 
 int calculateStruct(int *rank);
 
-int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSMP_Request request);
+int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSMP_Request req);
 
-int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len, OSMP_Request request);
+int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len, OSMP_Request req);
 
 int OSMP_CreateRequest(OSMP_Request *request);
 
 int OSMP_RemoveRequest(OSMP_Request *request);
 
 int OSMP_Wait(OSMP_Request request);
+
+int OSMP_DataSize(OSMP_Datatype datatype);
 
 #endif
