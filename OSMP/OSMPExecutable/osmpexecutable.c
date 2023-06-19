@@ -7,7 +7,8 @@
 
 int system(const char *command);
 
-int performTrainAction(int argc, char **argv) {
+int
+performTrainAction(int argc, char **argv) {
     int rv, size, rank;
     rv = OSMP_Init(&argc, &argv);
     rv = OSMP_Size(&size);
@@ -75,15 +76,15 @@ int IsendIRecv(int argc, char **argv) {
     }
     if (rank == 1) { // OSMP process 0
 
-        sleep(4);
+        sleep(10);
         bufin[0] = 1.234245;
 
         rv = OSMP_CreateRequest( &sendRequest );
         rv = OSMP_Isend(bufin, 1, OSMP_FLOAT, 0, sendRequest);
 
-        bcastbufin = malloc(strlen("Hello World!") + 1);
-        strncpy(bcastbufin, "Hello World!", strlen("Hello World!") + 1);
-        rv = OSMP_Bcast( bcastbufin, strlen("Hello World!") + 1, OSMP_BYTE, true, NULL, NULL);
+        //bcastbufin = malloc(strlen("Hello World!") + 1);
+        //strncpy(bcastbufin, "Hello World!", strlen("Hello World!") + 1);
+        //rv = OSMP_Bcast( bcastbufin, strlen("Hello World!") + 1, OSMP_BYTE, true, NULL, NULL);
 
         rv = OSMP_Wait( sendRequest );
         rv = OSMP_RemoveRequest( &sendRequest );
@@ -92,10 +93,10 @@ int IsendIRecv(int argc, char **argv) {
         rv = OSMP_CreateRequest( &recvRequest );
 
         rv = OSMP_Irecv( bufout, 1, OSMP_FLOAT, &source, &len, recvRequest );
-        bcastbufout = malloc(strlen("Hello World!") + 1);
-        rv = OSMP_Bcast( bcastbufout, strlen("Hello World!") + 1, OSMP_BYTE, false, &bcastSource, &bcastLen);
-        printf("BROADCAST: OSMP process %d received %d byte from %d [%s] \n", rank, bcastLen, bcastSource, bcastbufout);
-        sleep(2);
+        //bcastbufout = malloc(strlen("Hello World!") + 1);
+        //rv = OSMP_Bcast( bcastbufout, strlen("Hello World!") + 1, OSMP_BYTE, false, &bcastSource, &bcastLen);
+        //printf("BROADCAST: OSMP process %d received %d byte from %d [%s] \n", rank, bcastLen, bcastSource, bcastbufout);
+        sleep(20);
         rv = OSMP_Wait( recvRequest );
         printf("IRECV: OSMP process %d received %d byte from %d [%f] \n", rank, len, source, bufout[0]);
         rv = OSMP_RemoveRequest( &recvRequest );
@@ -303,9 +304,8 @@ int BarrierTest(int argc, char **argv) {
         printf("[%d] catched  | [%d] iteration\n", rank, i+1);
         OSMP_Barrier();
         printf("[%d] released | [%d] iteraion\n", rank, i+1);
-        usleep(500*1000);
+        usleep(100*1000);
     }
-    printf("finished: %d\n", rank);
 
     OSMP_Finalize();
     return OSMP_SUCCESS;
@@ -329,7 +329,7 @@ int main(int argc, char *argv[]) {
     } else if (atoi(argv[1]) == 8) {
         getSHMName(argc, argv);
     } else {
-        performTrainAction(argc, argv);
+        //performTrainAction(argc, argv);
     }
 
     return OSMP_SUCCESS;

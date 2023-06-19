@@ -36,8 +36,8 @@ int evaluateArgs(int argc, char *argv[]) {
         if (i == 1) {
             if (processAmount == 0) {
                 processAmount = atoi(argv[i]);
-                if (processAmount == 0 || processAmount > 150) {
-                    printf("Bitte gebe eine Prozessanzahl zwischen 0 und 150 ein");
+                if (processAmount == 0) {
+                    printf("Bitte gebe eine Prozessanzahl über 0 ein");
                     exit(-1);
                 }
             }
@@ -126,8 +126,8 @@ int evaluateArgs(int argc, char *argv[]) {
             } else {
                 file = fopen(fileName, "w");
                 if (file) {
-
                     strcpy(shm->log.logPath, fileName);
+                    fclose(file);
                     break;
                 } else {
                     printf("Fehler beim Erstellen der Datei: %s\n", fileName);
@@ -210,8 +210,8 @@ int shm_init(int pidAmount) {
 //Erstellt das SHM Objekt
 int start_shm(int pidAmount) {
 
-    size_t sizeOfSharedMem = (max_messages * pidAmount * sizeof(message) + pidAmount * sizeof(process) + sizeof(logger) + sizeof(Bcast) + sizeof(int) * 4 + sizeof(pthread_mutex_t) * 3 + sizeof(pthread_cond_t) * 2);
-
+    int
+    sizeOfSharedMem = (sizeof(SharedMem) + sizeof(process) * (pidAmount));
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
     if (fileDescriptor == -1) {
@@ -289,6 +289,10 @@ int main(int argc, char *argv[]) {
 
     //unlinke shm der main
     shm_unlink(SharedMemName);
+
+    for (int i = 1; i < optionalArgsIndex; i++) {
+        free(optionalArgs[i]);
+    }
 
     return 0;
 }

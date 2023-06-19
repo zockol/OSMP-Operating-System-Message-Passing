@@ -200,7 +200,7 @@ int OSMP_Finalize() {
 
             shm->processesCreated--;
 
-            if (munmap(shm, (max_messages * shm->processAmount * sizeof(message) + shm->processAmount * sizeof(process) + sizeof(logger) + sizeof(Bcast) + sizeof(int) * 4 + sizeof(pthread_mutex_t) * 3 + sizeof(pthread_cond_t) * 2)) == OSMP_ERROR) {
+            if (munmap(shm, (sizeof(SharedMem) + sizeof(process) * (shm->processAmount))) == OSMP_ERROR) {
                 debug("OSMP_FINALIZE", rankNow, "MUNMAP == OSMP_ERROR", NULL);
             }
             if (i == (shm->processAmount - 1)) {
@@ -264,9 +264,18 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
 void *isend(OSMP_Request *request){
     debug("*ISEND START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) *request;
+    pthread_mutex_lock(&req->request_mutex);
     req->complete = 0;
+    pthread_mutex_unlock(&req->request_mutex);
+
+
     OSMP_Send(&req->buf, req->count, req->datatype, req->dest);
+
+
+
+    pthread_mutex_lock(&req->request_mutex);
     req->complete = 1;
+    pthread_mutex_unlock(&req->request_mutex);
     debug("*ISEND END", rankNow, NULL, NULL);
 }
 
@@ -288,7 +297,9 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
 
 int OSMP_Test(OSMP_Request request, int *flag){
     IRequest *req = (IRequest*) request;
+    pthread_mutex_lock(&req->request_mutex);
     *flag = req->complete;
+    pthread_mutex_unlock(&req->request_mutex);
     return OSMP_SUCCESS;
 }
 
@@ -326,9 +337,15 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 void *ircv(OSMP_Request *request){
     debug("*IRCV START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) *request;
-    req->complete = false;
+    pthread_mutex_lock(&req->request_mutex);
+    req->complete = 0;
+    pthread_mutex_unlock(&req->request_mutex);
+
     OSMP_Recv(req->buf, req->count, req->datatype, req->source, req->len);
-    req->complete = true;
+
+    pthread_mutex_lock(&req->request_mutex);
+    req->complete = 1;
+    pthread_mutex_unlock(&req->request_mutex);
     debug("*IRCV END", rankNow, NULL, NULL);
 }
 
