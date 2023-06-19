@@ -293,7 +293,7 @@ int OSMP_Test(OSMP_Request request, int *flag){
 }
 
 int OSMP_GetShmName(char** name) {
-
+    *name = SharedMemName;
     return OSMP_SUCCESS;
 }
 

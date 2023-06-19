@@ -122,6 +122,8 @@ int OSMP_RemoveRequest(OSMP_Request *request);
 
 int OSMP_Wait(OSMP_Request request);
 
+int OSMP_GetShmName(char** name);
+
 int OSMP_Test(OSMP_Request request, int *flag);
 
 int OSMP_DataSize(OSMP_Datatype datatype);

@@ -4,6 +4,20 @@
 
 #include "../OSMPLib/osmplib.h"
 
+int getSHMName(int argc, char **argv) {
+    int rv, size, rank;
+    char* name;
+    OSMP_Request request = NULL;
+    rv = OSMP_Init(&argc, &argv);
+    rv = OSMP_Size(&size);
+    rv = OSMP_Rank(&rank);
+
+    rv = OSMP_GetShmName(&name);
+
+    printf("SHM-Name: %s\n", name);
+    return OSMP_SUCCESS;
+}
+
 int SendRecv(int argc, char **argv) {
     int rv, size, rank, source;
     int bufin[2], bufout[2], len;
@@ -297,6 +311,8 @@ int main(int argc, char *argv[]) {
         IsendIRecv(argc, argv);
     } else if (atoi(argv[1]) == 7) {
         SendRecv(argc, argv);
+    } else if (atoi(argv[1]) == 8) {
+        getSHMName(argc, argv);
     }
 
     return OSMP_SUCCESS;
