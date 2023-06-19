@@ -239,6 +239,7 @@ int OSMP_Rank(int *rank) {
 int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     debug("OSMP_SEND START", rankNow, NULL, NULL);
     //code um den Postkasten der destination zu beschreiben sobald in diesem Platz frei ist
+    sem_wait(&shm->messages);
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].rank == dest) {
             sem_wait(&shm->p[i].empty);
@@ -248,26 +249,25 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             shm->p[i].msg[shm->p[i].firstEmptySlot].srcRank = rankNow;
             shm->p[i].msg[shm->p[i].firstEmptySlot].destRank = dest;
             memcpy(shm->p[i].msg[shm->p[i].firstEmptySlot].buffer, buf,shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen);
-
             shm->p[i].firstEmptySlot++;
             shm->p[i].numberOfMessages++;
             shm->p[i].firstmsg++;
 
             pthread_mutex_unlock(&shm->mutex);
             sem_post(&shm->p[i].full);
+            debug("OSMP_SEND", rankNow, "FULL INC", NULL);
         }
     }
     debug("OSMP_SEND END", rankNow, NULL, NULL);
     return 0;
 }
 
-void *isend(OSMP_Request *request){
+void *isend(void* request){
     debug("*ISEND START", rankNow, NULL, NULL);
-    IRequest *req = (IRequest*) *request;
+    IRequest *req = (IRequest*) request;
     pthread_mutex_lock(&req->request_mutex);
     req->complete = 0;
     pthread_mutex_unlock(&req->request_mutex);
-
 
     OSMP_Send(&req->buf, req->count, req->datatype, req->dest);
 
@@ -289,7 +289,8 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
     req->dest = dest;
     req->source = &rankNow;
 
-    pthread_create(&req->thread, NULL, (void * (*) (void * ))isend, &req);
+
+    pthread_create(&req->thread, NULL, (void * (*) (void * ))isend, request);
 
     debug("OSMP_ISEND END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
@@ -314,10 +315,11 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
     int i = 0;
     for (i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
+            debug("OSMP_RECV", rankNow, "PRE SEM", NULL);
             sem_wait(&shm->p[i].full);
-
+            debug("OSMP_RECV", rankNow, "PRE MUTEX", NULL);
             pthread_mutex_lock(&shm->mutex);
-
+            debug("OSMP_RECV", rankNow, "AFTER MUTEX", NULL);
             *source = shm->p[i].msg[shm->p[i].firstmsg].srcRank;
             *len = shm->p[i].msg[shm->p[i].firstmsg].msgLen;
             memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, count * OSMP_DataSize(datatype));
@@ -325,6 +327,7 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
             shm->p[i].firstEmptySlot--;
             pthread_mutex_unlock(&shm->mutex);
             sem_post(&shm->p[i].empty);
+            sem_post(&shm->messages);
         }
 
     }
@@ -334,14 +337,17 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 }
 
 
-void *ircv(OSMP_Request *request){
+void *ircv(void* request){
     debug("*IRCV START", rankNow, NULL, NULL);
-    IRequest *req = (IRequest*) *request;
+    IRequest *req = (IRequest*) request;
     pthread_mutex_lock(&req->request_mutex);
     req->complete = 0;
     pthread_mutex_unlock(&req->request_mutex);
 
+
     OSMP_Recv(req->buf, req->count, req->datatype, req->source, req->len);
+
+
 
     pthread_mutex_lock(&req->request_mutex);
     req->complete = 1;
@@ -358,8 +364,7 @@ int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *l
     req->datatype = datatype;
     req->source = source;
     req->len = len;
-    pthread_create(&req->thread, NULL, (void * (*) (void * ))ircv, &req);
-    sleep(3);
+    pthread_create(&req->thread, NULL, (void * (*) (void * ))ircv, request);
     debug("OSMP_IRECV END", rankNow, NULL, NULL);
     return 0;
     

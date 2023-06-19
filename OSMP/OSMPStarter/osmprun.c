@@ -147,7 +147,6 @@ int shm_init(int pidAmount) {
 
     shm->processAmount = 0;
     shm->processesCreated = 0;
-
     for (int i = 0; i < pidAmount; i++) {
         shm->p[i].pid = 0;
         shm->p[i].rank = i;
@@ -180,6 +179,7 @@ int shm_init(int pidAmount) {
 
         sem_init(&shm->p[i].empty, 1, OSMP_MAX_MESSAGES_PROC);
         sem_init(&shm->p[i].full, 1, 0);
+        sem_init(&shm->messages, 1, max_messages);
 
 
         for (int j = 0; j < OSMP_MAX_MESSAGES_PROC; j++) {
@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
     //Parent und Child Trennung
     int i;
     for (i = 0; i < pidAmount; i++) {
-        usleep(5*1000);
+        usleep(20*1000);
         pid = fork();
 
         if (pid < 0) {

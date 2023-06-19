@@ -10,10 +10,6 @@
 
 #include "../OSMP.h"
 
-void *isend(OSMP_Request *request);
-
-void *ircv(OSMP_Request *request);
-
 int OSMP_DataSize(OSMP_Datatype datatype);
 
 #endif

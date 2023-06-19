@@ -80,7 +80,7 @@ typedef struct {
     Bcast broadcastMsg;
     int barrier_all;
     int barrier_all2;
-    //int messages;
+    sem_t messages;
     pthread_cond_t allCreated;
     logger log;
     process p[];

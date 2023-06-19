@@ -6,6 +6,30 @@
 
 int system(const char *command);
 
+int SendRecvNextNeighbour(int argc, char **argv) {
+    int rv, size, rank, source;
+    int bufin[1], bufout[1], len;
+    rv = OSMP_Init(&argc, &argv);
+    rv = OSMP_Size(&size);
+    rv = OSMP_Rank(&rank);
+    if (size < 256) {
+        printf("size < 256\n");
+        exit(-1);
+    }
+    if (rank < size-1) {
+        bufin[0] = 1337;
+        rv = OSMP_Send(bufin, 1, OSMP_INT, rank + 1);
+    }
+    if (rank > 0) {
+        sleep(20);
+        rv = OSMP_Recv(bufout, 1, OSMP_INT, &source, &len);
+        printf("OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufout[0]);
+    }
+
+    rv = OSMP_Finalize();
+    return 0;
+}
+
 int performTrainAction(int argc, char **argv) {
     int rv, size, rank;
     rv = OSMP_Init(&argc, &argv);
@@ -72,28 +96,24 @@ int IsendIRecv(int argc, char **argv) {
         printf("size != 2\n");
         exit(-1);
     }
-    if (rank == 1) { // OSMP process 0
+    if (rank == 0) { // OSMP process 0
 
         sleep(10);
         bufin[0] = 1.234245;
 
         rv = OSMP_CreateRequest( &sendRequest );
-        rv = OSMP_Isend(bufin, 1, OSMP_FLOAT, 0, sendRequest);
-
-        //bcastbufin = malloc(strlen("Hello World!") + 1);
-        //strncpy(bcastbufin, "Hello World!", strlen("Hello World!") + 1);
-        //rv = OSMP_Bcast( bcastbufin, strlen("Hello World!") + 1, OSMP_BYTE, true, NULL, NULL);
+        rv = OSMP_Isend(bufin, 1, OSMP_FLOAT, 1, sendRequest);
 
         rv = OSMP_Wait( sendRequest );
         rv = OSMP_RemoveRequest( &sendRequest );
 
-    } else { // OSMP process 1
+    } else {
+
+
+
         rv = OSMP_CreateRequest( &recvRequest );
 
         rv = OSMP_Irecv( bufout, 1, OSMP_FLOAT, &source, &len, recvRequest );
-        //bcastbufout = malloc(strlen("Hello World!") + 1);
-        //rv = OSMP_Bcast( bcastbufout, strlen("Hello World!") + 1, OSMP_BYTE, false, &bcastSource, &bcastLen);
-        //printf("BROADCAST: OSMP process %d received %d byte from %d [%s] \n", rank, bcastLen, bcastSource, bcastbufout);
         sleep(20);
         rv = OSMP_Wait( recvRequest );
         printf("IRECV: OSMP process %d received %d byte from %d [%f] \n", rank, len, source, bufout[0]);
@@ -101,6 +121,7 @@ int IsendIRecv(int argc, char **argv) {
     }
     rv = OSMP_Finalize();
     return OSMP_SUCCESS;
+
 }
 
 int SendRecvFull(int argc, char **argv) {
@@ -110,6 +131,7 @@ int SendRecvFull(int argc, char **argv) {
     rv = OSMP_Size(&size);
     rv = OSMP_Rank(&rank);
     if (size != 2) {
+        printf("size != 2\n");
         exit(-1);
     }
     if (rank == 0) { // OSMP process
@@ -120,7 +142,7 @@ int SendRecvFull(int argc, char **argv) {
 
     } else { // OSMP process 1
         for (int i = 0; i < 20; i++) {
-            printf("Moment bitte, 2 Sekunden Kaffepause\n");
+            printf("2 Sekunden Kaffeepause\n");
             sleep(2);
             rv = OSMP_Recv(bufout, 1, OSMP_INT, &source, &len);
             printf("OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufout[0]);
@@ -240,12 +262,9 @@ int sendIrecvTest(int argc, char **argv) {
     }
     if (rank == 1) { // OSMP process 0
 
-        sleep(4);
+        sleep(15);
         bufin[0] = 1.234245;
         rv = OSMP_Send(bufin, 1, OSMP_FLOAT, 0);
-        bcastbufin = malloc(strlen("Hello World!") + 1);
-        strncpy(bcastbufin, "Hello World!", strlen("Hello World!") + 1);
-        rv = OSMP_Bcast( bcastbufin, strlen("Hello World!") + 1, OSMP_BYTE, true, NULL, NULL);
 
     } else { // OSMP process 1
         rv = OSMP_CreateRequest( &request );
@@ -253,12 +272,6 @@ int sendIrecvTest(int argc, char **argv) {
         rv = OSMP_Irecv( bufout, 1, OSMP_FLOAT, &source, &len, request );
         rv = OSMP_Test(request, &flag);
         flag == 1 ? printf("request completed!\n") : printf("request not completed!\n");
-
-        bcastbufout = malloc(strlen("Hello World!") + 1);
-        rv = OSMP_Bcast( bcastbufout, strlen("Hello World!") + 1, OSMP_BYTE, false, &bcastSource, &bcastLen);
-        printf("BROADCAST: OSMP process %d received %d byte from %d [%s] \n", rank, bcastLen, bcastSource, bcastbufout);
-        sleep(2);
-
         rv = OSMP_Wait( request );
         rv = OSMP_Test(request, &flag);
         flag == 1 ? printf("request completed!\n") : printf("request not completed!\n");
@@ -276,7 +289,7 @@ int BroadcastTest(int argc, char **argv) {
     rv = OSMP_Size(&size);
     rv = OSMP_Rank(&rank);
     if (size < 3) {
-        printf("wrong size");
+        printf("size < 3\n");
         exit(-1);
     }
     if (rank == 3) { // OSMP process 0
@@ -318,32 +331,13 @@ int printTestValues() {
     printf("6 = ISendIRecv\n");
     printf("7 = SendRecv\n");
     printf("8 = getSHMName\n");
+    printf("9 = SendRecvNextNeighbour\n");
     printf("1337 = hidden action\n");
     printf("----------------------------\n");
     return OSMP_SUCCESS;
 }
 
 int main(int argc, char *argv[]) {
-
-//    if (atoi(argv[1]) == 1) {
-//        BarrierTest(argc, argv);
-//    } else if (atoi(argv[1]) == 2) {
-//        BroadcastTest(argc, argv);
-//    } else if (atoi(argv[1]) == 3) {
-//        sendIrecvTest(argc, argv);
-//    } else if (atoi(argv[1]) == 4) {
-//        SendRecvAllDatatypes(argc, argv);
-//    } else if (atoi(argv[1]) == 5) {
-//        SendRecvMoreThan16(argc, argv);
-//    } else if (atoi(argv[1]) == 6) {
-//        IsendIRecv(argc, argv);
-//    } else if (atoi(argv[1]) == 7) {
-//        SendRecv(argc, argv);
-//    } else if (atoi(argv[1]) == 8) {
-//        getSHMName(argc, argv);
-//    } else {
-//        //performTrainAction(argc, argv);
-//    }
 
     if (argc > 1) {
         switch (atoi(argv[1])) {
@@ -370,6 +364,9 @@ int main(int argc, char *argv[]) {
                 break;
             case 8:
                 getSHMName(argc, argv);
+                break;
+            case 9:
+                SendRecvNextNeighbour(argc, argv);
                 break;
             case 1337:
                 performTrainAction(argc, argv);
