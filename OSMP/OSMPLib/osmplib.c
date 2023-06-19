@@ -4,6 +4,7 @@
 //initiales shm
 SharedMem *shm;
 
+//IRequest Struct für die Requests
 typedef struct{
     pthread_t thread;
     char* buf;
@@ -107,10 +108,6 @@ int OSMP_Init(int *argc, char ***argv) {
         return OSMP_ERROR;
     }
 
-    //debug den calloc und free
-
-
-
     //definiere die eigene pid im shm
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == 0) {
@@ -128,6 +125,8 @@ int OSMP_Init(int *argc, char ***argv) {
         shm_unlink(SharedMemName);
         return OSMP_ERROR;
     }
+
+    //debugged die callocs und frees
     debug("OSMP_INIT", rankNow, NULL, "calloc");
     free(shm_stat);
     debug("OSMP_INIT", rankNow, NULL, "free");
@@ -262,6 +261,7 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     return 0;
 }
 
+//pointer Funktion die als initiale Startfunktion für den Thread von iSend gilt
 void *isend(void* request){
     debug("*ISEND START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
@@ -271,14 +271,13 @@ void *isend(void* request){
 
     OSMP_Send(&req->buf, req->count, req->datatype, req->dest);
 
-
-
     pthread_mutex_lock(&req->request_mutex);
     req->complete = 1;
     pthread_mutex_unlock(&req->request_mutex);
     debug("*ISEND END", rankNow, NULL, NULL);
 }
 
+//startet ein Send-Aufruf im Thread
 int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSMP_Request request){
     debug("OSMP_ISEND START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
@@ -296,6 +295,7 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
     return OSMP_SUCCESS;
 }
 
+//OSMP_Test setzt die mitgegebene flag auf 0 oder 1, basierend auf dem Status des Threads (req->complete)
 int OSMP_Test(OSMP_Request request, int *flag){
     IRequest *req = (IRequest*) request;
     pthread_mutex_lock(&req->request_mutex);
@@ -304,6 +304,7 @@ int OSMP_Test(OSMP_Request request, int *flag){
     return OSMP_SUCCESS;
 }
 
+//GetShmName setzt den mitgegebenen char auf das Makro SharedMemName
 int OSMP_GetShmName(char** name) {
     *name = SharedMemName;
     return OSMP_SUCCESS;
@@ -336,7 +337,7 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
     return OSMP_SUCCESS;
 }
 
-
+//initiale Startfunktion des Threads der iRecv funktion
 void *ircv(void* request){
     debug("*IRCV START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
@@ -344,10 +345,7 @@ void *ircv(void* request){
     req->complete = 0;
     pthread_mutex_unlock(&req->request_mutex);
 
-
     OSMP_Recv(req->buf, req->count, req->datatype, req->source, req->len);
-
-
 
     pthread_mutex_lock(&req->request_mutex);
     req->complete = 1;
@@ -355,7 +353,7 @@ void *ircv(void* request){
     debug("*IRCV END", rankNow, NULL, NULL);
 }
 
-
+//Erstellt einen Thread der *ircv aufruft
 int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len, OSMP_Request request){
     debug("OSMP_IRECV START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
@@ -370,6 +368,7 @@ int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *l
     
 }
 
+//Gilt als Schranke. Ab hier wird gewartet bis der Thread durchgelaufen ist
 int OSMP_Wait(OSMP_Request request){
     debug("OSMP_WAIT START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
@@ -408,7 +407,7 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
     return OSMP_SUCCESS;
 }
 
-
+//Initialisierung des mitgegebenen Requests
 int OSMP_CreateRequest(OSMP_Request *request){
     debug("OSMP_CREATEREQUEST START", rankNow, NULL, NULL);
 
@@ -439,8 +438,7 @@ int OSMP_CreateRequest(OSMP_Request *request){
     return OSMP_SUCCESS;   
 }
 
-
-
+//Freed den Speicher vom request
 int OSMP_RemoveRequest(OSMP_Request *request){
     debug("OSMP_REMOVEREQUEST START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) *request;
@@ -450,6 +448,7 @@ int OSMP_RemoveRequest(OSMP_Request *request){
     return OSMP_SUCCESS;
 }
 
+//Custom Funktion um die sizeof eines Datentypens wieder zu bekommen. Basiert auf den Enum Values "OSMP_Datatype"
 int OSMP_DataSize(OSMP_Datatype datatype) {
     if (datatype == 0) return sizeof(int);
     else if (datatype == 1) return sizeof(short);
@@ -460,6 +459,5 @@ int OSMP_DataSize(OSMP_Datatype datatype) {
     else if (datatype == 6) return sizeof(unsigned);
     else if (datatype == 7) return sizeof(float);
     else if (datatype == 8) return sizeof(double);
-
     return OSMP_SUCCESS;
 }
