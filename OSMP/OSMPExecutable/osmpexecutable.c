@@ -2,13 +2,11 @@
 // Created by ubuntu on 25.04.23.
 //
 
-#include "../OSMPLib/osmplib.h"
-#include <stdlib.h>
+#include "./osmpexecutable.h"
 
 int system(const char *command);
 
-int
-performTrainAction(int argc, char **argv) {
+int performTrainAction(int argc, char **argv) {
     int rv, size, rank;
     rv = OSMP_Init(&argc, &argv);
     rv = OSMP_Size(&size);
@@ -105,7 +103,7 @@ int IsendIRecv(int argc, char **argv) {
     return OSMP_SUCCESS;
 }
 
-int SendRecvMoreThan16(int argc, char **argv) {
+int SendRecvFull(int argc, char **argv) {
     int rv, size, rank, source;
     int bufin[3], bufout[3], len;
     rv = OSMP_Init(&argc, &argv);
@@ -132,7 +130,7 @@ int SendRecvMoreThan16(int argc, char **argv) {
     return 0;
 }
 
-int SendRecvAllDatatypes(int argc, char **argv) {
+int DatatypeTest(int argc, char **argv) {
     int rv, size, rank, source;
     int bufinINT[2], bufoutINT[2], len;
     short bufinSHORT[1], bufoutSHORT[1];
@@ -226,7 +224,7 @@ int SendRecvAllDatatypes(int argc, char **argv) {
     return 0;
 }
 
-int sendBcastIRecvTest(int argc, char **argv) {
+int sendIrecvTest(int argc, char **argv) {
     int rv, size, rank, source, bcastSource, flag;
     OSMP_Request request = NULL;
     int len, bcastLen;
@@ -311,25 +309,77 @@ int BarrierTest(int argc, char **argv) {
     return OSMP_SUCCESS;
 }
 
+int printTestValues() {
+    printf("1 = BarrierTest\n");
+    printf("2 = BroadcastTest\n");
+    printf("3 = sendIrecv and OSMP_Test\n");
+    printf("4 = DatatypeTest\n");
+    printf("5 = SendRecvFull\n");
+    printf("6 = ISendIRecv\n");
+    printf("7 = SendRecv\n");
+    printf("8 = getSHMName\n");
+    printf("1337 = hidden action\n");
+    printf("----------------------------\n");
+    return OSMP_SUCCESS;
+}
+
 int main(int argc, char *argv[]) {
-    if (atoi(argv[1]) == 1) {
-        BarrierTest(argc, argv);
-    } else if (atoi(argv[1]) == 2) {
-        BroadcastTest(argc, argv);
-    } else if (atoi(argv[1]) == 3) {
-        sendBcastIRecvTest(argc, argv);
-    } else if (atoi(argv[1]) == 4) {
-        SendRecvAllDatatypes(argc, argv);
-    } else if (atoi(argv[1]) == 5) {
-        SendRecvMoreThan16(argc, argv);
-    } else if (atoi(argv[1]) == 6) {
-        IsendIRecv(argc, argv);
-    } else if (atoi(argv[1]) == 7) {
-        SendRecv(argc, argv);
-    } else if (atoi(argv[1]) == 8) {
-        getSHMName(argc, argv);
+
+//    if (atoi(argv[1]) == 1) {
+//        BarrierTest(argc, argv);
+//    } else if (atoi(argv[1]) == 2) {
+//        BroadcastTest(argc, argv);
+//    } else if (atoi(argv[1]) == 3) {
+//        sendIrecvTest(argc, argv);
+//    } else if (atoi(argv[1]) == 4) {
+//        SendRecvAllDatatypes(argc, argv);
+//    } else if (atoi(argv[1]) == 5) {
+//        SendRecvMoreThan16(argc, argv);
+//    } else if (atoi(argv[1]) == 6) {
+//        IsendIRecv(argc, argv);
+//    } else if (atoi(argv[1]) == 7) {
+//        SendRecv(argc, argv);
+//    } else if (atoi(argv[1]) == 8) {
+//        getSHMName(argc, argv);
+//    } else {
+//        //performTrainAction(argc, argv);
+//    }
+
+    if (argc > 1) {
+        switch (atoi(argv[1])) {
+            case 1:
+                BarrierTest(argc, argv);
+                break;
+            case 2:
+                BroadcastTest(argc, argv);
+                break;
+            case 3:
+                sendIrecvTest(argc, argv);
+                break;
+            case 4:
+                DatatypeTest(argc, argv);
+                break;
+            case 5:
+                SendRecvFull(argc, argv);
+                break;
+            case 6:
+                IsendIRecv(argc, argv);
+                break;
+            case 7:
+                SendRecv(argc, argv);
+                break;
+            case 8:
+                getSHMName(argc, argv);
+                break;
+            case 1337:
+                performTrainAction(argc, argv);
+                break;
+            default:
+                printTestValues();
+                break;
+        }
     } else {
-        //performTrainAction(argc, argv);
+        printTestValues();
     }
 
     return OSMP_SUCCESS;

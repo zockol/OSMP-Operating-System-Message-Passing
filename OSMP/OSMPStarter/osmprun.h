@@ -7,8 +7,11 @@
 
 
 
-#include "../OSMPLib/osmplib.h"
+#include "../OSMP.h"
 
+int evaluateArgs(int argc, char *argv[]);
+int shm_init(int pidAmount);
+int start_shm(int pidAmount);
 
 
 #endif //GRP26_OSMPRUN_H
