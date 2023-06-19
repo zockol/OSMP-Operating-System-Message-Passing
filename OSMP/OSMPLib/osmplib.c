@@ -191,7 +191,7 @@ int OSMP_Finalize() {
     //kompletter reset code
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].rank == rankNow) {
-            shm->p[i].pid = 0;
+            shm->p[i].pid = -1;
             shm->p[i].rank = -1;
             shm->p[i].firstmsg = -1;
 
@@ -248,6 +248,7 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             shm->p[i].msg[shm->p[i].firstEmptySlot].srcRank = rankNow;
             shm->p[i].msg[shm->p[i].firstEmptySlot].destRank = dest;
             memcpy(shm->p[i].msg[shm->p[i].firstEmptySlot].buffer, buf,shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen);
+
             shm->p[i].firstEmptySlot++;
             shm->p[i].numberOfMessages++;
             shm->p[i].firstmsg++;

@@ -6,8 +6,15 @@
 
 int SendRecvAllDatatypes(int argc, char **argv) {
     int rv, size, rank, source;
-    int bufinInt[1], bufoutInt[1], len;
-    short bufinShort[1], b
+    int bufinINT[1], bufoutINT[1], len;
+    short bufinSHORT[1], bufoutSHORT[1];
+    long bufinLONG[1], bufoutLONG[1];
+    char *bufinBYTE, *bufoutBYTE;
+    unsigned char bufinUNSIGNEDCHAR[1], bufoutUNSIGNEDCHAR[1];
+    unsigned short bufinUNSIGNEDSHORT[1], bufoutUNSIGNEDSHORT[1];
+    unsigned bufinUNSIGNED[1], bufoutUNSIGNED[1];
+    float bufinFLOAT[1], bufoutFLOAT[1];
+    double bufinDOUBLE[1], bufoutDOUBLE[1];
     rv = OSMP_Init(&argc, &argv);
     rv = OSMP_Size(&size);
     rv = OSMP_Rank(&rank);
@@ -15,48 +22,76 @@ int SendRecvAllDatatypes(int argc, char **argv) {
         exit(-1);
     }
     if (rank == 0) { // OSMP process
+
         //INT
-        bufinInt[0] = 1337;
-        rv = OSMP_Send(bufinInt, 1, OSMP_INT, 1);
+        bufinINT[0] = 1;
+        rv = OSMP_Send(bufinINT, 1, OSMP_INT, 1);
 
         //SHORT
-        bufinShort[0] = 1337;
-        rv = OSMP_Send(bufinShort, 1, OSMP_SHORT, 1);
+        bufinSHORT[0] = 2;
+        rv = OSMP_Send(bufinSHORT, 1, OSMP_SHORT, 1);
 
         //LONG
-        bufinLong[0] = 1337;
-        rv = OSMP_Send(bufinLong, 1, OSMP_LONG, 1);
+        bufinLONG[0] = 3;
+        rv = OSMP_Send(bufinLONG, 1, OSMP_LONG, 1);
 
         //BYTE
-        bufinBYTE = "Hello World!";
-        rv = OSMP_Send(bufinBYTE, 1, OSMP_BYTE, 1);
+        bufinBYTE = malloc(strlen("Hier kommt die 4!") + 1);
+        strncpy(bufinBYTE, "Hier kommt die 4!", strlen("Hier kommt die 4!") + 1);
+        rv = OSMP_Send(bufinBYTE, strlen("Hier kommt die 4!") + 1, OSMP_BYTE, 1);
 
         //UNSIGNED_CHAR
-        bufinUNSIGNEDCHAR = "Hello World!";
+        bufinUNSIGNEDCHAR[0] = 5;
         rv = OSMP_Send(bufinUNSIGNEDCHAR, 1, OSMP_UNSIGNED_CHAR, 1);
 
         //UNSIGNED_SHORT
-        bufinUNSIGNEDSHORT = "Hello World!";
+        bufinUNSIGNEDSHORT[0] = 6;
         rv = OSMP_Send(bufinUNSIGNEDSHORT, 1, OSMP_UNSIGNED_SHORT, 1);
 
         //UNSIGNED
-        bufinUNSIGNED = "Hello World!";
+        bufinUNSIGNED[0] = 7;
         rv = OSMP_Send(bufinUNSIGNED, 1, OSMP_UNSIGNED, 1);
 
         //FLOAT
-        bufinFLOAT = "Hello World!";
+        bufinFLOAT[0] = 8.8888;
         rv = OSMP_Send(bufinFLOAT, 1, OSMP_FLOAT, 1);
 
         //DOUBLE
-        bufinDOUBLE = "Hello World!";
+        bufinDOUBLE[0] = 9.9999;
         rv = OSMP_Send(bufinDOUBLE, 1, OSMP_DOUBLE, 1);
 
-        rv = OSMP_Send()
 
     } else { // OSMP process 1
-            sleep(2);
-            rv = OSMP_Recv(bufoutInt, 1, OSMP_INT, &source, &len);
-            printf("OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufoutInt[0]);
+        sleep(3);
+        rv = OSMP_Recv(bufoutDOUBLE, 1, OSMP_DOUBLE, &source, &len);
+        printf("DOUBLE: OSMP process %d received %d byte from %d [%f] \n", rank, len, source, bufoutDOUBLE[0]);
+        sleep(1);
+        rv = OSMP_Recv(bufoutFLOAT, 1, OSMP_FLOAT, &source, &len);
+        printf("FLOAT: OSMP process %d received %d byte from %d [%f] \n", rank, len, source, bufoutFLOAT[0]);
+        sleep(1);
+        rv = OSMP_Recv(bufoutUNSIGNED, 1, OSMP_UNSIGNED, &source, &len);
+        printf("UNSIGNED: OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufoutUNSIGNED[0]);
+        sleep(1);
+        rv = OSMP_Recv(bufoutUNSIGNEDSHORT, 1, OSMP_UNSIGNED_SHORT, &source, &len);
+        printf("UNSIGNED_SHORT: OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufoutUNSIGNEDSHORT[0]);
+        sleep(1);
+        rv = OSMP_Recv(bufoutUNSIGNEDCHAR, 1, OSMP_UNSIGNED_CHAR, &source, &len);
+        printf("UNSIGNED_CHAR: OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufoutUNSIGNEDCHAR[0]);
+        sleep(1);
+        bufoutBYTE = malloc(strlen("Hier kommt die 4!") + 1);
+        rv = OSMP_Recv(bufoutBYTE, strlen("Hier kommt die 4!") + 1, OSMP_BYTE, &source, &len);
+        printf("BYTE: OSMP process %d received %d byte from %d [%s] \n", rank, len, source, bufoutBYTE);
+        sleep(1);
+        rv = OSMP_Recv(bufoutLONG, 1, OSMP_LONG, &source, &len);
+        printf("LONG: OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufoutLONG[0]);
+        sleep(1);
+        rv = OSMP_Recv(bufoutSHORT, 1, OSMP_SHORT, &source, &len);
+        printf("SHORT: OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufoutSHORT[0]);
+        sleep(1);
+        rv = OSMP_Recv(bufoutINT, 1, OSMP_INT, &source, &len);
+        printf("INT: OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufoutINT[0]);
+        sleep(1);
+
     }
     rv = OSMP_Finalize();
     return 0;
@@ -149,7 +184,7 @@ int main(int argc, char *argv[]) {
         BroadcastTest(argc, argv);
     } else if (atoi(argv[1]) == 3) {
         IsendIRecv(argc, argv);
-    } else if (atoi(argv[1]) == 2) {
+    } else if (atoi(argv[1]) == 4) {
         SendRecvAllDatatypes(argc, argv);
     }
 
