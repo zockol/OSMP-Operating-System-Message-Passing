@@ -289,7 +289,12 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
 int OSMP_Test(OSMP_Request request, int *flag){
     IRequest *req = (IRequest*) request;
     *flag = req->complete;
-    return *flag;
+    return OSMP_SUCCESS;
+}
+
+int OSMP_GetShmName(char** name) {
+
+    return OSMP_SUCCESS;
 }
 
 //falls Nachrichten in dem OSMP vorhanden sind, schreibe sie in buf rein

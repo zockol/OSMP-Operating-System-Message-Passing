@@ -223,8 +223,8 @@ int sendBcastIRecvTest(int argc, char **argv) {
         rv = OSMP_CreateRequest( &request );
 
         rv = OSMP_Irecv( bufout, 1, OSMP_FLOAT, &source, &len, request );
-        int completed = OSMP_Test(request, &flag);
-        completed == 1 ? printf("request completed!\n") : printf("request not completed!\n");
+        rv = OSMP_Test(request, &flag);
+        flag == 1 ? printf("request completed!\n") : printf("request not completed!\n");
 
         bcastbufout = malloc(strlen("Hello World!") + 1);
         rv = OSMP_Bcast( bcastbufout, strlen("Hello World!") + 1, OSMP_BYTE, false, &bcastSource, &bcastLen);
@@ -232,8 +232,8 @@ int sendBcastIRecvTest(int argc, char **argv) {
         sleep(2);
 
         rv = OSMP_Wait( request );
-        completed = OSMP_Test(request, &flag);
-        completed == 1 ? printf("request completed!\n") : printf("request not completed!\n");
+        rv = OSMP_Test(request, &flag);
+        flag == 1 ? printf("request completed!\n") : printf("request not completed!\n");
         printf("IRECV: OSMP process %d received %d byte from %d [%f] \n", rank, len, source, bufout[0]);
         rv = OSMP_RemoveRequest( &request );
     }
