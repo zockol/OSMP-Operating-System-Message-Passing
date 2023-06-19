@@ -4,9 +4,81 @@
 
 #include "../OSMPLib/osmplib.h"
 
+int IsendIRecv(int argc, char **argv) {
+    int rv, size, rank, source, bcastSource;
+    OSMP_Request sendRequest = NULL, recvRequest = NULL;
+    int len, bcastLen;
+    float bufin[1],bufout[1];
+    char *bcastbufin, *bcastbufout;
+    rv = OSMP_Init(&argc, &argv);
+    rv = OSMP_Size(&size);
+    rv = OSMP_Rank(&rank);
+
+    if (size != 2) {
+        printf("size != 2\n");
+        exit(-1);
+    }
+    if (rank == 1) { // OSMP process 0
+
+        sleep(4);
+        bufin[0] = 1.234245;
+
+        rv = OSMP_CreateRequest( &sendRequest );
+        rv = OSMP_Isend(bufin, 1, OSMP_FLOAT, 0, sendRequest);
+
+        bcastbufin = malloc(strlen("Hello World!") + 1);
+        strncpy(bcastbufin, "Hello World!", strlen("Hello World!") + 1);
+        rv = OSMP_Bcast( bcastbufin, strlen("Hello World!") + 1, OSMP_BYTE, true, NULL, NULL);
+
+        rv = OSMP_Wait( sendRequest );
+        rv = OSMP_RemoveRequest( &sendRequest );
+
+    } else { // OSMP process 1
+        rv = OSMP_CreateRequest( &recvRequest );
+
+        rv = OSMP_Irecv( bufout, 1, OSMP_FLOAT, &source, &len, recvRequest );
+        bcastbufout = malloc(strlen("Hello World!") + 1);
+        rv = OSMP_Bcast( bcastbufout, strlen("Hello World!") + 1, OSMP_BYTE, false, &bcastSource, &bcastLen);
+        printf("BROADCAST: OSMP process %d received %d byte from %d [%s] \n", rank, bcastLen, bcastSource, bcastbufout);
+        sleep(2);
+        rv = OSMP_Wait( recvRequest );
+        printf("IRECV: OSMP process %d received %d byte from %d [%f] \n", rank, len, source, bufout[0]);
+        rv = OSMP_RemoveRequest( &recvRequest );
+    }
+    rv = OSMP_Finalize();
+    return OSMP_SUCCESS;
+}
+
+int SendRecvMoreThan16(int argc, char **argv) {
+    int rv, size, rank, source;
+    int bufin[3], bufout[3], len;
+    rv = OSMP_Init(&argc, &argv);
+    rv = OSMP_Size(&size);
+    rv = OSMP_Rank(&rank);
+    if (size != 2) {
+        exit(-1);
+    }
+    if (rank == 0) { // OSMP process
+        for (int i = 0; i < 20; i++) {
+            bufin[0] = i + 1;
+            rv = OSMP_Send(bufin, 1, OSMP_INT, 1);
+        }
+
+    } else { // OSMP process 1
+        for (int i = 0; i < 20; i++) {
+            printf("Moment bitte, 2 Sekunden Kaffepause\n");
+            sleep(2);
+            rv = OSMP_Recv(bufout, 1, OSMP_INT, &source, &len);
+            printf("OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufout[0]);
+        }
+    }
+    rv = OSMP_Finalize();
+    return 0;
+}
+
 int SendRecvAllDatatypes(int argc, char **argv) {
     int rv, size, rank, source;
-    int bufinINT[1], bufoutINT[1], len;
+    int bufinINT[2], bufoutINT[2], len;
     short bufinSHORT[1], bufoutSHORT[1];
     long bufinLONG[1], bufoutLONG[1];
     char *bufinBYTE, *bufoutBYTE;
@@ -25,7 +97,8 @@ int SendRecvAllDatatypes(int argc, char **argv) {
 
         //INT
         bufinINT[0] = 1;
-        rv = OSMP_Send(bufinINT, 1, OSMP_INT, 1);
+        bufinINT[1] = 1337;
+        rv = OSMP_Send(bufinINT, 2, OSMP_INT, 1);
 
         //SHORT
         bufinSHORT[0] = 2;
@@ -88,8 +161,8 @@ int SendRecvAllDatatypes(int argc, char **argv) {
         rv = OSMP_Recv(bufoutSHORT, 1, OSMP_SHORT, &source, &len);
         printf("SHORT: OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufoutSHORT[0]);
         sleep(1);
-        rv = OSMP_Recv(bufoutINT, 1, OSMP_INT, &source, &len);
-        printf("INT: OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufoutINT[0]);
+        rv = OSMP_Recv(bufoutINT, 2, OSMP_INT, &source, &len);
+        printf("INT: OSMP process %d received %d byte from %d [%d:%d] \n", rank, len, source, bufoutINT[0], bufoutINT[1]);
         sleep(1);
 
     }
@@ -97,7 +170,7 @@ int SendRecvAllDatatypes(int argc, char **argv) {
     return 0;
 }
 
-int IsendIRecv(int argc, char **argv) {
+int sendBcastIRecv(int argc, char **argv) {
     int rv, size, rank, source, bcastSource;
     OSMP_Request request = NULL;
     int len, bcastLen;
@@ -183,9 +256,13 @@ int main(int argc, char *argv[]) {
     } else if (atoi(argv[1]) == 2) {
         BroadcastTest(argc, argv);
     } else if (atoi(argv[1]) == 3) {
-        IsendIRecv(argc, argv);
+        sendBcastIRecv(argc, argv);
     } else if (atoi(argv[1]) == 4) {
         SendRecvAllDatatypes(argc, argv);
+    } else if (atoi(argv[1]) == 5) {
+        SendRecvMoreThan16(argc, argv);
+    } else if (atoi(argv[1]) == 6) {
+        IsendIRecv(argc, argv);
     }
 
     return OSMP_SUCCESS;
