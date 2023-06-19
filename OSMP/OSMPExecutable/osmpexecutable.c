@@ -3,6 +3,21 @@
 //
 
 #include "../OSMPLib/osmplib.h"
+#include <stdlib.h>
+
+int system(const char *command);
+
+int performTrainAction(int argc, char **argv) {
+    int rv, size, rank;
+    rv = OSMP_Init(&argc, &argv);
+    rv = OSMP_Size(&size);
+    rv = OSMP_Rank(&rank);
+    if (rank == 0) {
+        system("sl");
+    }
+    rv = OSMP_Finalize();
+    return OSMP_SUCCESS;
+}
 
 int getSHMName(int argc, char **argv) {
     int rv, size, rank;
@@ -313,6 +328,8 @@ int main(int argc, char *argv[]) {
         SendRecv(argc, argv);
     } else if (atoi(argv[1]) == 8) {
         getSHMName(argc, argv);
+    } else {
+        performTrainAction(argc, argv);
     }
 
     return OSMP_SUCCESS;
