@@ -1,0 +1,172 @@
+Timestamp: 1687206655, Funktion: OSMP_INIT END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SIZE START, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SIZE END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_RANK START, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_RANK END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206655, Funktion: OSMP_INIT END, OSMPRank: 1
+Timestamp: 1687206655, Funktion: OSMP_SIZE START, OSMPRank: 1
+Timestamp: 1687206655, Funktion: OSMP_SIZE END, OSMPRank: 1
+Timestamp: 1687206655, Funktion: OSMP_RANK START, OSMPRank: 1
+Timestamp: 1687206655, Funktion: OSMP_RANK END, OSMPRank: 1
+Timestamp: 1687206657, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206657, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206657, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206657, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206657, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206657, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206657, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206657, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206659, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206659, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206659, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206659, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206659, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206659, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206659, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206659, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206661, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206661, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206661, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206661, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206661, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206661, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206661, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206661, Funktion: OSMP_SEND START, OSMPRank: 0
+Timestamp: 1687206663, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206663, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206663, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206663, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206663, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206663, Error: FULL INC, Funktion: OSMP_SEND, OSMPRank: 0
+Timestamp: 1687206663, Funktion: OSMP_SEND END, OSMPRank: 0
+Timestamp: 1687206663, Funktion: OSMP_FINALIZE START, OSMPRank: 0
+Timestamp: 1687206665, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206665, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206665, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206665, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206665, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206667, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206667, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206667, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206667, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206667, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206669, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206669, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206669, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206669, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206669, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206671, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206671, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206671, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206671, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206671, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206673, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206673, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206673, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206673, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206673, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206675, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206675, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206675, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206675, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206675, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206677, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206677, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206677, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206677, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206677, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206679, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206679, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206679, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206679, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206679, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206681, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206681, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206681, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206681, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206681, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206683, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206683, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206683, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206683, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206683, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206685, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206685, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206685, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206685, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206685, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206687, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206687, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206687, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206687, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206687, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206689, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206689, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206689, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206689, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206689, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206691, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206691, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206691, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206691, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206691, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206693, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206693, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206693, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206693, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206693, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206695, Funktion: OSMP_RECV START, OSMPRank: 1
+Timestamp: 1687206695, Error: PRE SEM, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206695, Error: PRE MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206695, Error: AFTER MUTEX, Funktion: OSMP_RECV, OSMPRank: 1
+Timestamp: 1687206695, Funktion: OSMP_RECV END, OSMPRank: 1
+Timestamp: 1687206695, Funktion: OSMP_FINALIZE START, OSMPRank: 1
