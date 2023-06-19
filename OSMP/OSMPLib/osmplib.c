@@ -108,27 +108,19 @@ int OSMP_Init(int *argc, char ***argv) {
     }
 
     //debug den calloc und free
-    debug("OSMP_INIT", rankNow, NULL, "calloc");
-    free(shm_stat);
-    debug("OSMP_INIT", rankNow, NULL, "free");
+
+
 
     //definiere die eigene pid im shm
-    int i = 0, breaker = 0;
-    for (i = 0; i < shm->processAmount; i++) {
-        if (shm->p[i].pid == 0 && breaker == 0) {
-            shm->p[i].pid = getpid();
-            breaker = 1;
-        }
-    }
-
-    //setzt auf den jetzigen p[i] den rang
     for (int i = 0; i < shm->processAmount; i++) {
-
-        if (shm->p[i].pid == getpid()) {
+        if (shm->p[i].pid == 0) {
+            shm->p[i].pid = getpid();
             shm->p[i].rank = i;
             rankNow = i;
+            break;
         }
     }
+
 
     //wenn shm MAP_FAILED returned, gebe OSMP ERROR
     if (shm == MAP_FAILED) {
@@ -136,6 +128,9 @@ int OSMP_Init(int *argc, char ***argv) {
         shm_unlink(SharedMemName);
         return OSMP_ERROR;
     }
+    debug("OSMP_INIT", rankNow, NULL, "calloc");
+    free(shm_stat);
+    debug("OSMP_INIT", rankNow, NULL, "free");
 
     debug("OSMP_INIT END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
@@ -145,23 +140,24 @@ int OSMP_Init(int *argc, char ***argv) {
 //locked jeden OSMP hier, bis alle an dieser Stelle angekommen sind
 int OSMP_Barrier() {
     debug("OSMP_BARRIER START", rankNow, NULL, NULL);
-    //locked den mutex
-    pthread_mutex_lock(&shm->mutex);
-
     //if-else konstrukt für ein flip zwischen barrier_all und barrier_all2
     if (shm->barrier_all != 0) {
+        pthread_mutex_lock(&shm->mutex);
         shm->barrier_all--;
 
         //wenn shm->barrier_all == 0 dann lasse alle anderen unten aus der while raus.
         if (shm->barrier_all == 0) {
             shm->barrier_all2 = shm->processAmount;
             pthread_cond_broadcast(&shm->cattr);
+
         } else {
             while (shm->barrier_all != 0) {
                 pthread_cond_wait(&shm->cattr, &shm->mutex);
             }
         }
+        pthread_mutex_unlock(&shm->mutex);
     } else if (shm->barrier_all2 != 0) {
+        pthread_mutex_lock(&shm->mutex);
         //genau das selbe wie dadrüber nur der flip
         shm->barrier_all2--;
         if (shm->barrier_all2 == 0) {
@@ -172,12 +168,12 @@ int OSMP_Barrier() {
                 pthread_cond_wait(&shm->cattr, &shm->mutex);
             }
         }
-
+        pthread_mutex_unlock(&shm->mutex);
     } else {
         //wenn beide Barriers 0 sind, dann error ausgeben
         debug("OSMP_BARRIER ERROR", rankNow, "BARRIER_ALL & BARRIER_ALL2 ZERO", NULL);
     }
-    pthread_mutex_unlock(&shm->mutex);
+
     debug("OSMP_BARRIER END", rankNow, NULL, NULL);
     return 0;
 }
@@ -204,7 +200,7 @@ int OSMP_Finalize() {
 
             shm->processesCreated--;
 
-            if (munmap(shm, (OSMP_MAX_MESSAGES_PROC * shm->processAmount * sizeof(message) + shm->processAmount * sizeof(process) + sizeof(logger) + sizeof(Bcast) + sizeof(int) * 4 + sizeof(pthread_mutex_t) + sizeof(pthread_cond_t) * 2)) == OSMP_ERROR) {
+            if (munmap(shm, (max_messages * shm->processAmount * sizeof(message) + shm->processAmount * sizeof(process) + sizeof(logger) + sizeof(Bcast) + sizeof(int) * 4 + sizeof(pthread_mutex_t) * 3 + sizeof(pthread_cond_t) * 2)) == OSMP_ERROR) {
                 debug("OSMP_FINALIZE", rankNow, "MUNMAP == OSMP_ERROR", NULL);
             }
             if (i == (shm->processAmount - 1)) {
@@ -234,11 +230,7 @@ int OSMP_Rank(int *rank) {
     }
 
     //checkt welcher rang dem laufenden prozess zugewiesen wurde in der OSMP INIT
-    for (int i = 0; i < shm->processAmount; i++) {
-        if (shm->p[i].pid == getpid()) {
-            *rank = shm->p[i].rank;
-        }
-    }
+    *rank = rankNow;
     debug("OSMP_RANK END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
 }
@@ -278,20 +270,17 @@ void *isend(OSMP_Request *request){
 int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSMP_Request request){
     debug("OSMP_ISEND START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
-    for (int i = 0; i < shm->processAmount; i++) {
-        if (shm->p[i].rank == dest) {
-            memcpy(&req->buf, buf, count);
-            req->count = count;
-            req->datatype = datatype;
-            req->dest = dest;
-            //req->source = rankNow;
-            pthread_create(&req->thread, NULL, (void * (*) (void * ))isend, &req);
-        }
-        debug("OSMP_ISEND END", rankNow, NULL, NULL);
 
-        return OSMP_SUCCESS;
-    
-    }
+    memcpy(&req->buf, buf, count * OSMP_DataSize(datatype));
+    req->count = count;
+    req->datatype = datatype;
+    req->dest = dest;
+    req->source = &rankNow;
+
+    pthread_create(&req->thread, NULL, (void * (*) (void * ))isend, &req);
+
+    debug("OSMP_ISEND END", rankNow, NULL, NULL);
+    return OSMP_SUCCESS;
 }
 
 int OSMP_Test(OSMP_Request *request, int flag){

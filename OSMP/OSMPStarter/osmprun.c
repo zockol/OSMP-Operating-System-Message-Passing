@@ -161,8 +161,9 @@ int shm_init(int pidAmount) {
         pthread_mutexattr_t mutex_attr2;
         pthread_mutexattr_init(&mutex_attr2);
         pthread_mutexattr_setpshared(&mutex_attr2, PTHREAD_PROCESS_SHARED);
+        pthread_mutex_init(&shm->mutex, &mutex_attr2);
 
-        // pthread_mutex_init(&shm->p[i].msg[k].send, &mutex_attr2);
+
 
 
         pthread_condattr_t barrier;
@@ -209,7 +210,7 @@ int shm_init(int pidAmount) {
 //Erstellt das SHM Objekt
 int start_shm(int pidAmount) {
 
-    size_t sizeOfSharedMem = (OSMP_MAX_MESSAGES_PROC * pidAmount * sizeof(message) + pidAmount * sizeof(process) + sizeof(logger) + sizeof(Bcast) + sizeof(int) * 4 + sizeof(pthread_mutex_t) + sizeof(pthread_cond_t) * 2);
+    size_t sizeOfSharedMem = (max_messages * pidAmount * sizeof(message) + pidAmount * sizeof(process) + sizeof(logger) + sizeof(Bcast) + sizeof(int) * 4 + sizeof(pthread_mutex_t) * 3 + sizeof(pthread_cond_t) * 2);
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
@@ -264,6 +265,7 @@ int main(int argc, char *argv[]) {
     //Parent und Child Trennung
     int i;
     for (i = 0; i < pidAmount; i++) {
+        usleep(5*1000);
         pid = fork();
 
         if (pid < 0) {
@@ -279,6 +281,7 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+
     //synchrochronisiere
     for (int i = 0; i < pidAmount; i++) {
         waitpid(-1, NULL, 0);
