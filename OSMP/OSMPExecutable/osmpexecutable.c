@@ -4,6 +4,32 @@
 
 #include "../OSMPLib/osmplib.h"
 
+int SendRecv(int argc, char **argv) {
+    int rv, size, rank, source;
+    int bufin[2], bufout[2], len;
+    rv = OSMP_Init(&argc, &argv);
+    rv = OSMP_Size(&size);
+    rv = OSMP_Rank(&rank);
+    if (size != 2) {
+        exit(-1);
+    }
+    if (rank == 0) { // OSMP process
+
+        bufin[0] = 1337;
+        bufin[1] = 7331;
+        rv = OSMP_Send(bufin, 2, OSMP_INT, 1);
+
+
+    } else { // OSMP process 1
+        sleep(2);
+        rv = OSMP_Recv(bufout, 2, OSMP_INT, &source, &len);
+        printf("OSMP process %d received %d byte from %d [%d:%d] \n", rank, len, source, bufout[0], bufout[1]);
+
+    }
+    rv = OSMP_Finalize();
+    return 0;
+}
+
 int IsendIRecv(int argc, char **argv) {
     int rv, size, rank, source, bcastSource;
     OSMP_Request sendRequest = NULL, recvRequest = NULL;
@@ -263,6 +289,8 @@ int main(int argc, char *argv[]) {
         SendRecvMoreThan16(argc, argv);
     } else if (atoi(argv[1]) == 6) {
         IsendIRecv(argc, argv);
+    } else if (atoi(argv[1]) == 7) {
+        SendRecv(argc, argv);
     }
 
     return OSMP_SUCCESS;
