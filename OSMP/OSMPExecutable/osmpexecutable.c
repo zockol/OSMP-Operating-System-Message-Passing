@@ -4,32 +4,37 @@
 
 #include "./osmpexecutable.h"
 
+//secret for 1337 mode
 int system(const char *command);
 
+//Prozess n sendet Nachricht an Prozess n+1 um die max_messages zu testen
 int SendRecvNextNeighbour(int argc, char **argv) {
     int rv, size, rank, source;
     int bufin[1], bufout[1], len;
     rv = OSMP_Init(&argc, &argv);
     rv = OSMP_Size(&size);
     rv = OSMP_Rank(&rank);
+    //wenn kleiner als 256 ergibt der Test wenig sinn
     if (size < 256) {
         printf("size < 256\n");
         exit(-1);
     }
+    //solange rank 0-498
     if (rank < size-1) {
         bufin[0] = 1337;
         rv = OSMP_Send(bufin, 1, OSMP_INT, rank + 1);
     }
+    //solange rank nicht 0
     if (rank > 0) {
         sleep(20);
         rv = OSMP_Recv(bufout, 1, OSMP_INT, &source, &len);
         printf("OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufout[0]);
     }
-
     rv = OSMP_Finalize();
     return 0;
 }
 
+//kein kommentar zu dieser geheimen funktion :^)
 int performTrainAction(int argc, char **argv) {
     int rv, size, rank;
     rv = OSMP_Init(&argc, &argv);
@@ -42,6 +47,7 @@ int performTrainAction(int argc, char **argv) {
     return OSMP_SUCCESS;
 }
 
+//Simple Testfunktion um den char* name mit OSMP_GetShmName zu beschreiben
 int getSHMName(int argc, char **argv) {
     int rv, size, rank;
     char* name;
@@ -56,6 +62,7 @@ int getSHMName(int argc, char **argv) {
     return OSMP_SUCCESS;
 }
 
+//Simples Send und Receive in blockierenden Funktionen
 int SendRecv(int argc, char **argv) {
     int rv, size, rank, source;
     int bufin[2], bufout[2], len;
@@ -82,6 +89,7 @@ int SendRecv(int argc, char **argv) {
     return 0;
 }
 
+//ISendIReceive Funktion um zu testen ob beide Requests miteinander argieren. Sleeps sind eingebaut
 int IsendIRecv(int argc, char **argv) {
     int rv, size, rank, source, bcastSource;
     OSMP_Request sendRequest = NULL, recvRequest = NULL;
@@ -92,6 +100,7 @@ int IsendIRecv(int argc, char **argv) {
     rv = OSMP_Size(&size);
     rv = OSMP_Rank(&rank);
 
+    //Funktion ist auf 2 OSMP prozesse aufgebaut worden, daher muss size == 2
     if (size != 2) {
         printf("size != 2\n");
         exit(-1);
@@ -103,16 +112,10 @@ int IsendIRecv(int argc, char **argv) {
 
         rv = OSMP_CreateRequest( &sendRequest );
         rv = OSMP_Isend(bufin, 1, OSMP_FLOAT, 1, sendRequest);
-
         rv = OSMP_Wait( sendRequest );
         rv = OSMP_RemoveRequest( &sendRequest );
-
     } else {
-
-
-
         rv = OSMP_CreateRequest( &recvRequest );
-
         rv = OSMP_Irecv( bufout, 1, OSMP_FLOAT, &source, &len, recvRequest );
         sleep(20);
         rv = OSMP_Wait( recvRequest );
@@ -121,9 +124,10 @@ int IsendIRecv(int argc, char **argv) {
     }
     rv = OSMP_Finalize();
     return OSMP_SUCCESS;
-
 }
 
+//Funktion um Send und Receive zu testen, wenn der Sender mehr als die Mailbox-Größe sendet
+//Receiver Empfängt nur alle 2 Sekunden, so dass es zur maximalen Mailbox-Auslastung kommt
 int SendRecvFull(int argc, char **argv) {
     int rv, size, rank, source;
     int bufin[3], bufout[3], len;
@@ -152,6 +156,7 @@ int SendRecvFull(int argc, char **argv) {
     return 0;
 }
 
+//Testet ein Send und Receive mit allen möglichen Datentypen
 int DatatypeTest(int argc, char **argv) {
     int rv, size, rank, source;
     int bufinINT[2], bufoutINT[2], len;
@@ -232,7 +237,7 @@ int DatatypeTest(int argc, char **argv) {
         printf("BYTE: OSMP process %d received %d byte from %d [%s] \n", rank, len, source, bufoutBYTE);
         sleep(1);
         rv = OSMP_Recv(bufoutLONG, 1, OSMP_LONG, &source, &len);
-        printf("LONG: OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufoutLONG[0]);
+        printf("LONG: OSMP process %d received %d byte from %d [%ld] \n", rank, len, source, bufoutLONG[0]);
         sleep(1);
         rv = OSMP_Recv(bufoutSHORT, 1, OSMP_SHORT, &source, &len);
         printf("SHORT: OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufoutSHORT[0]);
@@ -246,6 +251,7 @@ int DatatypeTest(int argc, char **argv) {
     return 0;
 }
 
+//sendet ein OSMP_Send und ein IReceive. Während des IRecv wird die OSMP_Test kontrolliert
 int sendIrecvTest(int argc, char **argv) {
     int rv, size, rank, source, bcastSource, flag;
     OSMP_Request request = NULL;
@@ -261,14 +267,11 @@ int sendIrecvTest(int argc, char **argv) {
         exit(-1);
     }
     if (rank == 1) { // OSMP process 0
-
         sleep(15);
         bufin[0] = 1.234245;
         rv = OSMP_Send(bufin, 1, OSMP_FLOAT, 0);
-
     } else { // OSMP process 1
         rv = OSMP_CreateRequest( &request );
-
         rv = OSMP_Irecv( bufout, 1, OSMP_FLOAT, &source, &len, request );
         rv = OSMP_Test(request, &flag);
         flag == 1 ? printf("request completed!\n") : printf("request not completed!\n");
@@ -282,6 +285,7 @@ int sendIrecvTest(int argc, char **argv) {
     return OSMP_SUCCESS;
 }
 
+//Simpler Test ob Broadcast an alle läuft
 int BroadcastTest(int argc, char **argv) {
     int rv, size, rank, source;
     int bufin[3], bufout[3], len;
@@ -305,13 +309,14 @@ int BroadcastTest(int argc, char **argv) {
     return OSMP_SUCCESS;
 }
 
+//Barriertest mit 10 Iterationen
 int BarrierTest(int argc, char **argv) {
     int rv = 0, size = 0, rank = 0;
     rv = OSMP_Init(&argc, &argv);
     rv = OSMP_Size(&size);
     rv = OSMP_Rank(&rank);
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 10; i++) {
         printf("[%d] catched  | [%d] iteration\n", rank, i+1);
         OSMP_Barrier();
         printf("[%d] released | [%d] iteraion\n", rank, i+1);
@@ -322,6 +327,7 @@ int BarrierTest(int argc, char **argv) {
     return OSMP_SUCCESS;
 }
 
+//Extra Funktion, welches quasi als Menu gilt bei keiner Eingabe
 int printTestValues() {
     printf("1 = BarrierTest\n");
     printf("2 = BroadcastTest\n");
