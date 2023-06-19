@@ -196,8 +196,8 @@ int SendRecvAllDatatypes(int argc, char **argv) {
     return 0;
 }
 
-int sendBcastIRecv(int argc, char **argv) {
-    int rv, size, rank, source, bcastSource;
+int sendBcastIRecvTest(int argc, char **argv) {
+    int rv, size, rank, source, bcastSource, flag;
     OSMP_Request request = NULL;
     int len, bcastLen;
     float bufin[1],bufout[1];
@@ -223,11 +223,17 @@ int sendBcastIRecv(int argc, char **argv) {
         rv = OSMP_CreateRequest( &request );
 
         rv = OSMP_Irecv( bufout, 1, OSMP_FLOAT, &source, &len, request );
+        int completed = OSMP_Test(request, &flag);
+        completed == 1 ? printf("request completed!\n") : printf("request not completed!\n");
+
         bcastbufout = malloc(strlen("Hello World!") + 1);
         rv = OSMP_Bcast( bcastbufout, strlen("Hello World!") + 1, OSMP_BYTE, false, &bcastSource, &bcastLen);
         printf("BROADCAST: OSMP process %d received %d byte from %d [%s] \n", rank, bcastLen, bcastSource, bcastbufout);
         sleep(2);
+
         rv = OSMP_Wait( request );
+        completed = OSMP_Test(request, &flag);
+        completed == 1 ? printf("request completed!\n") : printf("request not completed!\n");
         printf("IRECV: OSMP process %d received %d byte from %d [%f] \n", rank, len, source, bufout[0]);
         rv = OSMP_RemoveRequest( &request );
     }
@@ -282,7 +288,7 @@ int main(int argc, char *argv[]) {
     } else if (atoi(argv[1]) == 2) {
         BroadcastTest(argc, argv);
     } else if (atoi(argv[1]) == 3) {
-        sendBcastIRecv(argc, argv);
+        sendBcastIRecvTest(argc, argv);
     } else if (atoi(argv[1]) == 4) {
         SendRecvAllDatatypes(argc, argv);
     } else if (atoi(argv[1]) == 5) {

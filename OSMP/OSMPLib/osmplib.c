@@ -14,7 +14,7 @@ typedef struct{
     int dest;
     pthread_cond_t request_cond;
     pthread_mutex_t request_mutex;
-    bool complete; //Status der Operation 0=pending; 1=complete;
+    int complete; //Status der Operation 0=pending; 1=complete;
 } IRequest;
 
 
@@ -264,7 +264,9 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
 void *isend(OSMP_Request *request){
     debug("*ISEND START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) *request;
+    req->complete = 0;
     OSMP_Send(&req->buf, req->count, req->datatype, req->dest);
+    req->complete = 1;
     debug("*ISEND END", rankNow, NULL, NULL);
 }
 
@@ -284,9 +286,10 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
     return OSMP_SUCCESS;
 }
 
-int OSMP_Test(OSMP_Request *request, int flag){
-    IRequest *req = (IRequest*) *request;
-    return req->complete;
+int OSMP_Test(OSMP_Request request, int *flag){
+    IRequest *req = (IRequest*) request;
+    *flag = req->complete;
+    return *flag;
 }
 
 //falls Nachrichten in dem OSMP vorhanden sind, schreibe sie in buf rein
@@ -318,7 +321,9 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 void *ircv(OSMP_Request *request){
     debug("*IRCV START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) *request;
+    req->complete = false;
     OSMP_Recv(req->buf, req->count, req->datatype, req->source, req->len);
+    req->complete = true;
     debug("*IRCV END", rankNow, NULL, NULL);
 }
 
@@ -399,7 +404,7 @@ int OSMP_CreateRequest(OSMP_Request *request){
     req->len = NULL;
     pthread_cond_init(&req->request_cond, &request_cond_attr);
     pthread_mutex_init(&req->request_mutex, &mutex_request_attr);
-    req->complete = 0;
+    req->complete = false;
 
     *request = req;
 
