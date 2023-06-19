@@ -155,10 +155,8 @@ int shm_init(int pidAmount) {
         shm->p[i].numberOfMessages = 0;
         shm->p[i].firstEmptySlot = 0;
 
-        pthread_mutexattr_t mutex_attr;
-        pthread_mutexattr_init(&mutex_attr);
-        pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED);
-        pthread_mutex_init(&shm->mutex, &mutex_attr);
+        
+    
 
         pthread_mutexattr_t mutex_attr2;
         pthread_mutexattr_init(&mutex_attr2);
@@ -211,9 +209,7 @@ int shm_init(int pidAmount) {
 //Erstellt das SHM Objekt
 int start_shm(int pidAmount) {
 
-    size_t sizeOfSharedMem = (max_messages * pidAmount * sizeof(message) +
-                              pidAmount * sizeof(process) + sizeof(logger) +
-                              sizeof(Bcast));
+    size_t sizeOfSharedMem = (OSMP_MAX_MESSAGES_PROC * pidAmount * sizeof(message) + pidAmount * sizeof(process) + sizeof(logger) + sizeof(Bcast) + sizeof(int) * 4 + sizeof(pthread_mutex_t) + sizeof(pthread_cond_t) * 2);
 
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 

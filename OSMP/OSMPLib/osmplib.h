@@ -30,6 +30,8 @@
 #include "semaphore.h"
 #include "pthread.h"
 
+typedef void* OSMP_Request;
+
 #define TRUE 1
 typedef enum {
     OSMP_INT,
@@ -52,6 +54,7 @@ typedef struct {
 } Bcast;
 
 typedef struct {
+    bool full;
     int srcRank;
     int destRank;
     char buffer[message_max_size];
@@ -65,8 +68,8 @@ typedef struct {
     message msg[OSMP_MAX_MESSAGES_PROC];
     pid_t pid;
     int rank;
-    int numberOfMessages;
     int firstEmptySlot;
+    int numberOfMessages;
     int firstmsg;
     sem_t empty;
     sem_t full;
@@ -78,7 +81,6 @@ typedef struct {
 } logger;
 
 typedef struct {
-
     int processAmount;
     int processesCreated;
     pthread_mutex_t mutex;
@@ -108,9 +110,18 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
 
 int OSMP_Barrier();
 
-int debug(char *functionName, int srcRank, char *error, char *memory);
+int calculateStruct(int *rank);
 
+int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSMP_Request req);
 
+int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len, OSMP_Request req);
 
+int OSMP_CreateRequest(OSMP_Request *request);
+
+int OSMP_RemoveRequest(OSMP_Request *request);
+
+int OSMP_Wait(OSMP_Request request);
+
+int OSMP_DataSize(OSMP_Datatype datatype);
 
 #endif

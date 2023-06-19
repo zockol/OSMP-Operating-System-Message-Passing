@@ -15,7 +15,6 @@ int main(int argc, char *argv[]) {
     rv = OSMP_Size(&size);
     rv = OSMP_Rank(&rank);
     if (size != 2) {
-        debug("OSMPSENDRECIEVE EXECUTABLE", rank, "SIZE != 2", NULL);
         exit(-1);
     }
     if (rank == 0) { // OSMP process
