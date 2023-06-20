@@ -364,12 +364,15 @@ void *ircv(void* request){
 int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len, OSMP_Request request){
     debug("OSMP_IRECV START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
+    pthread_mutex_lock(&req->request_mutex);
     req->buf = buf;
     req->count = count;
     req->datatype = datatype;
     req->source = source;
     req->len = len;
+
     pthread_create(&req->thread, NULL, (void * (*) (void * ))ircv, request);
+    pthread_mutex_unlock(&req->request_mutex);
     debug("OSMP_IRECV END", rankNow, NULL, NULL);
     return 0;
     
@@ -379,7 +382,11 @@ int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *l
 int OSMP_Wait(OSMP_Request request){
     debug("OSMP_WAIT START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
-    pthread_join( req->thread, NULL);
+    pthread_mutex_lock(&req->request_mutex);
+    pthread_t thread = req->thread;
+    pthread_mutex_unlock(&req->request_mutex);
+    pthread_join( thread, NULL);
+
     debug("OSMP_WAIT END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
 }
