@@ -213,7 +213,9 @@ int OSMP_Finalize() {
 //beschreibt den pointer size mit dem processAmount angegeben im shm struct
 int OSMP_Size(int *size) {
     debug("OSMP_SIZE START", rankNow, NULL, NULL);
+    pthread_mutex_lock(&shm->mutex);
     *size = shm->processAmount;
+    pthread_mutex_unlock(&shm->mutex);
     debug("OSMP_SIZE END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
 }
@@ -282,6 +284,8 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
     debug("OSMP_ISEND START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
 
+    pthread_mutex_lock(&req->request_mutex);
+
     memcpy(&req->buf, buf, count * OSMP_DataSize(datatype));
     req->count = count;
     req->datatype = datatype;
@@ -289,7 +293,10 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
     req->source = &rankNow;
 
 
+
     pthread_create(&req->thread, NULL, (void * (*) (void * ))isend, request);
+
+    pthread_mutex_unlock(&req->request_mutex);
 
     debug("OSMP_ISEND END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
@@ -384,23 +391,29 @@ int OSMP_Wait(OSMP_Request request){
 int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *source, int *len) {
     debug("OSMP_BCAST START", rankNow, NULL, NULL);
 
+
+
     if (send == true) {
+        pthread_mutex_lock(&shm->mutex);
         //sender code
         shm->broadcastMsg.datatype = datatype;
         shm->broadcastMsg.msgLen = count * OSMP_DataSize(datatype);
         shm->broadcastMsg.srcRank = rankNow;
         memcpy(shm->broadcastMsg.buffer, buf, shm->broadcastMsg.msgLen * OSMP_DataSize(datatype));
-
+        pthread_mutex_unlock(&shm->mutex);
     }
     OSMP_Barrier();
     debug("OSMP_BCAST ERROR", rankNow, "Kam ich raus?", NULL);
     if (send == false) {
+        pthread_mutex_lock(&shm->mutex);
         //recv code
         debug("OSMP_BCAST ERROR", rankNow, "VOR MEMCPY", NULL);
         memcpy(buf, shm->broadcastMsg.buffer, shm->broadcastMsg.msgLen);
         debug("OSMP_BCAST ERROR", rankNow, "NACH MEMCPY", NULL);
         *source = shm->broadcastMsg.srcRank;
         *len = shm->broadcastMsg.msgLen;
+        pthread_mutex_unlock(&shm->mutex);
+
     }
 
     debug("OSMP_BCAST END", rankNow, NULL, NULL);
