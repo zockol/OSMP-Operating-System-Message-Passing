@@ -10,6 +10,9 @@ SharedMem *shm;
 //PathToExecutable ist lediglich nur der Path der Executable wie z.B. /OSMP/OSMPExecutable/osmpbcast
 char *pathToExecutable;
 
+pthread_mutexattr_t mutex_attr2;
+pthread_condattr_t barrier;
+
 //evaluateArgs Funktion wertet alle Argumente der Kommandozeile aus und speichert die ab
 //returned den index der executable datei
 int evaluateArgs(int argc, char *argv[]) {
@@ -146,29 +149,21 @@ int evaluateArgs(int argc, char *argv[]) {
 int shm_init(int pidAmount) {
 
     shm->processAmount = 0;
-    shm->processesCreated = 0;
     for (int i = 0; i < pidAmount; i++) {
         shm->p[i].pid = 0;
         shm->p[i].rank = i;
         shm->p[i].firstmsg = -1;
-        shm->p[i].numberOfMessages = 0;
         shm->p[i].firstEmptySlot = 0;
 
-        pthread_mutexattr_t mutex_attr2;
+
         pthread_mutexattr_init(&mutex_attr2);
         pthread_mutexattr_setpshared(&mutex_attr2, PTHREAD_PROCESS_SHARED);
         pthread_mutex_init(&shm->mutex, &mutex_attr2);
 
 
-        pthread_condattr_t barrier;
         pthread_condattr_init(&barrier);
         pthread_condattr_setpshared(&barrier, PTHREAD_PROCESS_SHARED);
         pthread_cond_init(&shm->cattr, &barrier);
-
-        pthread_condattr_t create;
-        pthread_condattr_init(&create);
-        pthread_condattr_setpshared(&create, PTHREAD_PROCESS_SHARED);
-        pthread_cond_init(&shm->allCreated, &create);
 
         sem_init(&shm->p[i].empty, 1, OSMP_MAX_MESSAGES_PROC);
         sem_init(&shm->p[i].full, 1, 0);
@@ -177,19 +172,9 @@ int shm_init(int pidAmount) {
 
         for (int j = 0; j < OSMP_MAX_MESSAGES_PROC; j++) {
             shm->p[i].msg[j].srcRank = -1;
-            if (i == OSMP_MAX_MESSAGES_PROC - 1) {
-                shm->p[i].msg[j].nextMsg = -1;
-            } else {
-                shm->p[i].msg[j].nextMsg = i + 1;
-            }
             shm->p[i].msg[j].msgLen = 0;
             memcpy(shm->p[i].msg[j].buffer, "\0", 1);
 
-            shm->p[i].msg[j].nextMsg = 0;
-            pthread_condattr_t read;
-            pthread_condattr_init(&read);
-            pthread_condattr_setpshared(&read, PTHREAD_PROCESS_SHARED);
-            pthread_cond_init(&shm->p[i].msg[j].read, &read);
         }
     }
 
@@ -285,5 +270,12 @@ int main(int argc, char *argv[]) {
         free(optionalArgs[i]);
     }
 
-    return 0;
+    sem_destroy(&shm->messages);
+
+    pthread_mutex_destroy(&shm->mutex);
+    pthread_cond_destroy(&shm->cattr);
+    pthread_mutexattr_destroy(&mutex_attr2);
+    pthread_condattr_destroy(&barrier);
+
+    return OSMP_SUCCESS;
 }

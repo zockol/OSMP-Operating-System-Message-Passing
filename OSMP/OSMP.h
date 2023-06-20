@@ -46,14 +46,9 @@ typedef struct {
 } Bcast;
 
 typedef struct {
-    bool full;
     int srcRank;
-    int destRank;
     char buffer[message_max_size];
-    OSMP_Datatype datatype;
     int msgLen;
-    int nextMsg;
-    pthread_cond_t read;
 } message;
 
 typedef struct {
@@ -61,7 +56,6 @@ typedef struct {
     pid_t pid;
     int rank;
     int firstEmptySlot;
-    int numberOfMessages;
     int firstmsg;
     sem_t empty;
     sem_t full;
@@ -74,14 +68,12 @@ typedef struct {
 
 typedef struct {
     int processAmount;
-    int processesCreated;
     pthread_mutex_t mutex;
     pthread_cond_t cattr;
     Bcast broadcastMsg;
     int barrier_all;
     int barrier_all2;
     sem_t messages;
-    pthread_cond_t allCreated;
     logger log;
     process p[];
 } SharedMem;

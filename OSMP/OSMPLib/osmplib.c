@@ -14,7 +14,9 @@ typedef struct{
     OSMP_Datatype datatype;
     int dest;
     pthread_cond_t request_cond;
+    pthread_condattr_t request_condattr;
     pthread_mutex_t request_mutex;
+    pthread_mutexattr_t request_mutexattr;
     int complete; //Status der Operation 0=pending; 1=complete;
 } IRequest;
 
@@ -24,7 +26,7 @@ int rankNow = 0;
 
 //debug methode. Schreibt in die vorher erstellte shm->log.logPath die mitgegebenen Debug Messages.
 int debug(char *functionName, int srcRank, char *error, char *memory) {
-
+    pthread_mutex_lock(&shm->mutex);
     //wenn logIntensity noch immer bei -1 ist, ist logging disabled
     if (shm->log.logIntensity == -1) return OSMP_SUCCESS;
 
@@ -66,9 +68,11 @@ int debug(char *functionName, int srcRank, char *error, char *memory) {
             fclose(file);
         } else {
             printf("Fehler beim öffnen der Datei\n");
+            pthread_mutex_unlock(&shm->mutex);
             return OSMP_ERROR;
         }
     }
+    pthread_mutex_unlock(&shm->mutex);
     return OSMP_SUCCESS;
 }
 
@@ -197,8 +201,6 @@ int OSMP_Finalize() {
             sem_destroy(&shm->p[i].empty);
             sem_destroy(&shm->p[i].full);
 
-            shm->processesCreated--;
-
             if (munmap(shm, (sizeof(SharedMem) + sizeof(process) * (shm->processAmount))) == OSMP_ERROR) {
                 debug("OSMP_FINALIZE", rankNow, "MUNMAP == OSMP_ERROR", NULL);
             }
@@ -240,23 +242,19 @@ int OSMP_Rank(int *rank) {
 int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     debug("OSMP_SEND START", rankNow, NULL, NULL);
     //code um den Postkasten der destination zu beschreiben sobald in diesem Platz frei ist
-    sem_wait(&shm->messages);
+
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].rank == dest) {
+            sem_wait(&shm->messages);
             sem_wait(&shm->p[i].empty);
             pthread_mutex_lock(&shm->mutex);
             shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen = count * OSMP_DataSize(datatype);
-            shm->p[i].msg[shm->p[i].firstEmptySlot].datatype = datatype;
             shm->p[i].msg[shm->p[i].firstEmptySlot].srcRank = rankNow;
-            shm->p[i].msg[shm->p[i].firstEmptySlot].destRank = dest;
             memcpy(shm->p[i].msg[shm->p[i].firstEmptySlot].buffer, buf,shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen);
             shm->p[i].firstEmptySlot++;
-            shm->p[i].numberOfMessages++;
             shm->p[i].firstmsg++;
-
             pthread_mutex_unlock(&shm->mutex);
             sem_post(&shm->p[i].full);
-            debug("OSMP_SEND", rankNow, "FULL INC", NULL);
         }
     }
     debug("OSMP_SEND END", rankNow, NULL, NULL);
@@ -323,19 +321,16 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
     int i = 0;
     for (i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].pid == getpid()) {
-            debug("OSMP_RECV", rankNow, "PRE SEM", NULL);
             sem_wait(&shm->p[i].full);
-            debug("OSMP_RECV", rankNow, "PRE MUTEX", NULL);
             pthread_mutex_lock(&shm->mutex);
-            debug("OSMP_RECV", rankNow, "AFTER MUTEX", NULL);
             *source = shm->p[i].msg[shm->p[i].firstmsg].srcRank;
             *len = shm->p[i].msg[shm->p[i].firstmsg].msgLen;
             memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, count * OSMP_DataSize(datatype));
             shm->p[i].firstmsg--;
             shm->p[i].firstEmptySlot--;
-            pthread_mutex_unlock(&shm->mutex);
             sem_post(&shm->p[i].empty);
             sem_post(&shm->messages);
+            pthread_mutex_unlock(&shm->mutex);
         }
 
     }
@@ -431,16 +426,17 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
 int OSMP_CreateRequest(OSMP_Request *request){
     debug("OSMP_CREATEREQUEST START", rankNow, NULL, NULL);
 
-    pthread_condattr_t request_cond_attr;
-    pthread_condattr_init(&request_cond_attr);
-    pthread_condattr_setpshared(&request_cond_attr, PTHREAD_PROCESS_SHARED);
 
-    pthread_mutexattr_t mutex_request_attr;
-    pthread_mutexattr_init(&mutex_request_attr);
-    pthread_mutexattr_setpshared(&mutex_request_attr, PTHREAD_PROCESS_SHARED);
 
     *request = calloc(1, sizeof(IRequest));
     IRequest *req = (IRequest*) *request;
+
+    pthread_condattr_init(&req->request_condattr);
+    pthread_condattr_setpshared(&req->request_condattr, PTHREAD_PROCESS_SHARED);
+
+    pthread_mutexattr_init(&req->request_mutexattr);
+    pthread_mutexattr_setpshared(&req->request_mutexattr, PTHREAD_PROCESS_SHARED);
+
     req->thread = 0;
     memcpy(&req->buf, "\0", 1);
     req->datatype = 0;
@@ -448,8 +444,8 @@ int OSMP_CreateRequest(OSMP_Request *request){
     req->dest = -1;
     req->source = NULL;
     req->len = NULL;
-    pthread_cond_init(&req->request_cond, &request_cond_attr);
-    pthread_mutex_init(&req->request_mutex, &mutex_request_attr);
+    pthread_cond_init(&req->request_cond, &req->request_condattr);
+    pthread_mutex_init(&req->request_mutex, &req->request_mutexattr);
     req->complete = false;
 
     *request = req;
@@ -462,6 +458,11 @@ int OSMP_CreateRequest(OSMP_Request *request){
 int OSMP_RemoveRequest(OSMP_Request *request){
     debug("OSMP_REMOVEREQUEST START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) *request;
+
+    pthread_mutex_destroy(&req->request_mutex);
+    pthread_cond_destroy(&req->request_cond);
+    pthread_mutexattr_destroy(&req->request_mutexattr);
+    pthread_condattr_destroy(&req->request_condattr);
 
     free(req);
     debug("OSMP_REMOVEREQUEST END", rankNow, NULL, NULL);
