@@ -206,7 +206,7 @@ int OSMP_Finalize() {
             sem_destroy(&shm->p[i].empty);
             sem_destroy(&shm->p[i].full);
 
-            if (munmap(shm, (sizeof(SharedMem) + sizeof(process) * (shm->processAmount))) == OSMP_ERROR) {
+            if (munmap(shm, (sizeof(SharedMem) + sizeof(process) * (long unsigned int) (shm->processAmount))) == OSMP_ERROR) {
                 debug("OSMP_FINALIZE", rankNow, "MUNMAP == OSMP_ERROR", NULL);
             }
             if (i == (shm->processAmount - 1)) {
@@ -253,7 +253,7 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             sem_wait(&shm->messages);
             sem_wait(&shm->p[i].empty);
             pthread_mutex_lock(&shm->mutex);
-            shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen = count * OSMP_DataSize(datatype);
+            shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen = (size_t) count * OSMP_DataSize(datatype);
             shm->p[i].msg[shm->p[i].firstEmptySlot].srcRank = rankNow;
             memcpy(shm->p[i].msg[shm->p[i].firstEmptySlot].buffer, buf,shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen);
             shm->p[i].firstEmptySlot++;
@@ -280,6 +280,7 @@ void *isend(void* request){
     req->complete = 1;
     pthread_mutex_unlock(&req->request_mutex);
     debug("*ISEND END", rankNow, NULL, NULL);
+    return 0;
 }
 
 //startet ein Send-Aufruf im Thread
@@ -289,7 +290,7 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
 
     pthread_mutex_lock(&req->request_mutex);
 
-    memcpy(&req->buf, buf, count * OSMP_DataSize(datatype));
+    memcpy(&req->buf, buf, (size_t) count * OSMP_DataSize(datatype));
     req->count = count;
     req->datatype = datatype;
     req->dest = dest;
@@ -329,8 +330,8 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
             sem_wait(&shm->p[i].full);
             pthread_mutex_lock(&shm->mutex);
             *source = shm->p[i].msg[shm->p[i].firstmsg].srcRank;
-            *len = shm->p[i].msg[shm->p[i].firstmsg].msgLen;
-            memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, count * OSMP_DataSize(datatype));
+            *len = (int) shm->p[i].msg[shm->p[i].firstmsg].msgLen;
+            memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, (size_t) count * OSMP_DataSize(datatype));
             shm->p[i].firstmsg--;
             shm->p[i].firstEmptySlot--;
             sem_post(&shm->p[i].empty);
@@ -358,6 +359,7 @@ void *ircv(void* request){
     req->complete = 1;
     pthread_mutex_unlock(&req->request_mutex);
     debug("*IRCV END", rankNow, NULL, NULL);
+    return 0;
 }
 
 //Erstellt einen Thread der *ircv aufruft
@@ -402,7 +404,7 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
         pthread_mutex_lock(&shm->mutex);
         //sender code
         shm->broadcastMsg.datatype = datatype;
-        shm->broadcastMsg.msgLen = count * OSMP_DataSize(datatype);
+        shm->broadcastMsg.msgLen = (size_t) count * OSMP_DataSize(datatype);
         shm->broadcastMsg.srcRank = rankNow;
         memcpy(shm->broadcastMsg.buffer, buf, shm->broadcastMsg.msgLen * OSMP_DataSize(datatype));
         pthread_mutex_unlock(&shm->mutex);
@@ -417,7 +419,7 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
         memcpy(buf, shm->broadcastMsg.buffer, shm->broadcastMsg.msgLen);
 
         *source = shm->broadcastMsg.srcRank;
-        *len = shm->broadcastMsg.msgLen;
+        *len = (int) shm->broadcastMsg.msgLen;
         pthread_mutex_unlock(&shm->mutex);
         debug("OSMP_BCAST ERROR", rankNow, "NACH MEMCPY", NULL);
 
@@ -475,7 +477,7 @@ int OSMP_RemoveRequest(OSMP_Request *request){
 }
 
 //Custom Funktion um die sizeof eines Datentypens wieder zu bekommen. Basiert auf den Enum Values "OSMP_Datatype"
-int OSMP_DataSize(OSMP_Datatype datatype) {
+size_t OSMP_DataSize(OSMP_Datatype datatype) {
     if (datatype == 0) return sizeof(int);
     else if (datatype == 1) return sizeof(short);
     else if (datatype == 2) return sizeof(long);

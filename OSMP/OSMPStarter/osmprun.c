@@ -3,6 +3,7 @@
 //
 //In dieser Quelltext-Datei ist die Funktionalität des OSMP-Starters implementiert
 
+
 #include "./osmprun.h"
 
 //SharedMem Variable deklarieren
@@ -12,6 +13,10 @@ char *pathToExecutable;
 
 pthread_mutexattr_t mutex_attr2;
 pthread_condattr_t barrier;
+
+int ftruncate(int df, off_t length);
+extern char* strdup(const char*);
+
 
 //evaluateArgs Funktion wertet alle Argumente der Kommandozeile aus und speichert die ab
 //returned den index der executable datei
@@ -188,14 +193,14 @@ int shm_init(int pidAmount) {
 //Erstellt das SHM Objekt
 int start_shm(int pidAmount) {
 
-    size_t sizeOfSharedMem = (sizeof(SharedMem) + sizeof(process) * (pidAmount));
+    size_t sizeOfSharedMem = (sizeof(SharedMem) + sizeof(process) * (size_t) (pidAmount));
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
     if (fileDescriptor == -1) {
         return -1;
     }
 
-    int ftrunc = ftruncate(fileDescriptor, sizeOfSharedMem);
+    int ftrunc = ftruncate(fileDescriptor, (__off_t)sizeOfSharedMem);
 
     if (ftrunc == -1) {
         printf("Fehler bei ftruncate %s\n", strerror(errno));
@@ -221,6 +226,10 @@ int main(int argc, char *argv[]) {
     int pidAmount = atoi(argv[1]);
     pid_t pid;
 
+    struct timespec sleepTime;
+    sleepTime.tv_sec = 0;
+    sleepTime.tv_nsec = 20000000;
+
     //erstellt das SHM Objekt
     start_shm(pidAmount);
     //initialisiert die Werte des SHM
@@ -242,7 +251,7 @@ int main(int argc, char *argv[]) {
     //Parent und Child Trennung
     int i;
     for (i = 0; i < pidAmount; i++) {
-        usleep(20*1000);
+        nanosleep(&sleepTime, NULL);
         pid = fork();
 
         if (pid < 0) {

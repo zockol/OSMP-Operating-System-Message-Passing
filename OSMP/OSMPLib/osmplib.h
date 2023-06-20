@@ -10,6 +10,6 @@
 
 #include "../OSMP.h"
 
-int OSMP_DataSize(OSMP_Datatype datatype);
+size_t OSMP_DataSize(OSMP_Datatype datatype);
 
 #endif

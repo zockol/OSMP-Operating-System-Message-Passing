@@ -23,6 +23,7 @@
 #define max_messages 256
 #define OSMP_MAX_MESSAGES_PROC 16
 
+
 typedef void* OSMP_Request;
 
 typedef enum {
@@ -40,7 +41,7 @@ typedef enum {
 
 typedef struct {
     char buffer[message_max_size];
-    int msgLen;
+    size_t msgLen;
     OSMP_Datatype datatype;
     int srcRank;
 } Bcast;
@@ -48,7 +49,7 @@ typedef struct {
 typedef struct {
     int srcRank;
     char buffer[message_max_size];
-    int msgLen;
+    size_t msgLen;
 } message;
 
 typedef struct {

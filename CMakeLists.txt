@@ -9,6 +9,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+add_compile_options(-std=c99 -D_POSIX_C_SOURCE=199309L -Wall -Werror -Wconversion)
+
 add_library(osmplib ./OSMP/OSMPLib/osmplib.c)
 
 add_executable(osmp ./OSMP/OSMPStarter/osmprun.c)
