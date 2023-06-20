@@ -159,6 +159,7 @@ int shm_init(int pidAmount) {
         pthread_mutexattr_init(&mutex_attr2);
         pthread_mutexattr_setpshared(&mutex_attr2, PTHREAD_PROCESS_SHARED);
         pthread_mutex_init(&shm->mutex, &mutex_attr2);
+        pthread_mutex_init(&shm->log.mutex, &mutex_attr2);
 
 
         pthread_condattr_init(&barrier);
@@ -273,6 +274,7 @@ int main(int argc, char *argv[]) {
     sem_destroy(&shm->messages);
 
     pthread_mutex_destroy(&shm->mutex);
+    pthread_mutex_destroy(&shm->log.mutex);
     pthread_cond_destroy(&shm->cattr);
     pthread_mutexattr_destroy(&mutex_attr2);
     pthread_condattr_destroy(&barrier);

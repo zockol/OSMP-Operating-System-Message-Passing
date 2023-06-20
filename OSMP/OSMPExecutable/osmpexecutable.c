@@ -296,6 +296,7 @@ int BroadcastTest(int argc, char **argv) {
         printf("size < 3\n");
         exit(-1);
     }
+    printf("Prozess %d erstellt\n", rank);
     if (rank == 3) { // OSMP process 0
         bufin[0] = 4711;
         bufin[1] = 4712;

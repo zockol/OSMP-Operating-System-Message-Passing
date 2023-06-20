@@ -26,9 +26,12 @@ int rankNow = 0;
 
 //debug methode. Schreibt in die vorher erstellte shm->log.logPath die mitgegebenen Debug Messages.
 int debug(char *functionName, int srcRank, char *error, char *memory) {
-    pthread_mutex_lock(&shm->mutex);
     //wenn logIntensity noch immer bei -1 ist, ist logging disabled
-    if (shm->log.logIntensity == -1) return OSMP_SUCCESS;
+    pthread_mutex_lock(&shm->log.mutex);
+    if (shm->log.logIntensity == -1) {
+        pthread_mutex_unlock(&shm->log.mutex);
+        return OSMP_SUCCESS;
+    }
 
     //buffer für die debug message
     char buffer[1024];
@@ -66,13 +69,15 @@ int debug(char *functionName, int srcRank, char *error, char *memory) {
         if (file) {
             fprintf(file, "%s", buffer);
             fclose(file);
+            pthread_mutex_unlock(&shm->log.mutex);
+            return OSMP_SUCCESS;
         } else {
             printf("Fehler beim öffnen der Datei\n");
-            pthread_mutex_unlock(&shm->mutex);
+            pthread_mutex_unlock(&shm->log.mutex);
             return OSMP_ERROR;
         }
     }
-    pthread_mutex_unlock(&shm->mutex);
+    pthread_mutex_unlock(&shm->log.mutex);
     return OSMP_SUCCESS;
 }
 
@@ -393,8 +398,6 @@ int OSMP_Wait(OSMP_Request request){
 int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *source, int *len) {
     debug("OSMP_BCAST START", rankNow, NULL, NULL);
 
-
-
     if (send == true) {
         pthread_mutex_lock(&shm->mutex);
         //sender code
@@ -405,16 +408,18 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
         pthread_mutex_unlock(&shm->mutex);
     }
     OSMP_Barrier();
-    debug("OSMP_BCAST ERROR", rankNow, "Kam ich raus?", NULL);
+    //debug("OSMP_BCAST ERROR", rankNow, "Kam ich raus?", NULL);
     if (send == false) {
+        debug("OSMP_BCAST ERROR", rankNow, "VOR MEMCPY", NULL);
         pthread_mutex_lock(&shm->mutex);
         //recv code
-        debug("OSMP_BCAST ERROR", rankNow, "VOR MEMCPY", NULL);
+
         memcpy(buf, shm->broadcastMsg.buffer, shm->broadcastMsg.msgLen);
-        debug("OSMP_BCAST ERROR", rankNow, "NACH MEMCPY", NULL);
+
         *source = shm->broadcastMsg.srcRank;
         *len = shm->broadcastMsg.msgLen;
         pthread_mutex_unlock(&shm->mutex);
+        debug("OSMP_BCAST ERROR", rankNow, "NACH MEMCPY", NULL);
 
     }
 

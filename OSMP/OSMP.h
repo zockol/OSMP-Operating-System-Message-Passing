@@ -64,6 +64,7 @@ typedef struct {
 typedef struct {
     int logIntensity;
     char logPath[256];
+    pthread_mutex_t mutex;
 } logger;
 
 typedef struct {
