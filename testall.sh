@@ -2,6 +2,8 @@
 
 clear
 
+mkdir -p logs
+
 # Barrier
 echo "BarrierTest mit 10 Prozessen | sleep 0"
 sleep 10
