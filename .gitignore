@@ -183,4 +183,5 @@ _deps
 ./OSMP/OSMPLib/osmplib
 ./OSMP/OSMPStarter/osmprun
 ./Lib/Echoall/echoall
-logs
+./.idea
+./.vscode

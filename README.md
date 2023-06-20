@@ -143,27 +143,27 @@ Hier sind die Mutex- und die Semaphorennutzung in unserem OSMP-Projekt erklärt.
 
 ### OSMP_Barrier
 
-![Untitled](./Images/Untitled.png)
+![Untitled](./Images/OSMP_Barrier.png)
 
 ### OSMP_Size/OSMP_Bcast
 
-![Untitled](./Images/Untitled%201.png)
+![Untitled](./Images/OSMP_Size_Bcast.png)
 
 ### OSMP_Wait/tOSMP_Test
 
-![Untitled](./Images/Untitled%202.png)
+![Untitled](./Images/OSMP_Wait_Test.png)
 
 ### OSMP_Send/OSMP_Recieve
 
-![Untitled](./Images/Untitled%203.png)
+![Untitled](./Images/OSMP_Send_Recv.png)
 
-### OSMP_Isend/OSMP_Irecv
+### *ircv/\*isend
 
-![Untitled](./Images/Untitled%204.png)
+![Untitled](./Images/OSMP_ircv_isnd.png)
 
-### OSMP_Isend/OSMP_Irecv
+### OSMP_ISend/IRecv
 
-![Untitled](./Images/Untitled%205.png)
+![Untitled](./Images/OSMP_ISend_IRecv.png)
 
 Bei der OSMP_Isend und OSMP_Ircv wird der Mutex der Request jedes mal gelockt, sobald der Thread erstellt und übergeben wird. Dadurch kann nämlich vermieden werden, dass Isend gleichzeitig die Threadnummer in den Thread schreibt und die Variablen des Structs an die OSMP_Send weitergibt.
 
@@ -179,6 +179,7 @@ Bei der OSMP_Isend und OSMP_Ircv wird der Mutex der Request jedes mal gelockt, s
 #
 #
 #
-### Danke für's lesen!
 
+# Danke für's lesen!
+#
 ![](./Images/sl.gif)
