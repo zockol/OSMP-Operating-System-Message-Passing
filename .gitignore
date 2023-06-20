@@ -183,7 +183,7 @@ _deps
 ./OSMP/OSMPLib/osmplib
 ./OSMP/OSMPStarter/osmprun
 ./Lib/Echoall/echoall
-./.idea
-./.vscode
-./logs
+.idea/
+.vscode/
+logs/
 Makefile
