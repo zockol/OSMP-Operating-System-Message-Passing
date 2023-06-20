@@ -185,3 +185,5 @@ _deps
 ./Lib/Echoall/echoall
 ./.idea
 ./.vscode
+./logs
+Makefile
