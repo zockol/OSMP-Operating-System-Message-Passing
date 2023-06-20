@@ -154,15 +154,10 @@ int shm_init(int pidAmount) {
         shm->p[i].numberOfMessages = 0;
         shm->p[i].firstEmptySlot = 0;
 
-        
-    
-
         pthread_mutexattr_t mutex_attr2;
         pthread_mutexattr_init(&mutex_attr2);
         pthread_mutexattr_setpshared(&mutex_attr2, PTHREAD_PROCESS_SHARED);
         pthread_mutex_init(&shm->mutex, &mutex_attr2);
-
-
 
 
         pthread_condattr_t barrier;
@@ -170,12 +165,10 @@ int shm_init(int pidAmount) {
         pthread_condattr_setpshared(&barrier, PTHREAD_PROCESS_SHARED);
         pthread_cond_init(&shm->cattr, &barrier);
 
-
         pthread_condattr_t create;
         pthread_condattr_init(&create);
         pthread_condattr_setpshared(&create, PTHREAD_PROCESS_SHARED);
         pthread_cond_init(&shm->allCreated, &create);
-
 
         sem_init(&shm->p[i].empty, 1, OSMP_MAX_MESSAGES_PROC);
         sem_init(&shm->p[i].full, 1, 0);
@@ -203,15 +196,13 @@ int shm_init(int pidAmount) {
     shm->processAmount = pidAmount;
     shm->barrier_all = pidAmount;
     shm->barrier_all2 = 0;
-
     return OSMP_SUCCESS;
 }
 
 //Erstellt das SHM Objekt
 int start_shm(int pidAmount) {
 
-    int
-    sizeOfSharedMem = (sizeof(SharedMem) + sizeof(process) * (pidAmount));
+    size_t sizeOfSharedMem = (sizeof(SharedMem) + sizeof(process) * (pidAmount));
     int fileDescriptor = shm_open(SharedMemName, O_CREAT | O_RDWR, 0640);
 
     if (fileDescriptor == -1) {
@@ -269,7 +260,7 @@ int main(int argc, char *argv[]) {
         pid = fork();
 
         if (pid < 0) {
-            printf("Fehler beim forken\n");
+            printf("Fehler beim forken, pid: %d\n", pid);
             shm_unlink(SharedMemName);
             return -1;
         } else if (pid == 0) {
