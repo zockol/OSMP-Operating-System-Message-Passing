@@ -20,6 +20,7 @@ typedef struct{
     int complete; //Status der Operation 0=pending; 1=complete;
 } IRequest;
 
+size_t shm_size;
 
 //rank des OSMP Prozesses abgespeichert, damit der Prozess intern sein Rang weiß
 int rankNow = 0;
@@ -108,7 +109,7 @@ int OSMP_Init(int *argc, char ***argv) {
     }
 
     //baue die variable mit der größe der datei und mmape die shm
-    size_t shm_size = (size_t) shm_stat->st_size;
+    shm_size = (size_t) shm_stat->st_size;
     shm = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
 
     //wenn map gefailed ist, error ausgeben
@@ -206,12 +207,12 @@ int OSMP_Finalize() {
             sem_destroy(&shm->p[i].empty);
             sem_destroy(&shm->p[i].full);
 
-            if (munmap(shm, (sizeof(SharedMem) + sizeof(process) * (long unsigned int) (shm->processAmount))) == OSMP_ERROR) {
+            if (munmap(shm, shm_size) == OSMP_ERROR) {
                 debug("OSMP_FINALIZE", rankNow, "MUNMAP == OSMP_ERROR", NULL);
             }
-            if (i == (shm->processAmount - 1)) {
-                shm = NULL;
-            }
+
+            shm = NULL;
+
         }
     }
     return OSMP_SUCCESS;

@@ -55,9 +55,12 @@ int getSHMName(int argc, char **argv) {
     OSMP_Size(&size);
     OSMP_Rank(&rank);
 
-    OSMP_GetShmName(&name);
+    if (rank == 0) {
+        OSMP_GetShmName(&name);
+        printf("SHM-Name: %s\n", name);
+    }
 
-    printf("SHM-Name: %s\n", name);
+    OSMP_Finalize();
     return OSMP_SUCCESS;
 }
 
