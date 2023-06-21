@@ -253,7 +253,7 @@ int shm_init(int pidAmount) {
             memset(shm->p[i].msg[j].buffer, '\0', sizeof(shm->p[i].msg[j].buffer));
         }
     }
-    er = sem_init(&shm->messages, 1, max_messages);
+    er = sem_init(&shm->messages, 1, OSMP_MAX_SLOTS);
     if(er) {
         printf("error at sem_init Line: %d\n", __LINE__);
         exit( -1);

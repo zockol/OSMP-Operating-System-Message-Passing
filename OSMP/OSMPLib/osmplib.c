@@ -341,8 +341,8 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
 
             shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen = (size_t) count * OSMP_DataSize(datatype);
 
-            if (shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen > message_max_size) {
-                debug("OSMP_SEND", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+            if (shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen > OSMP_MAX_PAYLOAD_LENGTH) {
+                debug("OSMP_SEND", rankNow, "MSGLEN > OSMP_MAX_PAYLOAD_LENGTH", NULL);
                 if (pthread_mutex_unlock(&shm->mutex) != 0) {
                     debug("OSMP_SEND", rankNow, "PTHREAD_MUTEX_UNLOCK != NULL AFTER MSGLEN", NULL);
                     return OSMP_ERROR;
@@ -407,8 +407,8 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
         return OSMP_ERROR;
     }
 
-    if ((size_t) count * OSMP_DataSize(datatype) > message_max_size) {
-        debug("OSMP_ISEND", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+    if ((size_t) count * OSMP_DataSize(datatype) > OSMP_MAX_PAYLOAD_LENGTH) {
+        debug("OSMP_ISEND", rankNow, "MSGLEN > OSMP_MAX_PAYLOAD_LENGTH", NULL);
         if (pthread_mutex_unlock(&req->request_mutex) != 0) {
             debug ("OSMP_ISEND", rankNow, "(AFTER MSGLEN ERROR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
         }
@@ -482,8 +482,8 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 
     *source = shm->p[rankNow].msg[shm->p[rankNow].firstmsg].srcRank;
 
-    if (shm->p[rankNow].msg[shm->p[rankNow].firstEmptySlot].msgLen > message_max_size) {
-        debug("OSMP_RECV", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+    if (shm->p[rankNow].msg[shm->p[rankNow].firstEmptySlot].msgLen > OSMP_MAX_PAYLOAD_LENGTH) {
+        debug("OSMP_RECV", rankNow, "MSGLEN > OSMP_MAX_PAYLOAD_LENGTH", NULL);
         if (pthread_mutex_unlock(&shm->mutex) != 0) {
             debug("OSMP_RECV", rankNow, "(IN MSGLEN ERROR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
         };
@@ -640,8 +640,8 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
         shm->broadcastMsg.msgLen = (size_t) count * OSMP_DataSize(datatype);
         shm->broadcastMsg.srcRank = rankNow;
 
-        if (shm->broadcastMsg.msgLen > message_max_size) {
-            debug("OSMP_BCAST", rankNow, "(SENDER) MSGLEN > MESSAGE_MAX_SIZE", NULL);
+        if (shm->broadcastMsg.msgLen > OSMP_MAX_PAYLOAD_LENGTH) {
+            debug("OSMP_BCAST", rankNow, "(SENDER) MSGLEN > OSMP_MAX_PAYLOAD_LENGTH", NULL);
             if (pthread_mutex_lock(&shm->mutex) != 0) {
                 debug("OSMP_BCAST", rankNow, "(SENDER | IN MSGLEN ERROR) PTHREAD_MUTEX_LOCK != 0", NULL);
             };
@@ -669,8 +669,8 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
         };
         //recv code
 
-        if (shm->broadcastMsg.msgLen > message_max_size) {
-            debug("OSMP_BCAST", rankNow, "(RECEIVER) MSGLEN > MESSAGE_MAX_SIZE", NULL);
+        if (shm->broadcastMsg.msgLen > OSMP_MAX_PAYLOAD_LENGTH) {
+            debug("OSMP_BCAST", rankNow, "(RECEIVER) MSGLEN > OSMP_MAX_PAYLOAD_LENGTH", NULL);
             return OSMP_ERROR;
         }
 
