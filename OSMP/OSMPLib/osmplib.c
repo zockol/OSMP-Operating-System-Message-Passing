@@ -264,11 +264,16 @@ int OSMP_Size(int *size) {
         printf("shm not initialized\n");
         return OSMP_ERROR;
     }
-
     debug("OSMP_SIZE START", rankNow, NULL, NULL);
-    pthread_mutex_lock(&shm->mutex);
+    if (pthread_mutex_lock(&shm->mutex) != 0) {
+        debug("OSMP_SIZE", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
     *size = shm->processAmount;
-    pthread_mutex_unlock(&shm->mutex);
+    if (pthread_mutex_unlock(&shm->mutex) != 0) {
+        debug("OSMP_SIZE", rankNow, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
     debug("OSMP_SIZE END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
 }
