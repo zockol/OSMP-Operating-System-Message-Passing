@@ -372,20 +372,21 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
 
 //pointer Funktion die als initiale Startfunktion für den Thread von iSend gilt
 void *isend(void* request){
-    if (request == NULL){
-        printf("There is no request to wait for! ");
-        return (void*)OSMP_ERROR;
-    }
     debug("*ISEND START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
-    pthread_mutex_lock(&req->request_mutex);
+    if (pthread_mutex_lock(&req->request_mutex) != 0) {
+        debug("*ISEND", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
+        return 0;
+    }
     req->complete = 0;
-
 
     OSMP_Send(&req->buf, req->count, req->datatype, req->dest);
 
     req->complete = 1;
-    pthread_mutex_unlock(&req->request_mutex);
+    if (pthread_mutex_unlock(&req->request_mutex) != 0) {
+        debug("*ISEND", rankNow, "PTHREAD_MUTEX_unLOCK != 0", NULL);
+        return 0;
+    }
     debug("*ISEND END", rankNow, NULL, NULL);
     return 0;
 }
