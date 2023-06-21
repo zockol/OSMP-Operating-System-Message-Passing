@@ -579,6 +579,13 @@ int OSMP_Wait(OSMP_Request request){
         return OSMP_ERROR;
     };
     pthread_t thread = req->thread;
+
+    if (thread<=0){
+        pthread_mutex_unlock(&req->request_mutex);
+        req->complete = -1;
+        printf("no thread to wait for");
+        return OSMP_ERROR;
+    }
     if (pthread_mutex_unlock(&req->request_mutex) != 0) {
         debug("OSMP_Wait", rankNow, "(1) PTHREAD_MUTEX_UNLOCK != 0", NULL);
         return OSMP_ERROR;
