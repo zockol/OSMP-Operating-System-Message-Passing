@@ -321,19 +321,33 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
         printf("shm not initialized\n");
         return OSMP_ERROR;
     }
-
     debug("OSMP_SEND START", rankNow, NULL, NULL);
     //code um den Postkasten der destination zu beschreiben sobald in diesem Platz frei ist
 
     for (int i = 0; i < sizeNow; i++) {
         if (i == dest) {
-            sem_wait(&shm->messages);
-            sem_wait(&shm->p[i].empty);
-            pthread_mutex_lock(&shm->mutex);
+            if (sem_wait(&shm->messages) == -1) {
+                debug("OSMP_SEND", rankNow, "SEM_WAIT MESSAGES == -1", NULL);
+                return OSMP_ERROR;
+            };
+            if (sem_wait(&shm->p[i].empty) == -1) {
+                debug("OSMP_SEND", rankNow, "SEM_WAIT EMPTY == -1", NULL);
+                return OSMP_ERROR;
+            };
+
+            if (pthread_mutex_lock(&shm->mutex) != 0) {
+                debug("OSMP_SEND", rankNow, "PTHREAD_MUTEX_LOCK != NULL", NULL);
+                return OSMP_ERROR;
+            };
+
             shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen = (size_t) count * OSMP_DataSize(datatype);
 
             if (shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen > message_max_size) {
                 debug("OSMP_SEND", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+                if (pthread_mutex_unlock(&shm->mutex) != 0) {
+                    debug("OSMP_SEND", rankNow, "PTHREAD_MUTEX_UNLOCK != NULL AFTER MSGLEN", NULL);
+                    return OSMP_ERROR;
+                };
                 return OSMP_ERROR;
             }
 
@@ -341,8 +355,15 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             memcpy(shm->p[i].msg[shm->p[i].firstEmptySlot].buffer, buf,shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen);
             shm->p[i].firstEmptySlot++;
             shm->p[i].firstmsg++;
-            pthread_mutex_unlock(&shm->mutex);
-            sem_post(&shm->p[i].full);
+
+            if (pthread_mutex_unlock(&shm->mutex) != 0) {
+                debug("OSMP_SEND", rankNow, "PTHREAD_MUTEX_UNLOCK != NULL", NULL);
+                return OSMP_ERROR;
+            };
+            if (sem_post(&shm->p[i].full) == -1) {
+                debug("OSMP_SEND", rankNow, "SEM_POST(FULL) == -1", NULL);
+                return OSMP_ERROR;
+            }
         }
     }
     debug("OSMP_SEND END", rankNow, NULL, NULL);
