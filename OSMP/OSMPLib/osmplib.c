@@ -131,7 +131,16 @@ int OSMP_Init(int *argc, char ***argv) {
     }
 
     sizeNow = shm->processAmount;
-    pidNow = getpid();
+
+    if ((pidNow = getpid()) == -1) {
+        debug("OSMP_INIT", rankNow, "PIDNOW == -1", NULL);
+        if (pthread_mutex_lock(&shm->mutex) != 0) {
+            debug("OSMP_INIT", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
+            return OSMP_ERROR;
+        }
+        return OSMP_ERROR;
+    };
+
     //definiere die eigene pid im shm
     for (int i = 0; i < sizeNow; i++) {
         if (shm->p[i].pid == 0) {
@@ -223,13 +232,13 @@ int OSMP_Barrier() {
 
 //muss jeder OSMP durchlaufen bevor er sich beendet und "resetted" sich damit selber
 int OSMP_Finalize() {
-    debug("OSMP_FINALIZE START", rankNow, NULL, NULL);
-
     //wenn shm nicht initialisiert, dann error
     if (shm == NULL) {
         printf("OSMPLIB.c OSMP_FINALIZE shm not initialized");
         return OSMP_ERROR;
     }
+
+    debug("OSMP_FINALIZE START", rankNow, NULL, NULL);
 
     if (pthread_mutex_lock(&shm->mutex) != 0) {
         debug("OSMP_FINALIZE", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
@@ -243,16 +252,24 @@ int OSMP_Finalize() {
             shm->p[i].firstmsg = -1;
 
             if (sem_destroy(&shm->p[i].empty) != 0) {
+                if (pthread_mutex_unlock(&shm->mutex) != 0) {
+                    debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+                    return OSMP_ERROR;
+                };
                 debug("OSMP_FINALIZE", -1, "SEM_DESTROY(EMPTY) != 0", NULL);
                 return OSMP_ERROR;
             };
             if (sem_destroy(&shm->p[i].full) != 0) {
+                if (pthread_mutex_unlock(&shm->mutex) != 0) {
+                    debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+                    return OSMP_ERROR;
+                };
                 debug("OSMP_FINALIZE", -1, "SEM_DESTROY(FULL) != 0", NULL);
                 return OSMP_ERROR;
             };
 
             if (pthread_mutex_unlock(&shm->mutex) != 0) {
-                debug("OSMP_FINALIZE", -1, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
+                debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
                 return OSMP_ERROR;
             };
             if (munmap(shm, shm_size) == OSMP_ERROR) {
@@ -260,9 +277,14 @@ int OSMP_Finalize() {
                 return OSMP_ERROR;
             }
             shm = NULL;
+            return OSMP_SUCCESS;
         }
     }
-    return OSMP_SUCCESS;
+    if (pthread_mutex_unlock(&shm->mutex) != 0) {
+        debug("OSMP_FINALIZE", -1, "(OUT OF FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
+    return OSMP_ERROR;
 }
 
 //beschreibt den pointer size mit dem processAmount angegeben im shm struct
