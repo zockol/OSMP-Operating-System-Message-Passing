@@ -250,7 +250,7 @@ int shm_init(int pidAmount) {
         for (int j = 0; j < OSMP_MAX_MESSAGES_PROC; j++) {
             shm->p[i].msg[j].srcRank = -1;
             shm->p[i].msg[j].msgLen = 0;
-            memcpy(shm->p[i].msg[j].buffer, "\0", 1);
+            memset(shm->p[i].msg[j].buffer, '\0', sizeof(shm->p[i].msg[j].buffer));
         }
     }
     er = sem_init(&shm->messages, 1, max_messages);

@@ -273,45 +273,44 @@ int OSMP_Finalize() {
         return OSMP_ERROR;
     };
     //kompletter reset code
-    for (int i = 0; i < sizeNow; i++) {
-        if (shm->p[i].rank == rankNow) {
-            shm->p[i].pid = -1;
-            shm->p[i].rank = -1;
-            shm->p[i].firstmsg = -1;
 
-            if (sem_destroy(&shm->p[i].empty) != 0) {
-                if (pthread_mutex_unlock(&shm->mutex) != 0) {
-                    debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
-                    return OSMP_ERROR;
-                };
-                debug("OSMP_FINALIZE", -1, "SEM_DESTROY(EMPTY) != 0", NULL);
-                return OSMP_ERROR;
-            };
-            if (sem_destroy(&shm->p[i].full) != 0) {
-                if (pthread_mutex_unlock(&shm->mutex) != 0) {
-                    debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
-                    return OSMP_ERROR;
-                };
-                debug("OSMP_FINALIZE", -1, "SEM_DESTROY(FULL) != 0", NULL);
-                return OSMP_ERROR;
-            };
+    shm->p[rankNow].pid = -1;
+    shm->p[rankNow].firstmsg = -1;
+    shm->p[rankNow].firstEmptySlot = 0;
 
-            if (pthread_mutex_unlock(&shm->mutex) != 0) {
-                debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
-                return OSMP_ERROR;
-            };
-            if (munmap(shm, shm_size) == OSMP_ERROR) {
-                debug("OSMP_FINALIZE", rankNow, "MUNMAP == OSMP_ERROR", NULL);
-                return OSMP_ERROR;
-            }
-            shm = NULL;
-            return OSMP_SUCCESS;
-        }
+    for (int i = 0; i < OSMP_MAX_MESSAGES_PROC; i++) {
+        shm->p[rankNow].msg[i].srcRank = -1;
+        shm->p[rankNow].msg[i].msgLen = 0;
+        memset(shm->p[rankNow].msg[i].buffer, '\0', sizeof(shm->p[rankNow].msg[i].buffer));
     }
-    if (pthread_mutex_unlock(&shm->mutex) != 0) {
-        debug("OSMP_FINALIZE", -1, "(OUT OF FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+
+    if (sem_destroy(&shm->p[rankNow].empty) != 0) {
+        if (pthread_mutex_unlock(&shm->mutex) != 0) {
+            debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+            return OSMP_ERROR;
+        };
+        debug("OSMP_FINALIZE", -1, "SEM_DESTROY(EMPTY) != 0", NULL);
         return OSMP_ERROR;
     };
+    if (sem_destroy(&shm->p[rankNow].full) != 0) {
+        if (pthread_mutex_unlock(&shm->mutex) != 0) {
+            debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+            return OSMP_ERROR;
+        };
+        debug("OSMP_FINALIZE", -1, "SEM_DESTROY(FULL) != 0", NULL);
+        return OSMP_ERROR;
+    };
+
+    if (pthread_mutex_unlock(&shm->mutex) != 0) {
+        debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
+    if (munmap(shm, shm_size) == OSMP_ERROR) {
+        debug("OSMP_FINALIZE", rankNow, "MUNMAP == OSMP_ERROR", NULL);
+        return OSMP_ERROR;
+    }
+    shm = NULL;
+
     return OSMP_ERROR;
 }
 
