@@ -1,3 +1,65 @@
+<a name="readme-top"></a>
+
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="">
+    <img src="images/birdo.png" alt="Logo" width="80" height="80">
+  </a>
+
+<h3 align="center">Operating System Message Passing</h3>
+
+  <p align="center">
+    <a href="https://github.com/zockol/Flappy-Bird-Recreation/issues">Report Bug</a>
+  </p>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#Ausführung">Ausführung</a>
+      <ul>
+        <li><a href="#Make">Make</a></li>
+        <li><a href="#Syntax">Syntax</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#Struktur-des-Shared-Memorys">Struktur des Shared Memorys</a>
+      <ul>
+        <li><a href="#SharedMemory-Struktur">SharedMemory-Struktur</a></li>
+        <li><a href="#Message-Struktur">Message-Struktur</a></li>
+        <li><a href="#Process-Struktur">Process-Struktur</a></li>
+        <li><a href="#Broadcast-Struktur">Broadcast-Struktur</a></li>
+        <li><a href="#Logger-Struktur">Logger-Struktur</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#Semaphoren-Verwaltung">Semaphoren-Verwaltung</a></li>
+      <ul>
+        <li><a href="#OSMP_Barrier">OSMP_Barrier</a></li>
+        <li><a href="#OSMP_Bcast">OSMP_Bcast</a></li>
+        <li><a href="#OSMP_Send">OSMP_Send</a></li>
+        <li><a href="#OSMP_Recv">OSMP_Recv</a></li>
+        <li><a href="#OSMP_Size">OSMP_Size</a></li>
+        <li><a href="#*isend-/-*ircv">*isend / *ircv</a></li>
+        <li><a href="#OSMP_ISend">OSMP_ISend</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#Danke-fürs-lesen!">Danke fürs lesen!</a></li>
+    </li>
+        <li>
+      <a href="#Support">Support</a></li>
+    </li>
+  </ol>
+</details>
+
 # OSMP - Entwurf und Implementation
 von [Felix Grüning](https://github.com/fegrue) und [Patrick Zockol](https://github.com/zockol)
 
@@ -214,29 +276,18 @@ Um gleichzeitige Zugriffe auf den Request zu vermeiden, wird zunächst der Mutex
 Zunächst wird der Mutex der IRequest-Struktur, auf die der Request zeigt, gesperrt, um gleichzeitige Zugriffe auf den Request zu vermeiden. Danach werden die Parameter des Requests auf die Parameter der Funktion kopiert. Anschließend wird ein neuer Thread erstellt, der mit der Funktion `*ircv()` aufgerufen wird. Sobald der Thread erstellt wurde, wird der Mutex der Request-Struktur wieder freigegeben, damit andere Prozesse auf den Request zugreifen können.
 
 ![OSMP_IRecv](./Images/OSMP_IRecv.png)
-
-
-###
-###
-###
-###
-###
-###
-###
-###
-###
-###
-###
-###
-###
-###
-###
-###
-###
-###
-###
-###
-
+##
+##
+##
+##
+##
+##
+##
+##
+##
+##
+##
+##
 
 # Danke für's lesen!
 ##
@@ -249,3 +300,15 @@ Zunächst wird der Mutex der IRequest-Struktur, auf die der Request zeigt, gespe
 Wenn Sie dies hilfreich fanden und das Projekt ihnen gefällt, dann geben Sie uns doch mal einen Kaffe aus:
 
 [![coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.paypal.com/paypalme/fegrue)
+
+<! MARKDOWN LINKS & IMAGES>
+
+[forks-shield]: https://img.shields.io/github/forks/zockol/Flappy-Bird-Recreation.svg?style=for-the-badge
+[forks-url]: https://github.com/zockol/Flappy-Bird-Recreation/network/members
+[stars-shield]: https://img.shields.io/github/stars/zockol/Flappy-Bird-Recreation.svg?style=for-the-badge
+[stars-url]: https://github.com/zockol/Flappy-Bird-Recreation/stargazers
+[issues-shield]: https://img.shields.io/github/issues/zockol/Flappy-Bird-Recreation.svg?style=for-the-badge
+[issues-url]: https://github.com/zockol/Flappy-Bird-Recreation/issues
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url-Patrick]: https://www.linkedin.com/in/patrick-zockol-687204253/
+[linkedin-url-Felix]: https://www.linkedin.com/in/patrick-zockol-687204253/
