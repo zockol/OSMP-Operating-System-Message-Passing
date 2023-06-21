@@ -11,6 +11,8 @@ SharedMem *shm;
 //PathToExecutable ist lediglich nur der Path der Executable wie z.B. /OSMP/OSMPExecutable/osmpbcast
 char *pathToExecutable;
 
+int er;
+
 pthread_mutexattr_t mutex_attr2;
 pthread_condattr_t barrier;
 
@@ -65,7 +67,8 @@ int evaluateArgs(int argc, char *argv[]) {
                                 loggingVerbosity = atoi(argv[i + 1]);
                                 if (loggingVerbosity < 1 || loggingVerbosity > 3) {
                                     printf("%s", falscheSyntax);
-                                    shm_unlink(SharedMemName);
+                                    er = shm_unlink(SharedMemName);
+                                    if(er) exit( -1 );
                                     exit(-1);
                                 } else {
                                     shm->log.logIntensity = loggingVerbosity;
@@ -75,14 +78,22 @@ int evaluateArgs(int argc, char *argv[]) {
                                         executePathIndex = i;
                                     } else {
                                         printf("%s", falscheSyntax);
-                                        shm_unlink(SharedMemName);
+                                        er = shm_unlink(SharedMemName);
+                                        if(er) {
+                                            printf("error at shm_unlink");
+                                            exit( -1);
+                                        }
                                         exit(-1);
                                     }
                                 }
 
                             } else {
                                 printf("%s", falscheSyntax);
-                                shm_unlink(SharedMemName);
+                                er = shm_unlink(SharedMemName);
+                                if(er) {
+                                    printf("error at shm_unlink");
+                                    exit( -1);
+                                }
                                 exit(-1);
                             }
                         } else {
@@ -91,19 +102,31 @@ int evaluateArgs(int argc, char *argv[]) {
                         }
                     } else {
                         printf("%s", falscheSyntax);
-                        shm_unlink(SharedMemName);
+                        er = shm_unlink(SharedMemName);
+                        if(er) {
+                            printf("error at shm_unlink");
+                            exit( -1);
+                        }
                         exit(-1);
                     }
                 } else {
                     printf("%s", falscheSyntax);
-                    shm_unlink(SharedMemName);
+                    er = shm_unlink(SharedMemName);
+                    if(er) {
+                        printf("error at shm_unlink");
+                        exit( -1);
+                    }
                     exit(-1);
                 }
             } else {
 
                 if (strcmp(argv[i], "-v") == 0) {
                     printf("%s", falscheSyntax);
-                    shm_unlink(SharedMemName);
+                    er = shm_unlink(SharedMemName);
+                    if(er) {
+                        printf("error at shm_unlink");
+                        exit( -1);
+                    }
                     exit(-1);
                 }
 
@@ -129,17 +152,29 @@ int evaluateArgs(int argc, char *argv[]) {
 
             FILE *file = fopen(fileName, "r");
             if (file) {
-                fclose(file);
+                er = fclose(file);
+                if(er) {
+                    printf("error at fclose");
+                    exit( -1);
+                }
                 i++;
             } else {
                 file = fopen(fileName, "w");
                 if (file) {
                     strcpy(shm->log.logPath, fileName);
-                    fclose(file);
+                    er = fclose(file);
+                    if(er) {
+                        printf("error at fclose");
+                        exit( -1);
+                    }
                     break;
                 } else {
                     printf("Fehler beim Erstellen der Datei: %s\n", fileName);
-                    shm_unlink(SharedMemName);
+                    er = shm_unlink(SharedMemName);
+                    if(er) {
+                        printf("error at shm_unlink");
+                        exit( -1);
+                    }
                     exit(-1);
                 }
             }
@@ -153,15 +188,47 @@ int evaluateArgs(int argc, char *argv[]) {
 //Hauptinitialisierung des SHM nach der erstellung
 int shm_init(int pidAmount) {
 
-    pthread_condattr_init(&barrier);
-    pthread_condattr_setpshared(&barrier, PTHREAD_PROCESS_SHARED);
-    pthread_cond_init(&shm->cattr, &barrier);
+    er = pthread_condattr_init(&barrier);
+    if(er) {
+        printf("error at pthread_condattr_init");
+        exit( -1);
+    }
+    er = pthread_condattr_setpshared(&barrier, PTHREAD_PROCESS_SHARED);
+    if(er) {
+        printf("error at pthread_condattr_setpshared");
+        exit( -1);
+    }
+    er = pthread_cond_init(&shm->cattr, &barrier);
+    if(er) {
+        printf("error at pthread_cond_init");
+        exit( -1);
+    }
 
-    pthread_mutexattr_init(&mutex_attr2);
-    pthread_mutexattr_setpshared(&mutex_attr2, PTHREAD_PROCESS_SHARED);
-    pthread_mutex_init(&shm->mutex, &mutex_attr2);
-    pthread_mutex_init(&shm->log.mutex, &mutex_attr2);
-    pthread_mutex_init(&shm->log.mutex, &mutex_attr2);
+    er = pthread_mutexattr_init(&mutex_attr2);
+    if(er) {
+        printf("error at pthread_mutexattr_init");
+        exit( -1);
+    }
+    er = pthread_mutexattr_setpshared(&mutex_attr2, PTHREAD_PROCESS_SHARED);
+    if(er) {
+        printf("error at pthread_mutexattr_setpshared");
+        exit( -1);
+    }
+    er = pthread_mutex_init(&shm->mutex, &mutex_attr2);
+    if(er) {
+        printf("error at pthread_mutex_init");
+        exit( -1);
+    }
+    er = pthread_mutex_init(&shm->log.mutex, &mutex_attr2);
+    if(er) {
+        printf("error at pthread_mutex_init");
+        exit( -1);
+    }
+    er = pthread_mutex_init(&shm->log.mutex, &mutex_attr2);
+    if(er) {
+        printf("error at pthread_mutex_init");
+        exit( -1);
+    }
 
     shm->processAmount = 0;
     for (int i = 0; i < pidAmount; i++) {
@@ -170,11 +237,27 @@ int shm_init(int pidAmount) {
         shm->p[i].firstmsg = -1;
         shm->p[i].firstEmptySlot = 0;
 
-        pthread_mutex_init(&shm->p[i].mutex_recv, &mutex_attr2);
-        pthread_mutex_init(&shm->p[i].mutex_send, &mutex_attr2);
+        er = pthread_mutex_init(&shm->p[i].mutex_recv, &mutex_attr2);
+        if(er) {
+            printf("error at pthread_mutex_init");
+            exit( -1);
+        }
+        er = pthread_mutex_init(&shm->p[i].mutex_send, &mutex_attr2);if(er) {
+            printf("error at pthread_mutex_init");
+            exit( -1);
+        }
+
 
         sem_init(&shm->p[i].empty, 1, OSMP_MAX_MESSAGES_PROC);
+        if(er) {
+            printf("error at sem_init");
+            exit( -1);
+        }
         sem_init(&shm->p[i].full, 1, 0);
+        if(er) {
+            printf("error at sem_init");
+            exit( -1);
+        }
 
         for (int j = 0; j < OSMP_MAX_MESSAGES_PROC; j++) {
             shm->p[i].msg[j].srcRank = -1;
@@ -183,8 +266,11 @@ int shm_init(int pidAmount) {
 
         }
     }
-
-    sem_init(&shm->messages, 1, max_messages);
+    er = sem_init(&shm->messages, 1, max_messages);
+    if(er) {
+        printf("error at sem_init");
+        exit( -1);
+    }
 
     shm->processAmount = pidAmount;
     shm->barrier_all = pidAmount;
@@ -214,7 +300,11 @@ int start_shm(int pidAmount) {
 
     if (shm == MAP_FAILED) {
         printf("Mapping Fail: %s\n", strerror(errno));
-        shm_unlink(SharedMemName);
+        er = shm_unlink(SharedMemName);
+        if(er) {
+            printf("error at shm_unlink");
+            exit( -1);
+        }
         return -1;
     }
 
@@ -223,7 +313,7 @@ int start_shm(int pidAmount) {
 
 //main
 int main(int argc, char *argv[]) {
-
+    er = 0;
     //nimmt die Prozessanzahl
     int pidAmount = atoi(argv[1]);
     pid_t pid;
@@ -282,13 +372,38 @@ int main(int argc, char *argv[]) {
         free(optionalArgs[i]);
     }
 
-    sem_destroy(&shm->messages);
+    er = sem_destroy(&shm->messages);
+    if(er) {
+        printf("error at sem_destroy");
+        exit( -1);
+    }
+    er = pthread_mutex_destroy(&shm->mutex);
+    if(er) {
+        printf("error at pthread_mutex_destroy");
+        exit( -1);
+    }
+    er = pthread_mutex_destroy(&shm->log.mutex);
+    if(er) {
+        printf("error at pthread_mutex_destroy");
+        exit( -1);
+    }
+    er = pthread_cond_destroy(&shm->cattr);
+    if(er) {
+        printf("error at pthread_cond_destroy");
+        exit( -1);
+    }
+    er = pthread_mutexattr_destroy(&mutex_attr2);
+    if(er) {
+        printf("error at pthread_mutexattr_destroy");
+        exit( -1);
+    }
+    er = pthread_condattr_destroy(&barrier);
+    if(er) {
+        printf("error at pthread_condattr_destroy");
+        exit( -1);
+    }
 
-    pthread_mutex_destroy(&shm->mutex);
-    pthread_mutex_destroy(&shm->log.mutex);
-    pthread_cond_destroy(&shm->cattr);
-    pthread_mutexattr_destroy(&mutex_attr2);
-    pthread_condattr_destroy(&barrier);
+
 
     return OSMP_SUCCESS;
 }
