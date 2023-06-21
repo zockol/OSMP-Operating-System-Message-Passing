@@ -224,6 +224,10 @@ int OSMP_Finalize() {
         return OSMP_ERROR;
     }
 
+    if (pthread_mutex_lock(&shm->mutex) != 0) {
+        debug("OSMP_FINALIZE", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
     //kompletter reset code
     for (int i = 0; i < shm->processAmount; i++) {
         if (shm->p[i].rank == rankNow) {
@@ -231,16 +235,24 @@ int OSMP_Finalize() {
             shm->p[i].rank = -1;
             shm->p[i].firstmsg = -1;
 
-            sem_destroy(&shm->p[i].empty);
-            sem_destroy(&shm->p[i].full);
+            if (sem_destroy(&shm->p[i].empty) != 0) {
+                debug("OSMP_FINALIZE", -1, "SEM_DESTROY(EMPTY) != 0", NULL);
+                return OSMP_ERROR;
+            };
+            if (sem_destroy(&shm->p[i].full) != 0) {
+                debug("OSMP_FINALIZE", -1, "SEM_DESTROY(FULL) != 0", NULL);
+                return OSMP_ERROR;
+            };
 
+            if (pthread_mutex_unlock(&shm->mutex) != 0) {
+                debug("OSMP_FINALIZE", -1, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
+                return OSMP_ERROR;
+            };
             if (munmap(shm, shm_size) == OSMP_ERROR) {
                 debug("OSMP_FINALIZE", rankNow, "MUNMAP == OSMP_ERROR", NULL);
                 return OSMP_ERROR;
             }
-
             shm = NULL;
-
         }
     }
     return OSMP_SUCCESS;
