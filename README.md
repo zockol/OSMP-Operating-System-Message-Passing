@@ -1,11 +1,5 @@
-<a name="readme-top"></a>
-
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-
 # OSMP - Entwurf und Implementation
-von [Felix Grüning](https://github.com/fegrue) und [Patrick Zockol](https://github.com/zockol)
+von [Felix Grüning](https://www.linkedin.com/in/felix-grüning-19443a280/) und [Patrick Zockol](https://www.linkedin.com/in/patrick-zockol-687204253/)
 
 ## Ausführung
 
@@ -245,14 +239,3 @@ Wenn Sie dies hilfreich fanden und das Projekt ihnen gefällt, dann geben Sie un
 
 [![coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.paypal.com/paypalme/fegrue)
 
-<! MARKDOWN LINKS & IMAGES>
-
-[forks-shield]: https://img.shields.io/github/forks/zockol/Flappy-Bird-Recreation.svg?style=for-the-badge
-[forks-url]: https://github.com/zockol/Flappy-Bird-Recreation/network/members
-[stars-shield]: https://img.shields.io/github/stars/zockol/Flappy-Bird-Recreation.svg?style=for-the-badge
-[stars-url]: https://github.com/zockol/Flappy-Bird-Recreation/stargazers
-[issues-shield]: https://img.shields.io/github/issues/zockol/Flappy-Bird-Recreation.svg?style=for-the-badge
-[issues-url]: https://github.com/zockol/Flappy-Bird-Recreation/issues
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url-Patrick]: https://www.linkedin.com/in/patrick-zockol-687204253/
-[linkedin-url-Felix]: https://www.linkedin.com/in/patrick-zockol-687204253/
