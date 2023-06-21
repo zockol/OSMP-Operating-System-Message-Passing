@@ -142,9 +142,9 @@ int OSMP_Init(int *argc, char ***argv) {
     }
 
     //debugged die callocs und frees
-    debug("OSMP_INIT", rankNow, NULL, "calloc");
+    debug("OSMP_INIT", rankNow, NULL, "CALLOC");
     free(shm_stat);
-    debug("OSMP_INIT", rankNow, NULL, "free");
+    debug("OSMP_INIT", rankNow, NULL, "FREE");
 
     debug("OSMP_INIT END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
@@ -161,36 +161,53 @@ int OSMP_Barrier() {
     debug("OSMP_BARRIER START", rankNow, NULL, NULL);
     //if-else konstrukt für ein flip zwischen barrier_all und barrier_all2
     if (shm->barrier_all != 0) {
-        pthread_mutex_lock(&shm->mutex);
+        if (pthread_mutex_lock(&shm->mutex) != 0) {
+            debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL1) PTHREAD_MUTEX_LOCK != 0", NULL);
+        };
         shm->barrier_all--;
-
         //wenn shm->barrier_all == 0 dann lasse alle anderen unten aus der while raus.
         if (shm->barrier_all == 0) {
             shm->barrier_all2 = shm->processAmount;
-            pthread_cond_broadcast(&shm->cattr);
-
+            if (pthread_cond_broadcast(&shm->cattr) != 0) {
+                debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL1) PTHREAD_COND_BROADCAST != 0", NULL);
+            };
         } else {
             while (shm->barrier_all != 0) {
-                pthread_cond_wait(&shm->cattr, &shm->mutex);
+                if (pthread_cond_wait(&shm->cattr, &shm->mutex) != 0) {
+                    debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL1) PTHREAD_COND_WAIT != 0", NULL);
+                };
             }
         }
-        pthread_mutex_unlock(&shm->mutex);
+        if (pthread_mutex_unlock(&shm->mutex) != 0) {
+            debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL1) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        };
+
+
     } else if (shm->barrier_all2 != 0) {
-        pthread_mutex_lock(&shm->mutex);
+        if (pthread_mutex_lock(&shm->mutex) != 0) {
+            debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL2) PTHREAD_MUTEX_LOCK != 0", NULL);
+        };
         //genau das selbe wie dadrüber nur der flip
         shm->barrier_all2--;
         if (shm->barrier_all2 == 0) {
             shm->barrier_all = shm->processAmount;
-            pthread_cond_broadcast(&shm->cattr);
+            if (pthread_cond_broadcast(&shm->cattr) != 0) {
+                debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL2) PTHREAD_COND_BROADCAST != 0", NULL);
+            };
         } else {
             while (shm->barrier_all2 != 0) {
-                pthread_cond_wait(&shm->cattr, &shm->mutex);
+                if (pthread_cond_wait(&shm->cattr, &shm->mutex) != 0) {
+                    debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL2) PTHREAD_COND_WAIT != 0", NULL);
+                };
             }
         }
-        pthread_mutex_unlock(&shm->mutex);
+        if (pthread_mutex_unlock(&shm->mutex) != 0) {
+            debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL2) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        };
     } else {
         //wenn beide Barriers 0 sind, dann error ausgeben
-        debug("OSMP_BARRIER ERROR", rankNow, "BARRIER_ALL & BARRIER_ALL2 ZERO", NULL);
+        debug("OSMP_BARRIER", rankNow, "BARRIER_ALL & BARRIER_ALL2 ZERO", NULL);
+        return OSMP_ERROR;
     }
 
     debug("OSMP_BARRIER END", rankNow, NULL, NULL);
@@ -276,6 +293,12 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
             sem_wait(&shm->p[i].empty);
             pthread_mutex_lock(&shm->mutex);
             shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen = (size_t) count * OSMP_DataSize(datatype);
+
+            if (shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen > message_max_size) {
+                debug("OSMP_SEND", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+                return OSMP_ERROR;
+            }
+
             shm->p[i].msg[shm->p[i].firstEmptySlot].srcRank = rankNow;
             memcpy(shm->p[i].msg[shm->p[i].firstEmptySlot].buffer, buf,shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen);
             shm->p[i].firstEmptySlot++;
@@ -311,6 +334,11 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
     IRequest *req = (IRequest*) request;
 
     pthread_mutex_lock(&req->request_mutex);
+
+    if ((size_t) count * OSMP_DataSize(datatype) > message_max_size) {
+        debug("OSMP_ISEND", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+        return OSMP_ERROR;
+    }
 
     memcpy(&req->buf, buf, (size_t) count * OSMP_DataSize(datatype));
     req->count = count;
@@ -352,7 +380,15 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
             sem_wait(&shm->p[i].full);
             pthread_mutex_lock(&shm->mutex);
             *source = shm->p[i].msg[shm->p[i].firstmsg].srcRank;
+
+            if (shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen > message_max_size) {
+                debug("OSMP_RECV", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+                return OSMP_ERROR;
+            }
+
             *len = (int) shm->p[i].msg[shm->p[i].firstmsg].msgLen;
+
+
             memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, (size_t) count * OSMP_DataSize(datatype));
             shm->p[i].firstmsg--;
             shm->p[i].firstEmptySlot--;
@@ -445,22 +481,31 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
         //sender code
         shm->broadcastMsg.msgLen = (size_t) count * OSMP_DataSize(datatype);
         shm->broadcastMsg.srcRank = rankNow;
+
+        if (shm->broadcastMsg.msgLen > message_max_size) {
+            debug("OSMP_BCAST", rankNow, "(SENDER) MSGLEN > MESSAGE_MAX_SIZE", NULL);
+            return OSMP_ERROR;
+        }
+
         memcpy(shm->broadcastMsg.buffer, buf, shm->broadcastMsg.msgLen * OSMP_DataSize(datatype));
         pthread_mutex_unlock(&shm->mutex);
     }
     OSMP_Barrier();
     //debug("OSMP_BCAST ERROR", rankNow, "Kam ich raus?", NULL);
     if (send == false) {
-        debug("OSMP_BCAST ERROR", rankNow, "VOR MEMCPY", NULL);
         pthread_mutex_lock(&shm->mutex);
         //recv code
+
+        if (shm->broadcastMsg.msgLen > message_max_size) {
+            debug("OSMP_BCAST", rankNow, "(RECEIVER) MSGLEN > MESSAGE_MAX_SIZE", NULL);
+            return OSMP_ERROR;
+        }
 
         memcpy(buf, shm->broadcastMsg.buffer, shm->broadcastMsg.msgLen);
 
         *source = shm->broadcastMsg.srcRank;
         *len = (int) shm->broadcastMsg.msgLen;
         pthread_mutex_unlock(&shm->mutex);
-        debug("OSMP_BCAST ERROR", rankNow, "NACH MEMCPY", NULL);
     }
 
     debug("OSMP_BCAST END", rankNow, NULL, NULL);
@@ -475,7 +520,7 @@ int OSMP_CreateRequest(OSMP_Request *request){
     }
 
     debug("OSMP_CREATEREQUEST START", rankNow, NULL, NULL);
-
+    debug("OSMP_CREATEREQUEST", rankNow, NULL, "CALLOC");
     *request = calloc(1, sizeof(IRequest));
     IRequest *req = (IRequest*) *request;
 
@@ -517,6 +562,7 @@ int OSMP_RemoveRequest(OSMP_Request *request){
     pthread_mutexattr_destroy(&req->request_mutexattr);
     pthread_condattr_destroy(&req->request_condattr);
 
+    debug("OSMP_REMOVEREQUEST", rankNow, NULL, "FREE");
     free(req);
     debug("OSMP_REMOVEREQUEST END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
