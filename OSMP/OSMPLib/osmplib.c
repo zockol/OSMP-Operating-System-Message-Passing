@@ -711,10 +711,22 @@ int OSMP_RemoveRequest(OSMP_Request *request){
     debug("OSMP_REMOVEREQUEST START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) *request;
 
-    pthread_mutex_destroy(&req->request_mutex);
-    pthread_cond_destroy(&req->request_cond);
-    pthread_mutexattr_destroy(&req->request_mutexattr);
-    pthread_condattr_destroy(&req->request_condattr);
+    if (pthread_mutex_destroy(&req->request_mutex) != 0) {
+        debug("OSMP_REMOVEREQUEST", rankNow, "PTHREAD_MUTEX_DESTROY != 0", NULL);
+        return OSMP_ERROR;
+    };
+    if (pthread_cond_destroy(&req->request_cond) != 0) {
+        debug("OSMP_REMOVEREQUEST", rankNow, "PTHREAD_COND_DESTROY != 0", NULL);
+        return OSMP_ERROR;
+    };
+    if (pthread_mutexattr_destroy(&req->request_mutexattr) != 0) {
+        debug("OSMP_REMOVEREQUEST", rankNow, "PTHREAD_MUTEXATTR_DESTROY != 0", NULL);
+        return OSMP_ERROR;
+    };
+    if (pthread_condattr_destroy(&req->request_condattr) != 0) {
+        debug("OSMP_REMOVEREQUEST", rankNow, "PTHREAD_CONDATTR_DESTROY != 0", NULL);
+        return OSMP_ERROR;
+    };
 
     debug("OSMP_REMOVEREQUEST", rankNow, NULL, "FREE");
     free(req);
