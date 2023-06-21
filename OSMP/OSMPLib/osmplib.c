@@ -52,7 +52,7 @@ int debug(char *functionName, int srcRank, char *error, char *memory) {
         sprintf(buffer, "Timestamp: %d, Error: MEMORY AND DEBUG != NULL IN debug(), Funktion: %s, OSMPRank: %d\n",
                 timestamp, functionName, srcRank);
 
-        //wenn syntax korrekt, dann überprüfe das logIntensitylevel, error/memory oder nichts und beschreibe entsprechend den Buffer
+    //wenn syntax korrekt, dann überprüfe das logIntensitylevel, error/memory oder nichts und beschreibe entsprechend den Buffer
     } else {
         if (shm->log.logIntensity >= 2 && error != NULL) {
             sprintf(buffer, "Timestamp: %d, Error: %s, Funktion: %s, OSMPRank: %d\n", timestamp, error, functionName,
@@ -147,7 +147,6 @@ int OSMP_Init(int *argc, char ***argv) {
             shm->p[i].pid = pidNow;
             shm->p[i].rank = i;
             rankNow = i;
-
             break;
         }
     }
@@ -498,7 +497,7 @@ int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *l
     pthread_mutex_unlock(&req->request_mutex);
     debug("OSMP_IRECV END", rankNow, NULL, NULL);
     return 0;
-
+    
 }
 
 //Gilt als Schranke. Ab hier wird gewartet bis der Thread durchgelaufen ist
@@ -607,7 +606,7 @@ int OSMP_CreateRequest(OSMP_Request *request){
     *request = req;
 
     debug("OSMP_CREATEREQUEST END", rankNow, NULL, NULL);
-    return OSMP_SUCCESS;
+    return OSMP_SUCCESS;   
 }
 
 //Freed den Speicher vom request
