@@ -27,6 +27,11 @@ int rankNow = 0;
 
 //debug methode. Schreibt in die vorher erstellte shm->log.logPath die mitgegebenen Debug Messages.
 int debug(char *functionName, int srcRank, char *error, char *memory) {
+    if (shm == NULL) {
+        printf("shm not initialized\n");
+        return OSMP_ERROR;
+    }
+
     //wenn logIntensity noch immer bei -1 ist, ist logging disabled
     pthread_mutex_lock(&shm->log.mutex);
     if (shm->log.logIntensity == -1) {
@@ -148,6 +153,11 @@ int OSMP_Init(int *argc, char ***argv) {
 
 //locked jeden OSMP hier, bis alle an dieser Stelle angekommen sind
 int OSMP_Barrier() {
+    if (shm == NULL) {
+        printf("shm not initialized\n");
+        return OSMP_ERROR;
+    }
+
     debug("OSMP_BARRIER START", rankNow, NULL, NULL);
     //if-else konstrukt für ein flip zwischen barrier_all und barrier_all2
     if (shm->barrier_all != 0) {
@@ -209,6 +219,7 @@ int OSMP_Finalize() {
 
             if (munmap(shm, shm_size) == OSMP_ERROR) {
                 debug("OSMP_FINALIZE", rankNow, "MUNMAP == OSMP_ERROR", NULL);
+                return OSMP_ERROR;
             }
 
             shm = NULL;
@@ -220,6 +231,11 @@ int OSMP_Finalize() {
 
 //beschreibt den pointer size mit dem processAmount angegeben im shm struct
 int OSMP_Size(int *size) {
+    if (shm == NULL) {
+        printf("shm not initialized\n");
+        return OSMP_ERROR;
+    }
+
     debug("OSMP_SIZE START", rankNow, NULL, NULL);
     pthread_mutex_lock(&shm->mutex);
     *size = shm->processAmount;
@@ -234,7 +250,7 @@ int OSMP_Rank(int *rank) {
 
     //ERROR wenn shm nicht initialisiert durch OSMP_INIT
     if (shm == NULL) {
-        printf("shm not initialized");
+        printf("shm not initialized\n");
         return OSMP_ERROR;
     }
 
@@ -246,6 +262,11 @@ int OSMP_Rank(int *rank) {
 
 //sendet eine nachricht an die gewünschte destination
 int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
+    if (shm == NULL) {
+        printf("shm not initialized\n");
+        return OSMP_ERROR;
+    }
+
     debug("OSMP_SEND START", rankNow, NULL, NULL);
     //code um den Postkasten der destination zu beschreiben sobald in diesem Platz frei ist
 
@@ -348,6 +369,11 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 
 //initiale Startfunktion des Threads der iRecv funktion
 void *ircv(void* request){
+    if (shm == NULL) {
+        printf("shm not initialized\n");
+        return (void*)OSMP_ERROR;
+    }
+
     debug("*IRCV START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
     pthread_mutex_lock(&req->request_mutex);
@@ -365,6 +391,11 @@ void *ircv(void* request){
 
 //Erstellt einen Thread der *ircv aufruft
 int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len, OSMP_Request request){
+    if (shm == NULL) {
+        printf("shm not initialized\n");
+        return OSMP_ERROR;
+    }
+
     debug("OSMP_IRECV START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
     pthread_mutex_lock(&req->request_mutex);
@@ -382,7 +413,10 @@ int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *l
 }
 
 //Gilt als Schranke. Ab hier wird gewartet bis der Thread durchgelaufen ist
-int OSMP_Wait(OSMP_Request request){
+int OSMP_Wait(OSMP_Request request){    if (shm == NULL) {
+        printf("shm not initialized\n");
+        return OSMP_ERROR;
+    }
     debug("OSMP_WAIT START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
     pthread_mutex_lock(&req->request_mutex);
@@ -399,6 +433,11 @@ int OSMP_Wait(OSMP_Request request){
 //wenn send == true ist, schreibe *buf in den broadcast buffer und warte bis alle da sind
 //wenn send == false ist, warte zuvor auf alle prozesse und schreibe dann den broadcust buffer in *buf
 int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *source, int *len) {
+    if (shm == NULL) {
+        printf("shm not initialized\n");
+        return OSMP_ERROR;
+    }
+
     debug("OSMP_BCAST START", rankNow, NULL, NULL);
 
     if (send == true) {
@@ -422,7 +461,6 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
         *len = (int) shm->broadcastMsg.msgLen;
         pthread_mutex_unlock(&shm->mutex);
         debug("OSMP_BCAST ERROR", rankNow, "NACH MEMCPY", NULL);
-
     }
 
     debug("OSMP_BCAST END", rankNow, NULL, NULL);
@@ -431,9 +469,12 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
 
 //Initialisierung des mitgegebenen Requests
 int OSMP_CreateRequest(OSMP_Request *request){
+    if (shm == NULL) {
+        printf("shm not initialized\n");
+        return OSMP_ERROR;
+    }
+
     debug("OSMP_CREATEREQUEST START", rankNow, NULL, NULL);
-
-
 
     *request = calloc(1, sizeof(IRequest));
     IRequest *req = (IRequest*) *request;
@@ -463,6 +504,11 @@ int OSMP_CreateRequest(OSMP_Request *request){
 
 //Freed den Speicher vom request
 int OSMP_RemoveRequest(OSMP_Request *request){
+    if (shm == NULL) {
+        printf("shm not initialized\n");
+        return OSMP_ERROR;
+    }
+
     debug("OSMP_REMOVEREQUEST START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) *request;
 
