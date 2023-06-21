@@ -42,7 +42,6 @@ typedef enum {
 typedef struct {
     char buffer[message_max_size];
     size_t msgLen;
-    OSMP_Datatype datatype;
     int srcRank;
 } Bcast;
 

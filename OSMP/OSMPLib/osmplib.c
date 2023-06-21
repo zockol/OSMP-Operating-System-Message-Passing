@@ -404,7 +404,6 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
     if (send == true) {
         pthread_mutex_lock(&shm->mutex);
         //sender code
-        shm->broadcastMsg.datatype = datatype;
         shm->broadcastMsg.msgLen = (size_t) count * OSMP_DataSize(datatype);
         shm->broadcastMsg.srcRank = rankNow;
         memcpy(shm->broadcastMsg.buffer, buf, shm->broadcastMsg.msgLen * OSMP_DataSize(datatype));
