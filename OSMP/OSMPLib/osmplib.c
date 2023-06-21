@@ -525,14 +525,14 @@ void *ircv(void* request){
 
 //Erstellt einen Thread der *ircv aufruft
 int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len, OSMP_Request request){
-    if (shm == NULL) {
-        printf("shm not initialized\n");
-        return OSMP_ERROR;
-    }
-
     debug("OSMP_IRECV START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
-    pthread_mutex_lock(&req->request_mutex);
+
+    if (pthread_mutex_lock(&req->request_mutex) != 0) {
+        debug("OSMP_IRECV", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
+
     req->complete = 0;
     req->buf = buf;
     req->count = count;
@@ -540,8 +540,17 @@ int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *l
     req->source = source;
     req->len = len;
 
-    pthread_create(&req->thread, NULL, (void * (*) (void * ))ircv, request);
-    pthread_mutex_unlock(&req->request_mutex);
+    if (pthread_create(&req->thread, NULL, (void * (*) (void * ))ircv, request) != 0) {
+        debug("IRECV", rankNow, "PTHREAD_CREATE != 0", NULL);
+        if (pthread_mutex_unlock(&req->request_mutex) != 0) {
+            debug("OSMP_IRECV", rankNow, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        }
+        return OSMP_ERROR;
+    };
+    if (pthread_mutex_unlock(&req->request_mutex) != 0) {
+        debug("OSMP_IRECV", rankNow, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
     debug("OSMP_IRECV END", rankNow, NULL, NULL);
     return 0;
     
