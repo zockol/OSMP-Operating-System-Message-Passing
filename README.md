@@ -4,62 +4,6 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="">
-    <img src="images/birdo.png" alt="Logo" width="80" height="80">
-  </a>
-
-<h3 align="center">Operating System Message Passing</h3>
-
-  <p align="center">
-    <a href="https://github.com/zockol/Flappy-Bird-Recreation/issues">Report Bug</a>
-  </p>
-</div>
-
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#Ausführung">Ausführung</a>
-      <ul>
-        <li><a href="#Make">Make</a></li>
-        <li><a href="#Syntax">Syntax</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#Struktur-des-Shared-Memorys">Struktur des Shared Memorys</a>
-      <ul>
-        <li><a href="#SharedMemory-Struktur">SharedMemory-Struktur</a></li>
-        <li><a href="#Message-Struktur">Message-Struktur</a></li>
-        <li><a href="#Process-Struktur">Process-Struktur</a></li>
-        <li><a href="#Broadcast-Struktur">Broadcast-Struktur</a></li>
-        <li><a href="#Logger-Struktur">Logger-Struktur</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#Semaphoren-Verwaltung">Semaphoren-Verwaltung</a></li>
-      <ul>
-        <li><a href="#OSMP_Barrier">OSMP_Barrier</a></li>
-        <li><a href="#OSMP_Bcast">OSMP_Bcast</a></li>
-        <li><a href="#OSMP_Send">OSMP_Send</a></li>
-        <li><a href="#OSMP_Recv">OSMP_Recv</a></li>
-        <li><a href="#OSMP_Size">OSMP_Size</a></li>
-        <li><a href="#*isend-/-*ircv">*isend / *ircv</a></li>
-        <li><a href="#OSMP_ISend">OSMP_ISend</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#Danke-fürs-lesen!">Danke fürs lesen!</a></li>
-    </li>
-        <li>
-      <a href="#Support">Support</a></li>
-    </li>
-  </ol>
-</details>
-
 # OSMP - Entwurf und Implementation
 von [Felix Grüning](https://github.com/fegrue) und [Patrick Zockol](https://github.com/zockol)
 
