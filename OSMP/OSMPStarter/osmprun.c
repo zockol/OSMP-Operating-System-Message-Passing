@@ -144,11 +144,11 @@ int evaluateArgs(int argc, char *argv[]) {
 
         char *baseName = "Log";
         char extension[] = ".txt";
-        int i = 1;
+        int j = 1;
         char fileName[256];
 
         while (1) {
-            sprintf(fileName, "%s%s%d%s", pathToLoggingFile, baseName, i, extension);
+            sprintf(fileName, "%s%s%d%s", pathToLoggingFile, baseName, j, extension);
 
             FILE *file = fopen(fileName, "r");
             if (file) {
@@ -157,7 +157,7 @@ int evaluateArgs(int argc, char *argv[]) {
                     printf("error at fclose Line: %d\n", __LINE__);
                     exit( -1);
                 }
-                i++;
+                j++;
             } else {
                 file = fopen(fileName, "w");
                 if (file) {
@@ -320,7 +320,7 @@ int main(int argc, char *argv[]) {
 
     struct timespec sleepTime;
     sleepTime.tv_sec = 0;
-    sleepTime.tv_nsec = 20000000;
+    sleepTime.tv_nsec = 10000000;
 
     //erstellt das SHM Objekt
     start_shm(pidAmount);
@@ -361,15 +361,15 @@ int main(int argc, char *argv[]) {
     }
 
     //synchrochronisiere
-    for (int i = 0; i < pidAmount; i++) {
+    for (int j = 0; j < pidAmount; j++) {
         waitpid(-1, NULL, 0);
     }
 
     //unlinke shm der main
     shm_unlink(SharedMemName);
 
-    for (int i = 1; i < optionalArgsIndex; i++) {
-        free(optionalArgs[i]);
+    for (int j = 1; j < optionalArgsIndex; j++) {
+        free(optionalArgs[j]);
     }
 
     er = sem_destroy(&shm->messages);

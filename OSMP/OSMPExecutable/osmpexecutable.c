@@ -318,15 +318,10 @@ int BarrierTest(int argc, char **argv) {
     OSMP_Size(&size);
     OSMP_Rank(&rank);
 
-    struct timespec sleepTime;
-    sleepTime.tv_sec = 0;
-    sleepTime.tv_nsec = 20000000;
-
     for (int i = 0; i < 10; i++) {
         printf("[%d] catched  | [%d] iteration\n", rank, i+1);
         OSMP_Barrier();
         printf("[%d] released | [%d] iteraion\n", rank, i+1);
-        nanosleep(&sleepTime, NULL);
     }
 
     OSMP_Finalize();

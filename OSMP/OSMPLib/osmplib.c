@@ -442,6 +442,7 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
 
 //OSMP_Test setzt die mitgegebene flag auf 0 oder 1, basierend auf dem Status des Threads (req->complete)
 int OSMP_Test(OSMP_Request request, int *flag){
+    debug("OSMP_TEST START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
     if (pthread_mutex_lock(&req->request_mutex) != 0) {
         debug("OSMP_TEST", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
@@ -452,6 +453,7 @@ int OSMP_Test(OSMP_Request request, int *flag){
         debug("OSMP_TEST", rankNow, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
         return OSMP_ERROR;
     }
+    debug("OSMP_TEST END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
 }
 
@@ -727,11 +729,6 @@ int OSMP_CreateRequest(OSMP_Request *request){
 
 //Freed den Speicher vom request
 int OSMP_RemoveRequest(OSMP_Request *request){
-    if (shm == NULL) {
-        printf("shm not initialized\n");
-        return OSMP_ERROR;
-    }
-
     debug("OSMP_REMOVEREQUEST START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) *request;
 
