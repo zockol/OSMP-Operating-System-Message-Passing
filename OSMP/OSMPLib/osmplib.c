@@ -247,16 +247,24 @@ int OSMP_Finalize() {
             shm->p[i].firstmsg = -1;
 
             if (sem_destroy(&shm->p[i].empty) != 0) {
+                if (pthread_mutex_unlock(&shm->mutex) != 0) {
+                    debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+                    return OSMP_ERROR;
+                };
                 debug("OSMP_FINALIZE", -1, "SEM_DESTROY(EMPTY) != 0", NULL);
                 return OSMP_ERROR;
             };
             if (sem_destroy(&shm->p[i].full) != 0) {
+                if (pthread_mutex_unlock(&shm->mutex) != 0) {
+                    debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+                    return OSMP_ERROR;
+                };
                 debug("OSMP_FINALIZE", -1, "SEM_DESTROY(FULL) != 0", NULL);
                 return OSMP_ERROR;
             };
 
             if (pthread_mutex_unlock(&shm->mutex) != 0) {
-                debug("OSMP_FINALIZE", -1, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
+                debug("OSMP_FINALIZE", -1, "(IN FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
                 return OSMP_ERROR;
             };
             if (munmap(shm, shm_size) == OSMP_ERROR) {
@@ -264,9 +272,14 @@ int OSMP_Finalize() {
                 return OSMP_ERROR;
             }
             shm = NULL;
+            return OSMP_SUCCESS;
         }
     }
-    return OSMP_SUCCESS;
+    if (pthread_mutex_unlock(&shm->mutex) != 0) {
+        debug("OSMP_FINALIZE", -1, "(OUT OF FOR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
+    return OSMP_ERROR;
 }
 
 //beschreibt den pointer size mit dem processAmount angegeben im shm struct
