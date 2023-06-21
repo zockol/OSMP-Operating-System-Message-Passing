@@ -279,14 +279,13 @@ int OSMP_Size(int *size) {
 
 //beschreibt den pointer rank mit dem derzeitigen rank des prozesses
 int OSMP_Rank(int *rank) {
-    debug("OSMP_RANK START", rankNow, NULL, NULL);
-
     //ERROR wenn shm nicht initialisiert durch OSMP_INIT
     if (shm == NULL) {
         printf("shm not initialized\n");
         return OSMP_ERROR;
     }
 
+    debug("OSMP_RANK START", rankNow, NULL, NULL);
     //checkt welcher rang dem laufenden prozess zugewiesen wurde in der OSMP INIT
     *rank = rankNow;
     debug("OSMP_RANK END", rankNow, NULL, NULL);
