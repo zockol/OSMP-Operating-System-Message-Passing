@@ -16,7 +16,7 @@ Um das Program zu starten gibt es die folgenden Punkte:
 
 Des weiteren gibt es eine optionale Logger-Syntax:
 
-- `-L {Pfad}` | aktiviert den Logger
+- `-L {Pfad}` aktiviert den Logger
 - `-v {1-3}` (optional) stellt die Stärke des Loggers ein
 
 Die Stärken des Loggers sind wie folgt definiert:
@@ -31,7 +31,7 @@ Beispielaufrufe:
 - `./build/bin/osmp 500 -L ./ ./build/bin/osmpexecutable 2` Start mit Log-Files in ./
 - `./build/bin/osmp 500 -L ./ -v 3 ./build/bin/osmpexecutable 2` Start mit Log-Files in ./ mit Stärke 3
 
-Desweiteren gibt es noch eine `testall.sh` im Projektordner, welches mit vorgegebenen Parametern alle Teste aufruft. Es wird im Projektordner der Ordner `./logs/` erstellt, in welchem dann die Logs aller Tests gespeichert werden.
+Desweiteren gibt es noch eine `testall.sh` im Projektordner, welches mit vorgegebenen Parametern alle Tests aufruft. Es wird im Projektordner der Ordner `./logs/` erstellt, in welchem dann die Logs aller Tests gespeichert werden.
 
 ## Struktur des Shared Memory
 
