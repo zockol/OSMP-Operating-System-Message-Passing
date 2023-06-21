@@ -19,8 +19,8 @@
 #define SharedMemName "/shm"
 #define OSMP_ERROR -1
 #define OSMP_SUCCESS 0
-#define message_max_size 1024
-#define max_messages 256
+#define OSMP_MAX_PAYLOAD_LENGTH 1024
+#define OSMP_MAX_SLOTS 256
 #define OSMP_MAX_MESSAGES_PROC 16
 
 
@@ -40,14 +40,14 @@ typedef enum {
 
 
 typedef struct {
-    char buffer[message_max_size];
+    char buffer[OSMP_MAX_PAYLOAD_LENGTH];
     size_t msgLen;
     int srcRank;
 } Bcast;
 
 typedef struct {
     int srcRank;
-    char buffer[message_max_size];
+    char buffer[OSMP_MAX_PAYLOAD_LENGTH];
     size_t msgLen;
 } message;
 
