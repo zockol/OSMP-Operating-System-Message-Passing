@@ -5,7 +5,9 @@ von [Felix Grüning](https://github.com/fegrue) und [Patrick Zockol](https://git
 
 ### Make
 - im Terminal in das Projekt Verzeichnis navigieren
-- `./makeall.sh` ausführen
+- `chmod +x ./makeall.sh` 
+- `chmod +x ./testall.sh`
+- `./makeall.sh`
 
 ### Syntax
 Um das Program zu starten gibt es die folgenden Punkte:
