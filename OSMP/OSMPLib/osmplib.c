@@ -134,6 +134,10 @@ int OSMP_Init(int *argc, char ***argv) {
 
     if ((pidNow = getpid()) == -1) {
         debug("OSMP_INIT", rankNow, "PIDNOW == -1", NULL);
+        if (pthread_mutex_lock(&shm->mutex) != 0) {
+            debug("OSMP_INIT", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
+            return OSMP_ERROR;
+        }
         return OSMP_ERROR;
     };
 
