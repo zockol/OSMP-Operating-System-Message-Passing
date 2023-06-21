@@ -25,6 +25,7 @@ size_t shm_size;
 //rank des OSMP Prozesses abgespeichert, damit der Prozess intern sein Rang weiß
 int rankNow = -1;
 int sizeNow = -1;
+pid_t pidNow = -1;
 
 //debug methode. Schreibt in die vorher erstellte shm->log.logPath die mitgegebenen Debug Messages.
 int debug(char *functionName, int srcRank, char *error, char *memory) {
@@ -131,12 +132,14 @@ int OSMP_Init(int *argc, char ***argv) {
     }
 
     sizeNow = shm->processAmount;
+    pidNow = getpid();
     //definiere die eigene pid im shm
     for (int i = 0; i < sizeNow; i++) {
         if (shm->p[i].pid == 0) {
-            shm->p[i].pid = getpid();
+            shm->p[i].pid = pidNow;
             shm->p[i].rank = i;
             rankNow = i;
+
             break;
         }
     }
@@ -303,7 +306,7 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     //code um den Postkasten der destination zu beschreiben sobald in diesem Platz frei ist
 
     for (int i = 0; i < sizeNow; i++) {
-        if (shm->p[i].rank == dest) {
+        if (i == dest) {
             sem_wait(&shm->messages);
             sem_wait(&shm->p[i].empty);
             pthread_mutex_lock(&shm->mutex);
@@ -389,30 +392,27 @@ int OSMP_GetShmName(char** name) {
 //falls Nachrichten in dem OSMP vorhanden sind, schreibe sie in buf rein
 int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len) {
     debug("OSMP_RECV START", rankNow, NULL, NULL);
-    int i = 0;
-    for (i = 0; i < sizeNow; i++) {
-        if (shm->p[i].pid == getpid()) {
-            sem_wait(&shm->p[i].full);
-            pthread_mutex_lock(&shm->mutex);
-            *source = shm->p[i].msg[shm->p[i].firstmsg].srcRank;
 
-            if (shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen > message_max_size) {
-                debug("OSMP_RECV", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
-                return OSMP_ERROR;
-            }
+    sem_wait(&shm->p[rankNow].full);
+    pthread_mutex_lock(&shm->mutex);
+    *source = shm->p[rankNow].msg[shm->p[rankNow].firstmsg].srcRank;
 
-            *len = (int) shm->p[i].msg[shm->p[i].firstmsg].msgLen;
-
-
-            memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, (size_t) count * OSMP_DataSize(datatype));
-            shm->p[i].firstmsg--;
-            shm->p[i].firstEmptySlot--;
-            sem_post(&shm->p[i].empty);
-            sem_post(&shm->messages);
-            pthread_mutex_unlock(&shm->mutex);
-        }
-
+    if (shm->p[rankNow].msg[shm->p[rankNow].firstEmptySlot].msgLen > message_max_size) {
+        debug("OSMP_RECV", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+        return OSMP_ERROR;
     }
+
+    *len = (int) shm->p[rankNow].msg[shm->p[rankNow].firstmsg].msgLen;
+
+
+    memcpy(buf, shm->p[rankNow].msg[shm->p[rankNow].firstmsg].buffer, (size_t) count * OSMP_DataSize(datatype));
+    shm->p[rankNow].firstmsg--;
+    shm->p[rankNow].firstEmptySlot--;
+    sem_post(&shm->p[rankNow].empty);
+    sem_post(&shm->messages);
+    pthread_mutex_unlock(&shm->mutex);
+
+
 
     debug("OSMP_RECV END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;

@@ -153,6 +153,16 @@ int evaluateArgs(int argc, char *argv[]) {
 //Hauptinitialisierung des SHM nach der erstellung
 int shm_init(int pidAmount) {
 
+    pthread_condattr_init(&barrier);
+    pthread_condattr_setpshared(&barrier, PTHREAD_PROCESS_SHARED);
+    pthread_cond_init(&shm->cattr, &barrier);
+
+    pthread_mutexattr_init(&mutex_attr2);
+    pthread_mutexattr_setpshared(&mutex_attr2, PTHREAD_PROCESS_SHARED);
+    pthread_mutex_init(&shm->mutex, &mutex_attr2);
+    pthread_mutex_init(&shm->log.mutex, &mutex_attr2);
+    pthread_mutex_init(&shm->log.mutex, &mutex_attr2);
+
     shm->processAmount = 0;
     for (int i = 0; i < pidAmount; i++) {
         shm->p[i].pid = 0;
@@ -160,21 +170,11 @@ int shm_init(int pidAmount) {
         shm->p[i].firstmsg = -1;
         shm->p[i].firstEmptySlot = 0;
 
-
-        pthread_mutexattr_init(&mutex_attr2);
-        pthread_mutexattr_setpshared(&mutex_attr2, PTHREAD_PROCESS_SHARED);
-        pthread_mutex_init(&shm->mutex, &mutex_attr2);
-        pthread_mutex_init(&shm->log.mutex, &mutex_attr2);
-
-
-        pthread_condattr_init(&barrier);
-        pthread_condattr_setpshared(&barrier, PTHREAD_PROCESS_SHARED);
-        pthread_cond_init(&shm->cattr, &barrier);
+        pthread_mutex_init(&shm->p[i].mutex_recv, &mutex_attr2);
+        pthread_mutex_init(&shm->p[i].mutex_send, &mutex_attr2);
 
         sem_init(&shm->p[i].empty, 1, OSMP_MAX_MESSAGES_PROC);
         sem_init(&shm->p[i].full, 1, 0);
-        sem_init(&shm->messages, 1, max_messages);
-
 
         for (int j = 0; j < OSMP_MAX_MESSAGES_PROC; j++) {
             shm->p[i].msg[j].srcRank = -1;
@@ -183,6 +183,8 @@ int shm_init(int pidAmount) {
 
         }
     }
+
+    sem_init(&shm->messages, 1, max_messages);
 
     shm->processAmount = pidAmount;
     shm->barrier_all = pidAmount;
