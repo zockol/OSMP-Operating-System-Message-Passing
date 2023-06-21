@@ -376,7 +376,7 @@ void *isend(void* request){
     IRequest *req = (IRequest*) request;
     if (pthread_mutex_lock(&req->request_mutex) != 0) {
         debug("*ISEND", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
-        return 0;
+        return NULL;
     }
     req->complete = 0;
 
@@ -385,10 +385,10 @@ void *isend(void* request){
     req->complete = 1;
     if (pthread_mutex_unlock(&req->request_mutex) != 0) {
         debug("*ISEND", rankNow, "PTHREAD_MUTEX_unLOCK != 0", NULL);
-        return 0;
+        return NULL;
     }
     debug("*ISEND END", rankNow, NULL, NULL);
-    return 0;
+    return NULL;
 }
 
 //startet ein Send-Aufruf im Thread
@@ -396,14 +396,18 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
     debug("OSMP_ISEND START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
 
-    pthread_mutex_lock(&req->request_mutex);
-
-
-    if ((size_t) count * OSMP_DataSize(datatype) > message_max_size) {
-        debug("OSMP_ISEND", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+    if (pthread_mutex_lock(&req->request_mutex) != 0) {
+        debug ("OSMP_ISEND", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
         return OSMP_ERROR;
     }
 
+    if ((size_t) count * OSMP_DataSize(datatype) > message_max_size) {
+        debug("OSMP_ISEND", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+        if (pthread_mutex_unlock(&req->request_mutex) != 0) {
+            debug ("OSMP_ISEND", rankNow, "(AFTER MSGLEN ERROR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        }
+        return OSMP_ERROR;
+    }
 
     req->complete = 0;
     memcpy(&req->buf, buf, (size_t) count * OSMP_DataSize(datatype));
@@ -412,11 +416,18 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
     req->dest = dest;
     req->source = &rankNow;
 
+    if (pthread_create(&req->thread, NULL, (void * (*) (void * ))isend, request) != 0) {
+        debug("ISEND", rankNow, "PTHREAD_CREATE != 0", NULL);
+        if (pthread_mutex_unlock(&req->request_mutex) != 0) {
+            debug ("OSMP_ISEND", rankNow, "(AFTER PTHREAD_CREATE ERROR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        }
+        return OSMP_ERROR;
+    };
 
-
-    pthread_create(&req->thread, NULL, (void * (*) (void * ))isend, request);
-
-    pthread_mutex_unlock(&req->request_mutex);
+    if (pthread_mutex_unlock(&req->request_mutex) != 0) {
+        debug ("OSMP_ISEND", rankNow, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        return OSMP_ERROR;
+    }
 
     debug("OSMP_ISEND END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
@@ -476,7 +487,7 @@ void *ircv(void* request){
     IRequest *req = (IRequest*) request;
     if (pthread_mutex_lock(&req->request_mutex) != 0) {
         debug("*IRCV", rankNow, "PTHREAD_MUTEX_LOCK != NULL", NULL);
-        return 0;
+        return NULL;
     }
     req->complete = 0;
 
@@ -485,10 +496,10 @@ void *ircv(void* request){
     req->complete = 1;
     if (pthread_mutex_unlock(&req->request_mutex) != 0) {
         debug("*IRCV", rankNow, "PTHREAD_MUTEX_UNLOCK != NULL", NULL);
-        return 0;
+        return NULL;
     }
     debug("*IRCV END", rankNow, NULL, NULL);
-    return 0;
+    return NULL;
 }
 
 //Erstellt einen Thread der *ircv aufruft
