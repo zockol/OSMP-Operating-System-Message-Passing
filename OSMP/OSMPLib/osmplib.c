@@ -458,26 +458,45 @@ int OSMP_GetShmName(char** name) {
 int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len) {
     debug("OSMP_RECV START", rankNow, NULL, NULL);
 
-    sem_wait(&shm->p[rankNow].full);
-    pthread_mutex_lock(&shm->mutex);
+    if (sem_wait(&shm->p[rankNow].full) != 0) {
+        debug("OSMP_RECV", rankNow, "SEM_WAIT(FULL) != 0", NULL);
+        return OSMP_ERROR;
+    };
+    if (pthread_mutex_lock(&shm->mutex) != 0) {
+        debug("OSMP_RECV", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
+
     *source = shm->p[rankNow].msg[shm->p[rankNow].firstmsg].srcRank;
 
     if (shm->p[rankNow].msg[shm->p[rankNow].firstEmptySlot].msgLen > message_max_size) {
         debug("OSMP_RECV", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+        if (pthread_mutex_unlock(&shm->mutex) != 0) {
+            debug("OSMP_RECV", rankNow, "(IN MSGLEN ERROR) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        };
         return OSMP_ERROR;
     }
 
     *len = (int) shm->p[rankNow].msg[shm->p[rankNow].firstmsg].msgLen;
 
-
     memcpy(buf, shm->p[rankNow].msg[shm->p[rankNow].firstmsg].buffer, (size_t) count * OSMP_DataSize(datatype));
     shm->p[rankNow].firstmsg--;
     shm->p[rankNow].firstEmptySlot--;
-    sem_post(&shm->p[rankNow].empty);
-    sem_post(&shm->messages);
-    pthread_mutex_unlock(&shm->mutex);
 
+    if (sem_post(&shm->p[rankNow].empty) != 0) {
+        debug("OSMP_RECV", rankNow, "SEM_POST(EMPTY) != 0", NULL);
+        return OSMP_ERROR;
+    };
 
+    if (sem_post(&shm->messages) != 0) {
+        debug("OSMP_RECV", rankNow, "SEM_POST(MESSAGES) != 0", NULL);
+        return OSMP_ERROR;
+    };
+
+    if (pthread_mutex_unlock(&shm->mutex) != 0) {
+        debug("OSMP_RECV", rankNow, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
 
     debug("OSMP_RECV END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
