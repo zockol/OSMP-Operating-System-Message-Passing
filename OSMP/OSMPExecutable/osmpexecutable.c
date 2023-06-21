@@ -273,6 +273,7 @@ int sendIrecvTest(int argc, char **argv) {
     } else { // OSMP process 1
         OSMP_CreateRequest(&request);
         OSMP_Irecv(bufout, 1, OSMP_FLOAT, &source, &len, request);
+        OSMP_Irecv(bufout, 1, OSMP_FLOAT, &source, &len, request);
         OSMP_Test(request, &flag);
         flag == 1 ? printf("request completed!\n") : printf("request not completed!\n");
         sleep(5);

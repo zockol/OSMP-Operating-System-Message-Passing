@@ -237,16 +237,6 @@ int shm_init(int pidAmount) {
         shm->p[i].firstmsg = -1;
         shm->p[i].firstEmptySlot = 0;
 
-        er = pthread_mutex_init(&shm->p[i].mutex_recv, &mutex_attr2);
-        if(er) {
-            printf("error at pthread_mutex_init Line: %d\n", __LINE__);
-            exit( -1);
-        }
-        er = pthread_mutex_init(&shm->p[i].mutex_send, &mutex_attr2);if(er) {
-            printf("error at pthread_mutex_init Line: %d\n", __LINE__);
-            exit( -1);
-        }
-
 
         sem_init(&shm->p[i].empty, 1, OSMP_MAX_MESSAGES_PROC);
         if(er) {

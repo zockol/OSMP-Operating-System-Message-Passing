@@ -554,6 +554,14 @@ int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *l
         return OSMP_ERROR;
     };
 
+    if(req->thread >0){
+        debug("OSMP_SEND", rankNow, "THREAD IS ALREADY EXISTING, CANNOT CREATE A NEW ONE", NULL);
+        if (pthread_mutex_unlock(&req->request_mutex) != 0) {
+            debug("OSMP_IRECV", rankNow, "(REQUEST THREAD > 0) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        };
+        return OSMP_ERROR;
+    }
+
     req->complete = 0;
     req->buf = buf;
     req->count = count;
@@ -717,6 +725,7 @@ int OSMP_CreateRequest(OSMP_Request *request){
     req->complete = -1;
     if (pthread_cond_init(&req->request_cond, &req->request_condattr) != 0) {
         debug("OSMP_CREATEREQUEST", rankNow, "PTHREAD_COND_INIT != 0", NULL);
+
         return OSMP_ERROR;
     };
     if (pthread_mutex_init(&req->request_mutex, &req->request_mutexattr) != 0) {

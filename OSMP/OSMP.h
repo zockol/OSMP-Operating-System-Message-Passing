@@ -59,8 +59,6 @@ typedef struct {
     int firstmsg;
     sem_t empty;
     sem_t full;
-    pthread_mutex_t mutex_send;
-    pthread_mutex_t mutex_recv;
 } process;
 
 typedef struct {
