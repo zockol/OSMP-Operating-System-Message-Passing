@@ -4,15 +4,15 @@ von [Felix Grüning](https://www.linkedin.com/in/felix-grüning-19443a280/) und 
 ## Ausführung
 
 ### Make
-- im Terminal in das Projekt Verzeichnis navigieren
-- `chmod +x ./makeall.sh` 
-- `chmod +x ./testall.sh`
-- `./makeall.sh`
+1. im Terminal in das Projekt Verzeichnis navigieren
+2. `chmod +x ./makeall.sh` 
+3. `chmod +x ./testall.sh`
+4. `./makeall.sh`
 
 ### Syntax
 Um das Program zu starten gibt es die folgenden Punkte:
-- Im Terminal ins Projektverzeichnis navigieren
-- `./build/bin/osmp [PROZESSANZAHL] ./build/bin/osmpexecutable {0-9/1337}`
+1. Im Terminal ins Projektverzeichnis navigieren
+2. `./build/bin/osmp [PROZESSANZAHL] ./build/bin/osmpexecutable {0-9/1337}`
 
 Des weiteren gibt es eine optionale Logger-Syntax:
 
@@ -21,9 +21,9 @@ Des weiteren gibt es eine optionale Logger-Syntax:
 
 Die Stärken des Loggers sind wie folgt definiert:
 
-- 1 - Standard Auswahl sollte -v nicht gegeben sein. Beinhaltet Start und Ende von Funktionsaufrufen
-- 2 - Beinhaltet alles aus 1, so wie alle ERROR aufrufe, sollten welche auftreten
-- 3 - Beinhaltet alle vorherigen inklusive alle `calloc()` und `free()` aufrufe
+- `1` - Standard Auswahl sollte -v nicht gegeben sein. Beinhaltet Start und Ende von Funktionsaufrufen
+- `2` - Beinhaltet alles aus 1, so wie alle ERROR aufrufe, falls welche auftreten
+- `3` - Beinhaltet alles aus 1 und 2, inklusive alle `calloc()` und `free()` Aufrufe
 
 Beispielaufrufe:
 
@@ -34,6 +34,21 @@ Beispielaufrufe:
 Desweiteren gibt es noch eine `testall.sh` im Projektordner, welches mit vorgegebenen Parametern alle Tests aufruft. Es wird im Projektordner der Ordner `./logs/` erstellt, in welchem dann die Logs aller Tests gespeichert werden.
 
 ## Struktur des Shared Memory
+
+### Fest definierte Werte
+
+- `MESSAGE_MAX_MESSAGE_PROC = 16`  Maximale Anzahl der Nachichten, die ein Prozess im Postkasten haben darf
+
+- `OSMP_MAX_PALOAD_LENGTH = 1024`  maximale Länge der Nachricht in Bytes
+
+- `OSMP_MAX_SLOTS = 255`  Maximale Anzahl aller Nachrichten, die im System vorhanden sein dürfen
+
+- `SharedMemName = "/shm"`  Name des Shared-Memorys
+
+- `OSMP_ERROR = -1` Vaiable die Zurückgegeben wird, wenn eine Funktion oder Prozess gestoppt wurde und einen Fehler aufweist
+
+- `OSMP_SUCCESS = 0` Vaiable die Zurückgegeben wird, wenn eine Funktion oder Prozess ohne Fehler durchgelaufen ist
+
 
 ### SharedMemory-Struktur
 
@@ -77,16 +92,14 @@ Ein Struct Array, welches alle Prozessdaten wie `pid` und `rank` des jeweiligen 
 ```c
 typedef struct {
     int srcRank;
-    char buffer[message_max_size];
+    char buffer[OSMP_MAX_PAYLOAD_LENGTH];
     size_t msgLen;
 } message;
 ```
 
-Das struct Message liegt in dem Struct des Shared-Memory. Es hat folgende Inhalte:
-
 - *`int srcRank;`*
 Dieser Integer hat den Rank vom sendenden Prozess abgespeichert
-- *`char buffer[message_max_size];`*
+- *`char buffer[OSMP_MAX_PAYLOAD_LENGTH];`*
 Dieses Array hat als Inhalt die empfangene Nachricht oder '\0', wenn keine Nachricht empfangen wurde
 - *`size_t msgLen;`*
 Tatsächliche Länge der empfangenen Nachricht in Byte
@@ -105,7 +118,7 @@ typedef struct {
 } process;
 ```
 
-- *`message msg[OSMP_MAX_MESSAGE_PROC];`*
+- *`message msg[OSMP_MAX_MESSAGES_PROC];`*
 Das Message-Struct welches die Nachrichten des eigenen Prozesses beinhaltet. Es hat ein Auffassungsvermögen von `OSMP_MAX_MESSAGE_PROC`
 - *`pid_t pid;`*
 Die Prozessnummer des Prozesses
@@ -124,14 +137,14 @@ Die Semaphore, die wartet, wenn der Prozess keine Nachrichten hat
 
 ```c
 typedef struct {
-    char buffer[message_max_size];
+    char buffer[OSMP_MAX_PAYLOAD_LENGTH];
     size_t msgLen;
     int srcRank;
 } Bcast;
 ```
 
-- *`char buffer[message_max_size];`*
-Der Buffer für den B-Cast in der Größe von `message_max_size`
+- *`char buffer[OSMP_MAX_PAYLOAD_LENGTH];`*
+Der Buffer für den B-Cast in der Größe von `OSMP_MAX_PAYLOAD_LENGTH`
 - *`size_t msgLen;`*
 Tatsächliche Länge der empfangenen Nachricht in Byte
 - *`int srcRank;`*
@@ -154,13 +167,16 @@ Der Logging-Path, der übergeben wird
 - *`pthread_mutex_t mutex;`*
 Der Mutex, welcher den Struct Zugriff vor gleichzeitigem Verwenden schützt
 
-## Semaphoren-Verwaltung
+## Semaphore- und Mutexnutzung
+
+**NOTE:**
+Bei den hier aufgeführten Abläufen handelt es sich um Pseudo-Code. Er dient zur Veranschaulichung und wird nicht korrekt (nach C99-Standard) dargestellt. 
 
 Hier sind die Mutex- und die Semaphorennutzung in unserem OSMP-Projekt erklärt:
 
 Wir verwenden in unserem Programm insgesammt 3 Semaphoren. Ein Semaphore ist für die Messages, und ist dafür zuständig, die Prozesse zu blockieren, wenn mehr als 256 Nachrichten existieren. Die beiden anderen, sind jeweils dafür da, die schreibenden Prozesse warten zu lassen, wenn der Postkasten voll ist und die lesenden Prozesse warten zu lassen, wenn der Postkasten leer ist. 
 
-Es werden ingesamt 3 Mutexe verwendet, welche hauptsächlich dazu dienen, vor mehrfachem Zugriff auf das Shared Memory zu schützen. 
+Es werden ingesamt 3 Mutexe verwendet, welche dazu dienen, vor mehrfachem Zugriff auf das Shared Memory und anderen Structs zu schützen. 
 
 ### OSMP_Barrier
 
@@ -175,7 +191,7 @@ Wenn der Prozess aus der Warteschleife herauskommt (Durch den pthread_cond_broad
 
 ### OSMP_Bcast
 
-Die OSMP_Bcast schaut als erstes, ob die Funktion vom senden oder den Empangenden Prozessen aufgerufen wurde. Die Mutexe sind bei den beiden Funktionen gleich. Es wird versucht die Mutex zu locken, damit die Prozesse nicht gegenseitig schreiben. Danach werden die Messages beschrieben, und dann der Mutex wieder freigegeben. 
+Die OSMP_Bcast schaut als erstes, ob die Funktion vom sendenden oder den empangenden Prozessen aufgerufen wurde. Die Verwendung der Mutexe sind dabei bei den beiden Varianten gleich. Es wird versucht die Mutex zu locken und danach werden die Message beschrieben/gelesen, und der Mutex wieder freigegeben. 
 
 ![OSMP_Bcast](./Images/OSMP_Bcast.png)
 
@@ -191,17 +207,11 @@ Die OSMP_Recv prüft zuerst, ob `sem_t full` frei ist, diese wird beim initialis
 
 ![OSMP_Recv](./Images/OSMP_Recv.png)
 
-### OSMP_Size
-
-In der Funktion wird der Mutex des Shared Memorys verwendet, um die Anzahl der Prozesse zurückzugeben. Der Zugriff auf den Shared Memory ist blockiert, solange der Mutex gesperrt ist. Sobald die Variable ausgelesen wurde, wird der Mutex freigegeben.
-
-![OSMP_Size](./Images/OSMP_Size.png)
-
 ### *isend / *ircv
 
 Die Mutexe dienen hier dazu, die Requests vor gleichzeitigen Zugriffen zu schützen. Zunächst wird der Mutex des Requests gelockt, bevor die Parameter in das IRequest-Struct kopiert werden. Danach wird der Thread erstellt und die Mutex wieder freigegeben. Dadurch wird sichergestellt, dass kein anderer Thread auf den Request zugreift, bevor dieser vollständig initialisiert wurde.
 
-![*isend und *ircv](./Images/isend_ircv.png)
+![*isend und *ircv](./Images/isend_irecieve.png)
 
 ### OSMP_ISend
 
@@ -221,22 +231,29 @@ In der Funktion wird der Mutex des Loggers verwendet. Der Zugriff auf den Log-St
 
 ![OSMP_IRecv](./Images/logger.png)
 
+### OSMP_Finalize
 
-##
-##
-##
-##
-##
-##
-##
-##
-##
-##
-##
-##
+In der OSMP_Finaize sperrt der Prozess als aller erstes den Mutex des Shared-Memorys. Nachdem der Mutex gelockt wurde, werden alle Variablen des Prozesses, der sie aufgerufen hat resettet, und der Mutex wieder freieggeben.  Danach wird `munmap()` aufgerufen, um den Speicher vom Prozess zu trennen. 
+
+![OSMP_Finalize](./Images/OSMP_Finalize.png)
+
+
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+
 
 # Danke für's lesen!
-##
+###
 ![](./Images/sl.gif)
 
 
