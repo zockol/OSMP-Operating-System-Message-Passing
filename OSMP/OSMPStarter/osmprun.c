@@ -29,7 +29,6 @@ int evaluateArgs(int argc, char *argv[]) {
     int executePathIndex = 0;
     char *pathToLoggingFile = NULL;
     int loggingVerbosity = 1;
-    shm->log.logIntensity = -1;
     pathToExecutable = NULL;
     int processAmount = 0;
 
@@ -230,7 +229,6 @@ int shm_init(int pidAmount) {
         exit( -1);
     }
 
-    shm->processAmount = 0;
     for (int i = 0; i < pidAmount; i++) {
         shm->p[i].pid = 0;
         shm->p[i].rank = i;
@@ -253,7 +251,6 @@ int shm_init(int pidAmount) {
             shm->p[i].msg[j].srcRank = -1;
             shm->p[i].msg[j].msgLen = 0;
             memcpy(shm->p[i].msg[j].buffer, "\0", 1);
-
         }
     }
     er = sem_init(&shm->messages, 1, max_messages);
@@ -261,6 +258,13 @@ int shm_init(int pidAmount) {
         printf("error at sem_init Line: %d\n", __LINE__);
         exit( -1);
     }
+
+    shm->broadcastMsg.srcRank = -1;
+    shm->broadcastMsg.msgLen = 0;
+    memcpy(shm->broadcastMsg.buffer, "\0", 1);
+
+    shm->log.logIntensity = -1;
+    memset(shm->log.logPath, '\0', sizeof(shm->log.logPath));
 
     shm->processAmount = pidAmount;
     shm->barrier_all = pidAmount;
