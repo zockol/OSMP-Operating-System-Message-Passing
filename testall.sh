@@ -41,7 +41,7 @@ sleep 1
 clear
 
 # SendRecv mit mehr als 20 Nachrichten bevor gelesen wird
-echo "5/10 SendRecvFull mit 2 Prozessen | Send sleep(0) - Recv sleep(2)"
+echo "5/10 SendRecvFull mit 2 Prozessen | Send sleep(0) - Recv sleep(1)"
 sleep 1
 echo "gestartet"
 ./build/bin/osmp 2 -L ./logs/ -v 3 ./build/bin/osmpexecutable 5
