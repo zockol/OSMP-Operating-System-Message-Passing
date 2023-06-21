@@ -514,12 +514,17 @@ int OSMP_Wait(OSMP_Request request){
     IRequest *req = (IRequest*) request;
     pthread_mutex_lock(&req->request_mutex);
     pthread_t thread = req->thread;
+    if (thread<=0){
+        pthread_mutex_unlock(&req->request_mutex);
+        req->complete = -1;
+        printf("no thread to wait for");
+        return OSMP_ERROR;
+    }
     pthread_mutex_unlock(&req->request_mutex);
     pthread_join( thread, NULL);
     pthread_mutex_lock(&req->request_mutex);
     req->complete = -1;
     pthread_mutex_unlock(&req->request_mutex);
-
 
     debug("OSMP_WAIT END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
