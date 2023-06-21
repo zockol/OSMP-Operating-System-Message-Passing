@@ -147,8 +147,8 @@ int SendRecvFull(int argc, char **argv) {
 
     } else { // OSMP process 1
         for (int i = 0; i < 20; i++) {
-            printf("2 Sekunden Kaffeepause\n");
-            sleep(2);
+            printf("1 Sekunden Kaffeepause\n");
+            sleep(1);
             OSMP_Recv(bufout, 1, OSMP_INT, &source, &len);
             printf("OSMP process %d received %d byte from %d [%d] \n", rank, len, source, bufout[0]);
         }
@@ -275,8 +275,9 @@ int sendIrecvTest(int argc, char **argv) {
         OSMP_Irecv(bufout, 1, OSMP_FLOAT, &source, &len, request);
         OSMP_Test(request, &flag);
         flag == 1 ? printf("request completed!\n") : printf("request not completed!\n");
-        OSMP_Wait(request);
+        sleep(5);
         OSMP_Test(request, &flag);
+        OSMP_Wait(request);
         flag == 1 ? printf("request completed!\n") : printf("request not completed!\n");
         printf("IRECV: OSMP process %d received %d byte from %d [%f] \n", rank, len, source, bufout[0]);
         OSMP_RemoveRequest(&request);
