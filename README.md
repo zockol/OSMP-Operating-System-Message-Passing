@@ -214,18 +214,29 @@ Um gleichzeitige Zugriffe auf den Request zu vermeiden, wird zunächst der Mutex
 Zunächst wird der Mutex der IRequest-Struktur, auf die der Request zeigt, gesperrt, um gleichzeitige Zugriffe auf den Request zu vermeiden. Danach werden die Parameter des Requests auf die Parameter der Funktion kopiert. Anschließend wird ein neuer Thread erstellt, der mit der Funktion `*ircv()` aufgerufen wird. Sobald der Thread erstellt wurde, wird der Mutex der Request-Struktur wieder freigegeben, damit andere Prozesse auf den Request zugreifen können.
 
 ![OSMP_IRecv](./Images/OSMP_IRecv.png)
-##
-##
-##
-##
-##
-##
-##
-##
-##
-##
-##
-##
+
+
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+###
+
 
 # Danke für's lesen!
 ##
