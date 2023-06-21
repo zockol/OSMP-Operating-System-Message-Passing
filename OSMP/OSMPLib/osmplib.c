@@ -380,11 +380,10 @@ void *isend(void* request){
     IRequest *req = (IRequest*) request;
     pthread_mutex_lock(&req->request_mutex);
     req->complete = 0;
-    pthread_mutex_unlock(&req->request_mutex);
+
 
     OSMP_Send(&req->buf, req->count, req->datatype, req->dest);
 
-    pthread_mutex_lock(&req->request_mutex);
     req->complete = 1;
     pthread_mutex_unlock(&req->request_mutex);
     debug("*ISEND END", rankNow, NULL, NULL);
@@ -472,27 +471,21 @@ int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *le
 
 //initiale Startfunktion des Threads der iRecv funktion
 void *ircv(void* request){
-    if (shm == NULL) {
-        printf("shm not initialized\n");
-        return (void*)OSMP_ERROR;
-    }
-
-    if (request == NULL){
-        printf("There is no request to wait for! ");
-        return (void* )OSMP_ERROR;
-    }
-
     debug("*IRCV START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
-    pthread_mutex_lock(&req->request_mutex);
+    if (pthread_mutex_lock(&req->request_mutex) != 0) {
+        debug("*IRCV", rankNow, "PTHREAD_MUTEX_LOCK != NULL", NULL);
+        return 0;
+    }
     req->complete = 0;
-    pthread_mutex_unlock(&req->request_mutex);
 
     OSMP_Recv(req->buf, req->count, req->datatype, req->source, req->len);
 
-    pthread_mutex_lock(&req->request_mutex);
     req->complete = 1;
-    pthread_mutex_unlock(&req->request_mutex);
+    if (pthread_mutex_unlock(&req->request_mutex) != 0) {
+        debug("*IRCV", rankNow, "PTHREAD_MUTEX_UNLOCK != NULL", NULL);
+        return 0;
+    }
     debug("*IRCV END", rankNow, NULL, NULL);
     return 0;
 }
