@@ -23,7 +23,9 @@ typedef struct{
 size_t shm_size;
 
 //rank des OSMP Prozesses abgespeichert, damit der Prozess intern sein Rang weiß
-int rankNow = 0;
+int rankNow = -1;
+int sizeNow = -1;
+pid_t pidNow = -1;
 
 //debug methode. Schreibt in die vorher erstellte shm->log.logPath die mitgegebenen Debug Messages.
 int debug(char *functionName, int srcRank, char *error, char *memory) {
@@ -50,7 +52,7 @@ int debug(char *functionName, int srcRank, char *error, char *memory) {
         sprintf(buffer, "Timestamp: %d, Error: MEMORY AND DEBUG != NULL IN debug(), Funktion: %s, OSMPRank: %d\n",
                 timestamp, functionName, srcRank);
 
-    //wenn syntax korrekt, dann überprüfe das logIntensitylevel, error/memory oder nichts und beschreibe entsprechend den Buffer
+        //wenn syntax korrekt, dann überprüfe das logIntensitylevel, error/memory oder nichts und beschreibe entsprechend den Buffer
     } else {
         if (shm->log.logIntensity >= 2 && error != NULL) {
             sprintf(buffer, "Timestamp: %d, Error: %s, Funktion: %s, OSMPRank: %d\n", timestamp, error, functionName,
@@ -116,23 +118,6 @@ int OSMP_Init(int *argc, char ***argv) {
     shm_size = (size_t) shm_stat->st_size;
     shm = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
 
-    //wenn map gefailed ist, error ausgeben
-    if (shm == MAP_FAILED) {
-        printf("Error beim mmap\n");
-        return OSMP_ERROR;
-    }
-
-    //definiere die eigene pid im shm
-    for (int i = 0; i < shm->processAmount; i++) {
-        if (shm->p[i].pid == 0) {
-            shm->p[i].pid = getpid();
-            shm->p[i].rank = i;
-            rankNow = i;
-            break;
-        }
-    }
-
-
     //wenn shm MAP_FAILED returned, gebe OSMP ERROR
     if (shm == MAP_FAILED) {
         printf("Mapping Fail: %s\n", strerror(errno));
@@ -140,10 +125,33 @@ int OSMP_Init(int *argc, char ***argv) {
         return OSMP_ERROR;
     }
 
+    if (pthread_mutex_lock(&shm->mutex) != 0) {
+        debug("OSMP_INIT", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
+        return OSMP_ERROR;
+    }
+
+    sizeNow = shm->processAmount;
+    pidNow = getpid();
+    //definiere die eigene pid im shm
+    for (int i = 0; i < sizeNow; i++) {
+        if (shm->p[i].pid == 0) {
+            shm->p[i].pid = pidNow;
+            shm->p[i].rank = i;
+            rankNow = i;
+
+            break;
+        }
+    }
+
+    if (pthread_mutex_unlock(&shm->mutex) != 0) {
+        debug("OSMP_INIT", rankNow, "PTHREAD_MUTEX_unLOCK != 0", NULL);
+        return OSMP_ERROR;
+    }
+
     //debugged die callocs und frees
-    debug("OSMP_INIT", rankNow, NULL, "calloc");
+    debug("OSMP_INIT", rankNow, NULL, "CALLOC");
     free(shm_stat);
-    debug("OSMP_INIT", rankNow, NULL, "free");
+    debug("OSMP_INIT", rankNow, NULL, "FREE");
 
     debug("OSMP_INIT END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
@@ -160,36 +168,53 @@ int OSMP_Barrier() {
     debug("OSMP_BARRIER START", rankNow, NULL, NULL);
     //if-else konstrukt für ein flip zwischen barrier_all und barrier_all2
     if (shm->barrier_all != 0) {
-        pthread_mutex_lock(&shm->mutex);
+        if (pthread_mutex_lock(&shm->mutex) != 0) {
+            debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL1) PTHREAD_MUTEX_LOCK != 0", NULL);
+        };
         shm->barrier_all--;
-
         //wenn shm->barrier_all == 0 dann lasse alle anderen unten aus der while raus.
         if (shm->barrier_all == 0) {
             shm->barrier_all2 = shm->processAmount;
-            pthread_cond_broadcast(&shm->cattr);
-
+            if (pthread_cond_broadcast(&shm->cattr) != 0) {
+                debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL1) PTHREAD_COND_BROADCAST != 0", NULL);
+            };
         } else {
             while (shm->barrier_all != 0) {
-                pthread_cond_wait(&shm->cattr, &shm->mutex);
+                if (pthread_cond_wait(&shm->cattr, &shm->mutex) != 0) {
+                    debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL1) PTHREAD_COND_WAIT != 0", NULL);
+                };
             }
         }
-        pthread_mutex_unlock(&shm->mutex);
+        if (pthread_mutex_unlock(&shm->mutex) != 0) {
+            debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL1) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        };
+
+
     } else if (shm->barrier_all2 != 0) {
-        pthread_mutex_lock(&shm->mutex);
+        if (pthread_mutex_lock(&shm->mutex) != 0) {
+            debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL2) PTHREAD_MUTEX_LOCK != 0", NULL);
+        };
         //genau das selbe wie dadrüber nur der flip
         shm->barrier_all2--;
         if (shm->barrier_all2 == 0) {
             shm->barrier_all = shm->processAmount;
-            pthread_cond_broadcast(&shm->cattr);
+            if (pthread_cond_broadcast(&shm->cattr) != 0) {
+                debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL2) PTHREAD_COND_BROADCAST != 0", NULL);
+            };
         } else {
             while (shm->barrier_all2 != 0) {
-                pthread_cond_wait(&shm->cattr, &shm->mutex);
+                if (pthread_cond_wait(&shm->cattr, &shm->mutex) != 0) {
+                    debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL2) PTHREAD_COND_WAIT != 0", NULL);
+                };
             }
         }
-        pthread_mutex_unlock(&shm->mutex);
+        if (pthread_mutex_unlock(&shm->mutex) != 0) {
+            debug("OSMP_BARRIER", rankNow, "(BARRIER_ALL2) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        };
     } else {
         //wenn beide Barriers 0 sind, dann error ausgeben
-        debug("OSMP_BARRIER ERROR", rankNow, "BARRIER_ALL & BARRIER_ALL2 ZERO", NULL);
+        debug("OSMP_BARRIER", rankNow, "BARRIER_ALL & BARRIER_ALL2 ZERO", NULL);
+        return OSMP_ERROR;
     }
 
     debug("OSMP_BARRIER END", rankNow, NULL, NULL);
@@ -206,23 +231,35 @@ int OSMP_Finalize() {
         return OSMP_ERROR;
     }
 
+    if (pthread_mutex_lock(&shm->mutex) != 0) {
+        debug("OSMP_FINALIZE", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
     //kompletter reset code
-    for (int i = 0; i < shm->processAmount; i++) {
+    for (int i = 0; i < sizeNow; i++) {
         if (shm->p[i].rank == rankNow) {
             shm->p[i].pid = -1;
             shm->p[i].rank = -1;
             shm->p[i].firstmsg = -1;
 
-            sem_destroy(&shm->p[i].empty);
-            sem_destroy(&shm->p[i].full);
+            if (sem_destroy(&shm->p[i].empty) != 0) {
+                debug("OSMP_FINALIZE", -1, "SEM_DESTROY(EMPTY) != 0", NULL);
+                return OSMP_ERROR;
+            };
+            if (sem_destroy(&shm->p[i].full) != 0) {
+                debug("OSMP_FINALIZE", -1, "SEM_DESTROY(FULL) != 0", NULL);
+                return OSMP_ERROR;
+            };
 
+            if (pthread_mutex_unlock(&shm->mutex) != 0) {
+                debug("OSMP_FINALIZE", -1, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
+                return OSMP_ERROR;
+            };
             if (munmap(shm, shm_size) == OSMP_ERROR) {
                 debug("OSMP_FINALIZE", rankNow, "MUNMAP == OSMP_ERROR", NULL);
                 return OSMP_ERROR;
             }
-
             shm = NULL;
-
         }
     }
     return OSMP_SUCCESS;
@@ -234,25 +271,23 @@ int OSMP_Size(int *size) {
         printf("shm not initialized\n");
         return OSMP_ERROR;
     }
-
     debug("OSMP_SIZE START", rankNow, NULL, NULL);
-    pthread_mutex_lock(&shm->mutex);
-    *size = shm->processAmount;
-    pthread_mutex_unlock(&shm->mutex);
+
+    *size = sizeNow;
+
     debug("OSMP_SIZE END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
 }
 
 //beschreibt den pointer rank mit dem derzeitigen rank des prozesses
 int OSMP_Rank(int *rank) {
-    debug("OSMP_RANK START", rankNow, NULL, NULL);
-
     //ERROR wenn shm nicht initialisiert durch OSMP_INIT
     if (shm == NULL) {
         printf("shm not initialized\n");
         return OSMP_ERROR;
     }
 
+    debug("OSMP_RANK START", rankNow, NULL, NULL);
     //checkt welcher rang dem laufenden prozess zugewiesen wurde in der OSMP INIT
     *rank = rankNow;
     debug("OSMP_RANK END", rankNow, NULL, NULL);
@@ -269,12 +304,18 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     debug("OSMP_SEND START", rankNow, NULL, NULL);
     //code um den Postkasten der destination zu beschreiben sobald in diesem Platz frei ist
 
-    for (int i = 0; i < shm->processAmount; i++) {
-        if (shm->p[i].rank == dest) {
+    for (int i = 0; i < sizeNow; i++) {
+        if (i == dest) {
             sem_wait(&shm->messages);
             sem_wait(&shm->p[i].empty);
             pthread_mutex_lock(&shm->mutex);
             shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen = (size_t) count * OSMP_DataSize(datatype);
+
+            if (shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen > message_max_size) {
+                debug("OSMP_SEND", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+                return OSMP_ERROR;
+            }
+
             shm->p[i].msg[shm->p[i].firstEmptySlot].srcRank = rankNow;
             memcpy(shm->p[i].msg[shm->p[i].firstEmptySlot].buffer, buf,shm->p[i].msg[shm->p[i].firstEmptySlot].msgLen);
             shm->p[i].firstEmptySlot++;
@@ -315,6 +356,13 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
 
     pthread_mutex_lock(&req->request_mutex);
 
+
+    if ((size_t) count * OSMP_DataSize(datatype) > message_max_size) {
+        debug("OSMP_ISEND", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+        return OSMP_ERROR;
+    }
+
+
     req->complete = 0;
     memcpy(&req->buf, buf, (size_t) count * OSMP_DataSize(datatype));
     req->count = count;
@@ -354,22 +402,27 @@ int OSMP_GetShmName(char** name) {
 //falls Nachrichten in dem OSMP vorhanden sind, schreibe sie in buf rein
 int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len) {
     debug("OSMP_RECV START", rankNow, NULL, NULL);
-    int i = 0;
-    for (i = 0; i < shm->processAmount; i++) {
-        if (shm->p[i].pid == getpid()) {
-            sem_wait(&shm->p[i].full);
-            pthread_mutex_lock(&shm->mutex);
-            *source = shm->p[i].msg[shm->p[i].firstmsg].srcRank;
-            *len = (int) shm->p[i].msg[shm->p[i].firstmsg].msgLen;
-            memcpy(buf, shm->p[i].msg[shm->p[i].firstmsg].buffer, (size_t) count * OSMP_DataSize(datatype));
-            shm->p[i].firstmsg--;
-            shm->p[i].firstEmptySlot--;
-            sem_post(&shm->p[i].empty);
-            sem_post(&shm->messages);
-            pthread_mutex_unlock(&shm->mutex);
-        }
 
+    sem_wait(&shm->p[rankNow].full);
+    pthread_mutex_lock(&shm->mutex);
+    *source = shm->p[rankNow].msg[shm->p[rankNow].firstmsg].srcRank;
+
+    if (shm->p[rankNow].msg[shm->p[rankNow].firstEmptySlot].msgLen > message_max_size) {
+        debug("OSMP_RECV", rankNow, "MSGLEN > MESSAGE_MAX_SIZE", NULL);
+        return OSMP_ERROR;
     }
+
+    *len = (int) shm->p[rankNow].msg[shm->p[rankNow].firstmsg].msgLen;
+
+
+    memcpy(buf, shm->p[rankNow].msg[shm->p[rankNow].firstmsg].buffer, (size_t) count * OSMP_DataSize(datatype));
+    shm->p[rankNow].firstmsg--;
+    shm->p[rankNow].firstEmptySlot--;
+    sem_post(&shm->p[rankNow].empty);
+    sem_post(&shm->messages);
+    pthread_mutex_unlock(&shm->mutex);
+
+
 
     debug("OSMP_RECV END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
@@ -423,7 +476,7 @@ int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *l
     pthread_mutex_unlock(&req->request_mutex);
     debug("OSMP_IRECV END", rankNow, NULL, NULL);
     return 0;
-    
+
 }
 
 //Gilt als Schranke. Ab hier wird gewartet bis der Thread durchgelaufen ist
@@ -468,22 +521,31 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
         //sender code
         shm->broadcastMsg.msgLen = (size_t) count * OSMP_DataSize(datatype);
         shm->broadcastMsg.srcRank = rankNow;
+
+        if (shm->broadcastMsg.msgLen > message_max_size) {
+            debug("OSMP_BCAST", rankNow, "(SENDER) MSGLEN > MESSAGE_MAX_SIZE", NULL);
+            return OSMP_ERROR;
+        }
+
         memcpy(shm->broadcastMsg.buffer, buf, shm->broadcastMsg.msgLen * OSMP_DataSize(datatype));
         pthread_mutex_unlock(&shm->mutex);
     }
     OSMP_Barrier();
     //debug("OSMP_BCAST ERROR", rankNow, "Kam ich raus?", NULL);
     if (send == false) {
-        debug("OSMP_BCAST ERROR", rankNow, "VOR MEMCPY", NULL);
         pthread_mutex_lock(&shm->mutex);
         //recv code
+
+        if (shm->broadcastMsg.msgLen > message_max_size) {
+            debug("OSMP_BCAST", rankNow, "(RECEIVER) MSGLEN > MESSAGE_MAX_SIZE", NULL);
+            return OSMP_ERROR;
+        }
 
         memcpy(buf, shm->broadcastMsg.buffer, shm->broadcastMsg.msgLen);
 
         *source = shm->broadcastMsg.srcRank;
         *len = (int) shm->broadcastMsg.msgLen;
         pthread_mutex_unlock(&shm->mutex);
-        debug("OSMP_BCAST ERROR", rankNow, "NACH MEMCPY", NULL);
     }
 
     debug("OSMP_BCAST END", rankNow, NULL, NULL);
@@ -498,7 +560,7 @@ int OSMP_CreateRequest(OSMP_Request *request){
     }
 
     debug("OSMP_CREATEREQUEST START", rankNow, NULL, NULL);
-
+    debug("OSMP_CREATEREQUEST", rankNow, NULL, "CALLOC");
     *request = calloc(1, sizeof(IRequest));
     IRequest *req = (IRequest*) *request;
 
@@ -523,7 +585,7 @@ int OSMP_CreateRequest(OSMP_Request *request){
     *request = req;
 
     debug("OSMP_CREATEREQUEST END", rankNow, NULL, NULL);
-    return OSMP_SUCCESS;   
+    return OSMP_SUCCESS;
 }
 
 //Freed den Speicher vom request
@@ -541,6 +603,7 @@ int OSMP_RemoveRequest(OSMP_Request *request){
     pthread_mutexattr_destroy(&req->request_mutexattr);
     pthread_condattr_destroy(&req->request_condattr);
 
+    debug("OSMP_REMOVEREQUEST", rankNow, NULL, "FREE");
     free(req);
     debug("OSMP_REMOVEREQUEST END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
