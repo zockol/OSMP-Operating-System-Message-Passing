@@ -1,0 +1,138 @@
+==76670== Memcheck, a memory error detector
+==76670== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==76670== Using Valgrind-3.21.0-d97fed7c3e-20230428 and LibVEX; rerun with -h for copyright info
+==76670== Command: ./build/bin/osmp 500 -L ./logs/ ./build/bin/osmpexecutable 9
+==76670== Parent PID: 67009
+==76670== 
+--76670-- 
+--76670-- Valgrind options:
+--76670--    --leak-check=full
+--76670--    --show-leak-kinds=all
+--76670--    --track-origins=yes
+--76670--    --verbose
+--76670--    --log-file=valgrind-out.txt
+--76670-- Contents of /proc/version:
+--76670--   Linux version 6.3.8-200.fc38.x86_64 (mockbuild@eb6ac96f7c884b69bc9d849b723f6a81) (gcc (GCC) 13.1.1 20230511 (Red Hat 13.1.1-2), GNU ld version 2.39-9.fc38) #1 SMP PREEMPT_DYNAMIC Thu Jun 15 02:15:40 UTC 2023
+--76670-- 
+--76670-- Arch and hwcaps: AMD64, LittleEndian, amd64-cx16-lzcnt-rdtscp-sse3-ssse3-avx-avx2-bmi-f16c-rdrand-rdseed
+--76670-- Page sizes: currently 4096, max supported 4096
+--76670-- Valgrind library directory: /usr/libexec/valgrind
+--76670-- Reading syms from /home/fegrue/Dokumente/code/c/grp26/build/bin/osmp
+==76670== Downloading debug info for /home/fegrue/Dokumente/code/c/grp26/build/bin/osmp...
+==76670== Server query failed: No such file or directory
+--76670-- Reading syms from /usr/lib64/ld-linux-x86-64.so.2
+--76670-- Warning: cross-CU LIMITATION: some inlined fn names
+--76670-- might be shown as UnknownInlinedFun
+--76670-- Reading syms from /usr/libexec/valgrind/memcheck-amd64-linux
+==76670== Downloading debug info for /usr/libexec/valgrind/memcheck-amd64-linux...
+--76670--   Considering /home/fegrue/.cache/debuginfod_client/ddc85abc993117c5dc02ae4e8af56c937ec02144/debuginfo ..
+--76670--   .. CRC is valid
+==76670== Successfully downloaded debug file for /usr/libexec/valgrind/memcheck-amd64-linux
+==76670== Downloading debug info for /home/fegrue/.cache/debuginfod_client/ddc85abc993117c5dc02ae4e8af56c937ec02144/debuginfo...
+--76670--   Considering /home/fegrue/.cache/debuginfod_client/782731e50ab9f14d33c27ff3cdbfea6d15ec4748/debuginfo ..
+--76670--   .. build-id is valid
+==76670== Successfully downloaded debug file for /home/fegrue/.cache/debuginfod_client/ddc85abc993117c5dc02ae4e8af56c937ec02144/debuginfo
+--76670--    object doesn't have a dynamic symbol table
+--76670-- Scheduler: using generic scheduler lock implementation.
+--76670-- Reading suppressions file: /usr/libexec/valgrind/default.supp
+==76670== embedded gdbserver: reading from /tmp/vgdb-pipe-from-vgdb-to-76670-by-fegrue-on-LAPTOP-VJ889SRF
+==76670== embedded gdbserver: writing to   /tmp/vgdb-pipe-to-vgdb-from-76670-by-fegrue-on-LAPTOP-VJ889SRF
+==76670== embedded gdbserver: shared mem   /tmp/vgdb-pipe-shared-mem-vgdb-76670-by-fegrue-on-LAPTOP-VJ889SRF
+==76670== 
+==76670== TO CONTROL THIS PROCESS USING vgdb (which you probably
+==76670== don't want to do, unless you know exactly what you're doing,
+==76670== or are doing some strange experiment):
+==76670==   /usr/libexec/valgrind/../../bin/vgdb --pid=76670 ...command...
+==76670== 
+==76670== TO DEBUG THIS PROCESS USING GDB: start GDB like this
+==76670==   /path/to/gdb ./build/bin/osmp
+==76670== and then give GDB the following command
+==76670==   target remote | /usr/libexec/valgrind/../../bin/vgdb --pid=76670
+==76670== --pid is optional if only one valgrind process is running
+==76670== 
+--76670-- REDIR: 0x40246d0 (ld-linux-x86-64.so.2:strlen) redirected to 0x580c3bf2 (vgPlain_amd64_linux_REDIR_FOR_strlen)
+--76670-- REDIR: 0x4022e80 (ld-linux-x86-64.so.2:index) redirected to 0x580c3c0c (vgPlain_amd64_linux_REDIR_FOR_index)
+--76670-- Reading syms from /usr/libexec/valgrind/vgpreload_core-amd64-linux.so
+--76670-- Reading syms from /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so
+==76670== WARNING: new redirection conflicts with existing -- ignoring it
+--76670--     old: 0x040246d0 (strlen              ) R-> (0000.0) 0x580c3bf2 vgPlain_amd64_linux_REDIR_FOR_strlen
+--76670--     new: 0x040246d0 (strlen              ) R-> (2007.0) 0x04847d60 strlen
+--76670-- REDIR: 0x40230b0 (ld-linux-x86-64.so.2:strcmp) redirected to 0x4848e80 (strcmp)
+--76670-- REDIR: 0x40222d0 (ld-linux-x86-64.so.2:mempcpy) redirected to 0x484c6f0 (mempcpy)
+--76670-- Reading syms from /usr/lib64/libc.so.6
+==76670== Downloading debug info for /usr/lib64/libc.so.6...
+--76670--   Considering /home/fegrue/.cache/debuginfod_client/245240a31888ad5c11bbc55b18e02d87388f59a9/debuginfo ..
+--76670--   .. CRC is valid
+==76670== Successfully downloaded debug file for /usr/lib64/libc.so.6
+==76670== Downloading debug info for /home/fegrue/.cache/debuginfod_client/245240a31888ad5c11bbc55b18e02d87388f59a9/debuginfo...
+--76670--   Considering /home/fegrue/.cache/debuginfod_client/f66888372ff8d4cb9bf2db2e4afbe04b45f76c99/debuginfo ..
+--76670--   .. build-id is valid
+==76670== Successfully downloaded debug file for /home/fegrue/.cache/debuginfod_client/245240a31888ad5c11bbc55b18e02d87388f59a9/debuginfo
+==76670== WARNING: new redirection conflicts with existing -- ignoring it
+--76670--     old: 0x0490e980 (memalign            ) R-> (1011.0) 0x04846bda memalign
+--76670--     new: 0x0490e980 (memalign            ) R-> (1017.0) 0x048470ce aligned_alloc
+==76670== WARNING: new redirection conflicts with existing -- ignoring it
+--76670--     old: 0x0490e980 (memalign            ) R-> (1011.0) 0x04846bda memalign
+--76670--     new: 0x0490e980 (memalign            ) R-> (1017.0) 0x04847058 aligned_alloc
+==76670== WARNING: new redirection conflicts with existing -- ignoring it
+--76670--     old: 0x0490e980 (memalign            ) R-> (1011.0) 0x04846bda memalign
+--76670--     new: 0x0490e980 (memalign            ) R-> (1017.0) 0x048470ce aligned_alloc
+==76670== WARNING: new redirection conflicts with existing -- ignoring it
+--76670--     old: 0x0490e980 (memalign            ) R-> (1011.0) 0x04846bda memalign
+--76670--     new: 0x0490e980 (memalign            ) R-> (1017.0) 0x04847058 aligned_alloc
+--76670-- REDIR: 0x4024870 (ld-linux-x86-64.so.2:strncmp) redirected to 0x48486b0 (strncmp)
+--76670-- REDIR: 0x4914bd0 (libc.so.6:strnlen) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4914c60 (libc.so.6:strpbrk) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4912e30 (libc.so.6:strcmp) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4927f50 (libc.so.6:wcsnlen) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4911f30 (libc.so.6:memset) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4926700 (libc.so.6:wcslen) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x49114c0 (libc.so.6:memcpy@@GLIBC_2.14) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x49264b0 (libc.so.6:wcschr) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4912d20 (libc.so.6:index) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4914c90 (libc.so.6:rindex) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4926540 (libc.so.6:wcscmp) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4912150 (libc.so.6:stpncpy) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4926b90 (libc.so.6:wmemchr) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4914a80 (libc.so.6:strncmp) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x49121b0 (libc.so.6:strcasecmp) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4913fa0 (libc.so.6:strcspn) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x49265d0 (libc.so.6:wcscpy) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4912cb0 (libc.so.6:strcat) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4914980 (libc.so.6:strncasecmp_l) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x49113d0 (libc.so.6:bcmp) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4911ea0 (libc.so.6:memrchr) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4912da0 (libc.so.6:strchrnul) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4913f30 (libc.so.6:strcpy) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4912250 (libc.so.6:strcasecmp_l) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4914850 (libc.so.6:strlen) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4914b20 (libc.so.6:strncpy) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4926c10 (libc.so.6:wmemcmp) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x49120e0 (libc.so.6:stpcpy) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4911c60 (libc.so.6:memmove) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+==76670== Preferring higher priority redirection:
+--76670--     old: 0x049cc000 (__memcpy_avx_unalign) R-> (2018.0) 0x04849fa0 __memcpy_avx_unaligned_erms
+--76670--     new: 0x049cc000 (__memcpy_avx_unalign) R-> (2018.1) 0x0484b780 memmove
+--76670-- REDIR: 0x4911350 (libc.so.6:memchr) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4914e60 (libc.so.6:strspn) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4911d80 (libc.so.6:mempcpy) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x49148e0 (libc.so.6:strncasecmp) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x4912020 (libc.so.6:rawmemchr) redirected to 0x48361ea (_vgnU_ifunc_wrapper)
+--76670-- REDIR: 0x49d0bf0 (libc.so.6:__strrchr_avx2) redirected to 0x4847740 (rindex)
+--76670-- REDIR: 0x49ced40 (libc.so.6:__strlen_avx2) redirected to 0x4847c40 (strlen)
+--76670-- REDIR: 0x49cc000 (libc.so.6:__memcpy_avx_unaligned_erms) redirected to 0x484b780 (memmove)
+--76670-- REDIR: 0x49cb600 (libc.so.6:__memchr_avx2) redirected to 0x4848f00 (memchr)
+--76670-- REDIR: 0x49ce590 (libc.so.6:__strcmp_avx2) redirected to 0x4848d80 (strcmp)
+--76670-- REDIR: 0x49ce3a0 (libc.so.6:__strchrnul_avx2) redirected to 0x484c1d0 (strchrnul)
+--76670-- REDIR: 0x490db90 (libc.so.6:malloc) redirected to 0x48417b9 (malloc)
+--76670-- REDIR: 0x49ce160 (libc.so.6:__strchr_avx2) redirected to 0x4847920 (index)
+--76670-- REDIR: 0x490e150 (libc.so.6:free) redirected to 0x484423a (free)
+--76670-- REDIR: 0x49ceaf0 (libc.so.6:__strcpy_avx2) redirected to 0x4847d90 (strcpy)
+==76670== 
+==76670== HEAP SUMMARY:
+==76670==     in use at exit: 0 bytes in 0 blocks
+==76670==   total heap usage: 158 allocs, 158 frees, 74,106 bytes allocated
+==76670== 
+==76670== All heap blocks were freed -- no leaks are possible
+==76670== 
+==76670== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
