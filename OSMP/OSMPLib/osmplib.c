@@ -416,6 +416,11 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
         return OSMP_ERROR;
     }
 
+    if(req->thread >0){
+        debug("OSMP_SEND", rankNow, "THREAD IS ALREADY EXISTING, CANNOT CREATE A NEW ONE", NULL);
+        return OSMP_ERROR;
+    }
+
     req->complete = 0;
     memcpy(&req->buf, buf, (size_t) count * OSMP_DataSize(datatype));
     req->count = count;
