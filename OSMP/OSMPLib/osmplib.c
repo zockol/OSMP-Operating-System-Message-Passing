@@ -652,20 +652,29 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
 
 //Initialisierung des mitgegebenen Requests
 int OSMP_CreateRequest(OSMP_Request *request){
-    if (shm == NULL) {
-        printf("shm not initialized\n");
-        return OSMP_ERROR;
-    }
     debug("OSMP_CREATEREQUEST START", rankNow, NULL, NULL);
     debug("OSMP_CREATEREQUEST", rankNow, NULL, "CALLOC");
     *request = calloc(1, sizeof(IRequest));
     IRequest *req = (IRequest*) *request;
 
-    pthread_condattr_init(&req->request_condattr);
-    pthread_condattr_setpshared(&req->request_condattr, PTHREAD_PROCESS_SHARED);
+    if (pthread_condattr_init(&req->request_condattr) != 0) {
+        debug("OSMP_CREATEREQUEST", rankNow, "PTHREAD_CONDATTR_INIT != 0", NULL);
+        return OSMP_ERROR;
+    };
+    if (pthread_condattr_setpshared(&req->request_condattr, PTHREAD_PROCESS_SHARED) != 0) {
+        debug("OSMP_CREATEREQUEST", rankNow, "PTHREAD_CONDATTR_SETPSHARED != 0", NULL);
+        return OSMP_ERROR;
+    };
 
-    pthread_mutexattr_init(&req->request_mutexattr);
-    pthread_mutexattr_setpshared(&req->request_mutexattr, PTHREAD_PROCESS_SHARED);
+    if (pthread_mutexattr_init(&req->request_mutexattr) != 0) {
+        debug("OSMP_CREATEREQUEST", rankNow, "PTHREAD_MUTEXATTR_INIT != 0", NULL);
+        return OSMP_ERROR;
+    };
+
+    if (pthread_mutexattr_setpshared(&req->request_mutexattr, PTHREAD_PROCESS_SHARED) != 0) {
+        debug("OSMP_CREATEREQUEST", rankNow, "PTHREAD_MUTEXATTR_SETPSHARED != 0", NULL);
+        return OSMP_ERROR;
+    };
 
     req->thread = 0;
     memcpy(&req->buf, "\0", 1);
@@ -675,8 +684,15 @@ int OSMP_CreateRequest(OSMP_Request *request){
     req->source = NULL;
     req->len = NULL;
     req->complete = -1;
-    pthread_cond_init(&req->request_cond, &req->request_condattr);
-    pthread_mutex_init(&req->request_mutex, &req->request_mutexattr);
+    if (pthread_cond_init(&req->request_cond, &req->request_condattr) != 0) {
+        debug("OSMP_CREATEREQUEST", rankNow, "PTHREAD_COND_INIT != 0", NULL);
+        return OSMP_ERROR;
+    };
+    if (pthread_mutex_init(&req->request_mutex, &req->request_mutexattr) != 0) {
+        debug("OSMP_CREATEREQUEST", rankNow, "PTHREAD_MUTEX_INIT != 0", NULL);
+        return OSMP_ERROR;
+    };
+
     req->complete = false;
 
     *request = req;
