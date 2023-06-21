@@ -80,7 +80,7 @@ int evaluateArgs(int argc, char *argv[]) {
                                         printf("%s", falscheSyntax);
                                         er = shm_unlink(SharedMemName);
                                         if(er) {
-                                            printf("error at shm_unlink");
+                                            printf("error at shm_unlink Line: %d\n", __LINE__);
                                             exit( -1);
                                         }
                                         exit(-1);
@@ -91,7 +91,7 @@ int evaluateArgs(int argc, char *argv[]) {
                                 printf("%s", falscheSyntax);
                                 er = shm_unlink(SharedMemName);
                                 if(er) {
-                                    printf("error at shm_unlink");
+                                    printf("error at shm_unlink Line: %d\n", __LINE__);
                                     exit( -1);
                                 }
                                 exit(-1);
@@ -104,7 +104,7 @@ int evaluateArgs(int argc, char *argv[]) {
                         printf("%s", falscheSyntax);
                         er = shm_unlink(SharedMemName);
                         if(er) {
-                            printf("error at shm_unlink");
+                            printf("error at shm_unlink Line: %d\n", __LINE__);
                             exit( -1);
                         }
                         exit(-1);
@@ -113,7 +113,7 @@ int evaluateArgs(int argc, char *argv[]) {
                     printf("%s", falscheSyntax);
                     er = shm_unlink(SharedMemName);
                     if(er) {
-                        printf("error at shm_unlink");
+                        printf("error at shm_unlink Line: %d\n", __LINE__);
                         exit( -1);
                     }
                     exit(-1);
@@ -124,7 +124,7 @@ int evaluateArgs(int argc, char *argv[]) {
                     printf("%s", falscheSyntax);
                     er = shm_unlink(SharedMemName);
                     if(er) {
-                        printf("error at shm_unlink");
+                        printf("error at shm_unlink Line: %d\n", __LINE__);
                         exit( -1);
                     }
                     exit(-1);
@@ -154,7 +154,7 @@ int evaluateArgs(int argc, char *argv[]) {
             if (file) {
                 er = fclose(file);
                 if(er) {
-                    printf("error at fclose");
+                    printf("error at fclose Line: %d\n", __LINE__);
                     exit( -1);
                 }
                 i++;
@@ -164,7 +164,7 @@ int evaluateArgs(int argc, char *argv[]) {
                     strcpy(shm->log.logPath, fileName);
                     er = fclose(file);
                     if(er) {
-                        printf("error at fclose");
+                        printf("error at fclose Line: %d\n", __LINE__);
                         exit( -1);
                     }
                     break;
@@ -172,7 +172,7 @@ int evaluateArgs(int argc, char *argv[]) {
                     printf("Fehler beim Erstellen der Datei: %s\n", fileName);
                     er = shm_unlink(SharedMemName);
                     if(er) {
-                        printf("error at shm_unlink");
+                        printf("error at shm_unlink Line: %d\n", __LINE__);
                         exit( -1);
                     }
                     exit(-1);
@@ -190,43 +190,43 @@ int shm_init(int pidAmount) {
 
     er = pthread_condattr_init(&barrier);
     if(er) {
-        printf("error at pthread_condattr_init");
+        printf("error at pthread_condattr_init Line: %d\n", __LINE__);
         exit( -1);
     }
     er = pthread_condattr_setpshared(&barrier, PTHREAD_PROCESS_SHARED);
     if(er) {
-        printf("error at pthread_condattr_setpshared");
+        printf("error at pthread_condattr_setpshared Line: %d\n", __LINE__);
         exit( -1);
     }
     er = pthread_cond_init(&shm->cattr, &barrier);
     if(er) {
-        printf("error at pthread_cond_init");
+        printf("error at pthread_cond_init Line: %d\n", __LINE__);
         exit( -1);
     }
 
     er = pthread_mutexattr_init(&mutex_attr2);
     if(er) {
-        printf("error at pthread_mutexattr_init");
+        printf("error at pthread_mutexattr_init Line: %d\n", __LINE__);
         exit( -1);
     }
     er = pthread_mutexattr_setpshared(&mutex_attr2, PTHREAD_PROCESS_SHARED);
     if(er) {
-        printf("error at pthread_mutexattr_setpshared");
+        printf("error at pthread_mutexattr_setpshared Line: %d\n", __LINE__);
         exit( -1);
     }
     er = pthread_mutex_init(&shm->mutex, &mutex_attr2);
     if(er) {
-        printf("error at pthread_mutex_init");
+        printf("error at pthread_mutex_init Line: %d\n", __LINE__);
         exit( -1);
     }
     er = pthread_mutex_init(&shm->log.mutex, &mutex_attr2);
     if(er) {
-        printf("error at pthread_mutex_init");
+        printf("error at pthread_mutex_init Line: %d\n", __LINE__);
         exit( -1);
     }
     er = pthread_mutex_init(&shm->log.mutex, &mutex_attr2);
     if(er) {
-        printf("error at pthread_mutex_init");
+        printf("error at pthread_mutex_init Line: %d\n", __LINE__);
         exit( -1);
     }
 
@@ -239,23 +239,23 @@ int shm_init(int pidAmount) {
 
         er = pthread_mutex_init(&shm->p[i].mutex_recv, &mutex_attr2);
         if(er) {
-            printf("error at pthread_mutex_init");
+            printf("error at pthread_mutex_init Line: %d\n", __LINE__);
             exit( -1);
         }
         er = pthread_mutex_init(&shm->p[i].mutex_send, &mutex_attr2);if(er) {
-            printf("error at pthread_mutex_init");
+            printf("error at pthread_mutex_init Line: %d\n", __LINE__);
             exit( -1);
         }
 
 
         sem_init(&shm->p[i].empty, 1, OSMP_MAX_MESSAGES_PROC);
         if(er) {
-            printf("error at sem_init");
+            printf("error at sem_init Line: %d\n", __LINE__);
             exit( -1);
         }
         sem_init(&shm->p[i].full, 1, 0);
         if(er) {
-            printf("error at sem_init");
+            printf("error at sem_init Line: %d\n", __LINE__);
             exit( -1);
         }
 
@@ -268,7 +268,7 @@ int shm_init(int pidAmount) {
     }
     er = sem_init(&shm->messages, 1, max_messages);
     if(er) {
-        printf("error at sem_init");
+        printf("error at sem_init Line: %d\n", __LINE__);
         exit( -1);
     }
 
@@ -302,7 +302,7 @@ int start_shm(int pidAmount) {
         printf("Mapping Fail: %s\n", strerror(errno));
         er = shm_unlink(SharedMemName);
         if(er) {
-            printf("error at shm_unlink");
+            printf("error at shm_unlink Line: %d\n", __LINE__);
             exit( -1);
         }
         return -1;
@@ -374,32 +374,32 @@ int main(int argc, char *argv[]) {
 
     er = sem_destroy(&shm->messages);
     if(er) {
-        printf("error at sem_destroy");
+        printf("error at sem_destroy Line: %d\n", __LINE__);
         exit( -1);
     }
     er = pthread_mutex_destroy(&shm->mutex);
     if(er) {
-        printf("error at pthread_mutex_destroy");
+        printf("error at pthread_mutex_destroy Line: %d\n", __LINE__);
         exit( -1);
     }
     er = pthread_mutex_destroy(&shm->log.mutex);
     if(er) {
-        printf("error at pthread_mutex_destroy");
+        printf("error at pthread_mutex_destroy Line: %d\n", __LINE__);
         exit( -1);
     }
     er = pthread_cond_destroy(&shm->cattr);
     if(er) {
-        printf("error at pthread_cond_destroy");
+        printf("error at pthread_cond_destroy Line: %d\n", __LINE__);
         exit( -1);
     }
     er = pthread_mutexattr_destroy(&mutex_attr2);
     if(er) {
-        printf("error at pthread_mutexattr_destroy");
+        printf("error at pthread_mutexattr_destroy Line: %d\n", __LINE__);
         exit( -1);
     }
     er = pthread_condattr_destroy(&barrier);
     if(er) {
-        printf("error at pthread_condattr_destroy");
+        printf("error at pthread_condattr_destroy Line: %d\n", __LINE__);
         exit( -1);
     }
 
