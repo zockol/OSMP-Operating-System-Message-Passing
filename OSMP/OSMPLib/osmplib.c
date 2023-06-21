@@ -435,14 +435,16 @@ int OSMP_Isend(const void *buf, int count, OSMP_Datatype datatype, int dest, OSM
 
 //OSMP_Test setzt die mitgegebene flag auf 0 oder 1, basierend auf dem Status des Threads (req->complete)
 int OSMP_Test(OSMP_Request request, int *flag){
-    if (request == NULL){
-        printf("There is no request to wait for! ");
+    IRequest *req = (IRequest*) request;
+    if (pthread_mutex_lock(&req->request_mutex) != 0) {
+        debug("OSMP_TEST", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
         return OSMP_ERROR;
     }
-    IRequest *req = (IRequest*) request;
-    pthread_mutex_lock(&req->request_mutex);
     *flag = req->complete;
-    pthread_mutex_unlock(&req->request_mutex);
+    if (pthread_mutex_unlock(&req->request_mutex) != 0) {
+        debug("OSMP_TEST", rankNow, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        return OSMP_ERROR;
+    }
     return OSMP_SUCCESS;
 }
 
