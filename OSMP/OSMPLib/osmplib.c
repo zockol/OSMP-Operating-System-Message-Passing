@@ -131,14 +131,18 @@ int OSMP_Init(int *argc, char ***argv) {
     }
 
     sizeNow = shm->processAmount;
-    pidNow = getpid();
+
+    if ((pidNow = getpid()) == -1) {
+        debug("OSMP_INIT", rankNow, "PIDNOW == -1", NULL);
+        return OSMP_ERROR;
+    };
+
     //definiere die eigene pid im shm
     for (int i = 0; i < sizeNow; i++) {
         if (shm->p[i].pid == 0) {
             shm->p[i].pid = pidNow;
             shm->p[i].rank = i;
             rankNow = i;
-
             break;
         }
     }
@@ -223,13 +227,13 @@ int OSMP_Barrier() {
 
 //muss jeder OSMP durchlaufen bevor er sich beendet und "resetted" sich damit selber
 int OSMP_Finalize() {
-    debug("OSMP_FINALIZE START", rankNow, NULL, NULL);
-
     //wenn shm nicht initialisiert, dann error
     if (shm == NULL) {
         printf("OSMPLIB.c OSMP_FINALIZE shm not initialized");
         return OSMP_ERROR;
     }
+
+    debug("OSMP_FINALIZE START", rankNow, NULL, NULL);
 
     if (pthread_mutex_lock(&shm->mutex) != 0) {
         debug("OSMP_FINALIZE", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
