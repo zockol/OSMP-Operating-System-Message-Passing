@@ -594,27 +594,41 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
         printf("shm not initialized\n");
         return OSMP_ERROR;
     }
-
     debug("OSMP_BCAST START", rankNow, NULL, NULL);
 
     if (send == true) {
-        pthread_mutex_lock(&shm->mutex);
+        if (pthread_mutex_lock(&shm->mutex) != 0) {
+            debug("OSMP_BCAST", rankNow, "(SENDER) PTHREAD_MUTEX_LOCK != 0", NULL);
+            return OSMP_ERROR;
+        };
         //sender code
         shm->broadcastMsg.msgLen = (size_t) count * OSMP_DataSize(datatype);
         shm->broadcastMsg.srcRank = rankNow;
 
         if (shm->broadcastMsg.msgLen > message_max_size) {
             debug("OSMP_BCAST", rankNow, "(SENDER) MSGLEN > MESSAGE_MAX_SIZE", NULL);
+            if (pthread_mutex_lock(&shm->mutex) != 0) {
+                debug("OSMP_BCAST", rankNow, "(SENDER | IN MSGLEN ERROR) PTHREAD_MUTEX_LOCK != 0", NULL);
+            };
             return OSMP_ERROR;
         }
 
         memcpy(shm->broadcastMsg.buffer, buf, shm->broadcastMsg.msgLen * OSMP_DataSize(datatype));
-        pthread_mutex_unlock(&shm->mutex);
+        if (pthread_mutex_unlock(&shm->mutex) != 0) {
+            debug("OSMP_BCAST", rankNow, "(SENDER) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+            return OSMP_ERROR;
+        };
     }
     OSMP_Barrier();
     //debug("OSMP_BCAST ERROR", rankNow, "Kam ich raus?", NULL);
     if (send == false) {
-        pthread_mutex_lock(&shm->mutex);
+        if (pthread_mutex_lock(&shm->mutex) != 0) {
+            debug("OSMP_BCAST", rankNow, "(RECEIVER) PTHREAD_MUTEX_LOCK != 0", NULL);
+            if (pthread_mutex_lock(&shm->mutex) != 0) {
+                debug("OSMP_BCAST", rankNow, "(RECEIVER | IN MSGLEN ERROR) PTHREAD_MUTEX_LOCK != 0", NULL);
+            };
+            return OSMP_ERROR;
+        };
         //recv code
 
         if (shm->broadcastMsg.msgLen > message_max_size) {
@@ -626,7 +640,10 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
 
         *source = shm->broadcastMsg.srcRank;
         *len = (int) shm->broadcastMsg.msgLen;
-        pthread_mutex_unlock(&shm->mutex);
+        if (pthread_mutex_unlock(&shm->mutex) != 0) {
+            debug("OSMP_BCAST", rankNow, "(SENDER) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+            return OSMP_ERROR;
+        };
     }
 
     debug("OSMP_BCAST END", rankNow, NULL, NULL);
@@ -639,7 +656,6 @@ int OSMP_CreateRequest(OSMP_Request *request){
         printf("shm not initialized\n");
         return OSMP_ERROR;
     }
-
     debug("OSMP_CREATEREQUEST START", rankNow, NULL, NULL);
     debug("OSMP_CREATEREQUEST", rankNow, NULL, "CALLOC");
     *request = calloc(1, sizeof(IRequest));
