@@ -558,30 +558,34 @@ int OSMP_Irecv(void *buf, int count, OSMP_Datatype datatype, int *source, int *l
 
 //Gilt als Schranke. Ab hier wird gewartet bis der Thread durchgelaufen ist
 int OSMP_Wait(OSMP_Request request){
-    if (shm == NULL) {
-        printf("shm not initialized\n");
-        return OSMP_ERROR;
-    }
-    if (request == NULL){
-        printf("There is no request to wait for! ");
-        return OSMP_ERROR;
-    }
     debug("OSMP_WAIT START", rankNow, NULL, NULL);
     IRequest *req = (IRequest*) request;
-    pthread_mutex_lock(&req->request_mutex);
+    if (pthread_mutex_lock(&req->request_mutex) != 0) {
+        debug("OSMP_Wait", rankNow, "(1) PTHREAD_MUTEX_LOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
     pthread_t thread = req->thread;
-    pthread_mutex_unlock(&req->request_mutex);
-    pthread_join( thread, NULL);
-    pthread_mutex_lock(&req->request_mutex);
+    if (pthread_mutex_unlock(&req->request_mutex) != 0) {
+        debug("OSMP_Wait", rankNow, "(1) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
+    if (pthread_join( thread, NULL) != 0) {
+        debug("OSMP_WAIT", rankNow, "PTHREAD_JOIN != 0", NULL);
+        return OSMP_ERROR;
+    };
+    if (pthread_mutex_lock(&req->request_mutex) != 0) {
+        debug("OSMP_Wait", rankNow, "(2) PTHREAD_MUTEX_LOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
     req->complete = -1;
-    pthread_mutex_unlock(&req->request_mutex);
-
+    if (pthread_mutex_unlock(&req->request_mutex) != 0) {
+        debug("OSMP_Wait", rankNow, "(2) PTHREAD_MUTEX_UNLOCK != 0", NULL);
+        return OSMP_ERROR;
+    };
 
     debug("OSMP_WAIT END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
 }
-
-
 
 //wenn send == true ist, schreibe *buf in den broadcast buffer und warte bis alle da sind
 //wenn send == false ist, warte zuvor auf alle prozesse und schreibe dann den broadcust buffer in *buf
