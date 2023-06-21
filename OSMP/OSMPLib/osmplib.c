@@ -23,7 +23,8 @@ typedef struct{
 size_t shm_size;
 
 //rank des OSMP Prozesses abgespeichert, damit der Prozess intern sein Rang weiß
-int rankNow = 0;
+int rankNow = -1;
+int sizeNow = -1;
 
 //debug methode. Schreibt in die vorher erstellte shm->log.logPath die mitgegebenen Debug Messages.
 int debug(char *functionName, int srcRank, char *error, char *memory) {
@@ -117,14 +118,21 @@ int OSMP_Init(int *argc, char ***argv) {
     shm_size = (size_t) shm_stat->st_size;
     shm = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
 
-    //wenn map gefailed ist, error ausgeben
+    //wenn shm MAP_FAILED returned, gebe OSMP ERROR
     if (shm == MAP_FAILED) {
-        printf("Error beim mmap\n");
+        printf("Mapping Fail: %s\n", strerror(errno));
+        shm_unlink(SharedMemName);
         return OSMP_ERROR;
     }
 
+    if (pthread_mutex_lock(&shm->mutex) != 0) {
+        debug("OSMP_INIT", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
+        return OSMP_ERROR;
+    }
+
+    sizeNow = shm->processAmount;
     //definiere die eigene pid im shm
-    for (int i = 0; i < shm->processAmount; i++) {
+    for (int i = 0; i < sizeNow; i++) {
         if (shm->p[i].pid == 0) {
             shm->p[i].pid = getpid();
             shm->p[i].rank = i;
@@ -133,11 +141,8 @@ int OSMP_Init(int *argc, char ***argv) {
         }
     }
 
-
-    //wenn shm MAP_FAILED returned, gebe OSMP ERROR
-    if (shm == MAP_FAILED) {
-        printf("Mapping Fail: %s\n", strerror(errno));
-        shm_unlink(SharedMemName);
+    if (pthread_mutex_unlock(&shm->mutex) != 0) {
+        debug("OSMP_INIT", rankNow, "PTHREAD_MUTEX_unLOCK != 0", NULL);
         return OSMP_ERROR;
     }
 
@@ -229,7 +234,7 @@ int OSMP_Finalize() {
         return OSMP_ERROR;
     };
     //kompletter reset code
-    for (int i = 0; i < shm->processAmount; i++) {
+    for (int i = 0; i < sizeNow; i++) {
         if (shm->p[i].rank == rankNow) {
             shm->p[i].pid = -1;
             shm->p[i].rank = -1;
@@ -265,15 +270,9 @@ int OSMP_Size(int *size) {
         return OSMP_ERROR;
     }
     debug("OSMP_SIZE START", rankNow, NULL, NULL);
-    if (pthread_mutex_lock(&shm->mutex) != 0) {
-        debug("OSMP_SIZE", rankNow, "PTHREAD_MUTEX_LOCK != 0", NULL);
-        return OSMP_ERROR;
-    };
-    *size = shm->processAmount;
-    if (pthread_mutex_unlock(&shm->mutex) != 0) {
-        debug("OSMP_SIZE", rankNow, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
-        return OSMP_ERROR;
-    };
+
+    *size = sizeNow;
+
     debug("OSMP_SIZE END", rankNow, NULL, NULL);
     return OSMP_SUCCESS;
 }
@@ -304,7 +303,7 @@ int OSMP_Send(const void *buf, int count, OSMP_Datatype datatype, int dest) {
     debug("OSMP_SEND START", rankNow, NULL, NULL);
     //code um den Postkasten der destination zu beschreiben sobald in diesem Platz frei ist
 
-    for (int i = 0; i < shm->processAmount; i++) {
+    for (int i = 0; i < sizeNow; i++) {
         if (shm->p[i].rank == dest) {
             sem_wait(&shm->messages);
             sem_wait(&shm->p[i].empty);
@@ -392,7 +391,7 @@ int OSMP_GetShmName(char** name) {
 int OSMP_Recv(void *buf, int count, OSMP_Datatype datatype, int *source, int *len) {
     debug("OSMP_RECV START", rankNow, NULL, NULL);
     int i = 0;
-    for (i = 0; i < shm->processAmount; i++) {
+    for (i = 0; i < sizeNow; i++) {
         if (shm->p[i].pid == getpid()) {
             sem_wait(&shm->p[i].full);
             pthread_mutex_lock(&shm->mutex);
