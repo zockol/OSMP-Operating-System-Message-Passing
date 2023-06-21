@@ -152,7 +152,7 @@ int OSMP_Init(int *argc, char ***argv) {
     }
 
     if (pthread_mutex_unlock(&shm->mutex) != 0) {
-        debug("OSMP_INIT", rankNow, "PTHREAD_MUTEX_unLOCK != 0", NULL);
+        debug("OSMP_INIT", rankNow, "PTHREAD_MUTEX_UNLOCK != 0", NULL);
         return OSMP_ERROR;
     }
 

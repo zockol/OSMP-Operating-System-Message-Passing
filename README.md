@@ -225,11 +225,11 @@ Zunächst wird der Mutex der IRequest-Struktur, auf die der Request zeigt, gespe
 
 ![OSMP_IRecv](./Images/OSMP_IRecv.png)
 
-### Logger
+### Debug
 
 In der Funktion wird der Mutex des Loggers verwendet. Der Zugriff auf den Log-Struct ist blockiert, solange der Mutex gesperrt ist. Sobald die Variable ausgelesen wurde, wird der Mutex freigegeben.
 
-![OSMP_IRecv](./Images/logger.png)
+![OSMP_IRecv](./Images/debug.png)
 
 ### OSMP_Finalize
 
