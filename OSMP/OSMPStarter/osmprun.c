@@ -312,9 +312,9 @@ int main(int argc, char *argv[]) {
     int pidAmount = atoi(argv[1]);
     pid_t pid;
 
-    struct timespec sleepTime;
-    sleepTime.tv_sec = 0;
-    sleepTime.tv_nsec = 10000000;
+//    struct timespec sleepTime;
+//    sleepTime.tv_sec = 0;
+//    sleepTime.tv_nsec = 10000000;
 
     //erstellt das SHM Objekt
     start_shm(pidAmount);
@@ -337,7 +337,7 @@ int main(int argc, char *argv[]) {
     //Parent und Child Trennung
     int i;
     for (i = 0; i < pidAmount; i++) {
-        nanosleep(&sleepTime, NULL);
+        //nanosleep(&sleepTime, NULL);
         pid = fork();
 
         if (pid < 0) {

@@ -278,6 +278,10 @@ int OSMP_Finalize() {
     };
     //kompletter reset code
 
+    for (int i = 0; i < shm->p[rankNow].firstEmptySlot; i++) {
+        sem_post(&shm->messages);
+    }
+
     shm->p[rankNow].pid = -1;
     shm->p[rankNow].firstmsg = -1;
     shm->p[rankNow].firstEmptySlot = 0;
@@ -637,24 +641,15 @@ int OSMP_Wait(OSMP_Request request){
         return OSMP_ERROR;
     };
 
-    //beschreibe thread mit req->thread
-    pthread_t thread = req->thread;
-
-
+    //setze complete wieder auf reset
     if (req->thread<=0){
-        if (pthread_mutex_unlock(&req->request_mutex) != 0) {
-            debug("OSMP_Wait", rankNow, "(1) PTHREAD_MUTEX_UNLOCK != 0", NULL);
-            return OSMP_ERROR;
-        };
         req->complete = -1;
-        //HIER WEITER!!!
-        return OSMP_ERROR;
     }
     if (pthread_mutex_unlock(&req->request_mutex) != 0) {
         debug("OSMP_Wait", rankNow, "(1) PTHREAD_MUTEX_UNLOCK != 0", NULL);
         return OSMP_ERROR;
     };
-    if (pthread_join( thread, NULL) != 0) {
+    if (pthread_join( req->thread, NULL) != 0) {
         debug("OSMP_WAIT", rankNow, "PTHREAD_JOIN != 0", NULL);
         return OSMP_ERROR;
     };
@@ -704,11 +699,12 @@ int OSMP_Bcast(void *buf, int count, OSMP_Datatype datatype, bool send, int *sou
             return OSMP_ERROR;
         };
     }
+    //Setze Barrier und Staue alle Prozesse hier an
     if (OSMP_Barrier() != OSMP_SUCCESS) {
         debug("OSMP_BCAST", rankNow, "OSMP_BARRIER != OSMP_SUCCESS", NULL);
         return OSMP_ERROR;
     };
-    //debug("OSMP_BCAST ERROR", rankNow, "Kam ich raus?", NULL);
+
     if (send == false) {
         if (pthread_mutex_lock(&shm->mutex) != 0) {
             debug("OSMP_BCAST", rankNow, "(RECEIVER) PTHREAD_MUTEX_LOCK != 0", NULL);

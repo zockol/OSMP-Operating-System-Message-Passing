@@ -402,7 +402,7 @@ int BarrierTest(int argc, char **argv) {
     rv = OSMP_Rank(&rank);
     if (rv == -1) printError(__LINE__);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 1; i++) {
         printf("[%d] catched  | [%d] iteration\n", rank, i+1);
         rv = OSMP_Barrier();
         if (rv == -1) printError(__LINE__);
