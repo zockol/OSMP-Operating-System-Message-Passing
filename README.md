@@ -1,4 +1,4 @@
-# OSMP - Entwurf und Implementation
+# OSMP - Operating System Message Passing
 von [Felix Grüning](https://www.linkedin.com/in/felix-grüning-19443a280/) und [Patrick Zockol](https://www.linkedin.com/in/patrick-zockol-687204253/)
 
 ## Ausführung
